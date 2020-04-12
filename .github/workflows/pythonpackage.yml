@@ -24,10 +24,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install tox
-    - name: Unit tests
+    - name: Unit test on Python3.7
       if: ${{ matrix.python_version }} == '3.7'
       run: |
-        tox -e py3.7
+        tox -e py37
+    - name: Unit test on Python3.8
+      if: ${{ matrix.python_version }} == '3.8'
+      run: |
+        tox -e py38
     - name: Lint
       run: |
         tox -e lint
