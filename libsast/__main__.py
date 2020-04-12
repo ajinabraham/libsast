@@ -29,8 +29,6 @@ def output(out, scan_results):
 
 def main():
     """Main CLI."""
-    # TODO remove this
-    default = '/Users/ajinabraham/Code/libsast/rules/pattern'
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--path',
                         nargs='+',
@@ -42,7 +40,6 @@ def main():
                         required=False)
     parser.add_argument('-r', '--pattern-dir',
                         help='Python pattern directory',
-                        default=default,
                         required=False)
     parser.add_argument('-s', '--sgrep-dir',
                         help='sgrep rules directory',
