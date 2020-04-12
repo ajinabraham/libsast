@@ -1,0 +1,70 @@
+//RegexAnd
+import android.view.View;
+import android.webkit.WebView;
+import android.widget.Button;
+import android.widget.EditText;
+WebView engine = (WebView) (findViewById(R.id.webView1));
+engine.loadUrl("file:///" + Environment.getExternalStorageDirectory().getPath() + "testing.html");
+
+
+//RegexOr
+public static ForgeAccount add(Context context, ForgeAccount account) {
+    // Initialise GSON
+    Gson gson = new Gson();
+    // Get the already saved Forge accounts
+    HashMap<UUID, ForgeAccount> accounts = FileManager.load(context);
+    // Give the account a random UID
+    account.setId(java.util.UUID.randomUUID());
+    // Add the new account to the hash map
+    accounts.put(account.getId(), account);
+    // Convert the list of Forge Accounts to a JSON string
+    String jsonString = gson.toJson(new ArrayList<>(accounts.values()));
+    // Internal save
+    FileOutputStream outputStream;
+    try {
+        // Save the JSON to the file
+        outputStream = context.openFileOutput(context.getString(R.string.filename_forge_accounts), Context.MODE_WORLD_READABLE);
+        outputStream.write(jsonString.getBytes());
+        outputStream.close();
+        return account;
+    } catch (Exception e) {
+        // If there is an error, log it
+        Log.e(Forge.ERROR_LOG, e.getMessage());
+        return null;
+    }
+}
+
+//RegexAndNot
+
+import WebKit
+var webView: WKWebView!
+override func loadView() {
+    webView = WKWebView()
+    webView.navigationDelegate = self
+    webview.javaScriptEnabled=true
+    view = webView
+}
+
+//RegexAndOr
+
+import android.telephony.SmsManager;
+@Override
+   public void onRequestPermissionsResult(int requestCode,String permissions[], int[] grantResults) {
+      switch (requestCode) {
+         case MY_PERMISSIONS_REQUEST_SEND_SMS: {
+            if (grantResults.length > 0
+               && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                  SmsManager smsManager = SmsManager.getDefault();
+                  smsManager.sendTextMessage(phoneNo, null, message, null, null);
+                  Toast.makeText(getApplicationContext(), "SMS sent.", 
+                     Toast.LENGTH_LONG).show();
+            } else {
+               Toast.makeText(getApplicationContext(), 
+                  "SMS faild, please try again.", Toast.LENGTH_LONG).show();
+               return;
+            }
+         }
+      }
+
+   }
+}
