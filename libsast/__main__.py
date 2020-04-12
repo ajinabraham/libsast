@@ -88,7 +88,7 @@ def main():
         result = Scanner(options, args.path).scan()
         output(args.output, result)
     elif args.version:
-        logger.info('nodejsscan v%s', __version__)
+        logger.info('libsast v%s', __version__)
     else:
         parser.print_help()
 
