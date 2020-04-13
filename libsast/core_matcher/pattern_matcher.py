@@ -5,11 +5,7 @@ import os
 from pathlib import Path
 
 from libsast.core_matcher.helpers import get_rules
-from libsast.core_matcher.matchers import (
-    InputCase,
-    Level,
-    MatchCommand,
-)
+from libsast.core_matcher.matchers import MatchCommand
 from libsast.logger import init_logger
 
 logger = init_logger(__name__)
@@ -94,9 +90,9 @@ class PatternMatcher:
                                  'pattern to match')
                     return
                 case = rule.get('input_case')
-                if case == InputCase.lower:
+                if case == 'lower':
                     fmt_data = data.lower()
-                elif case == InputCase.upper:
+                elif case == 'upper':
                     fmt_data = data.upper()
                 else:
                     fmt_data = data
@@ -111,12 +107,6 @@ class PatternMatcher:
         """Add Code Analysis Findings."""
         for match in matches:
             crule = copy.deepcopy(rule)
-            crule['input_case'] = (rule['input_case'].value
-                                   if rule.get('input_case') else
-                                   InputCase.exact.value)
-            crule['severity'] = (rule['severity'].value if rule.get('severity')
-                                 else Level.error.value)
-            crule['type'] = rule['type'].__name__
             details = {
                 'file_path': file_path,
                 'match_string': match[0],

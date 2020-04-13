@@ -1,0 +1,22 @@
+- id: test_regex
+  description: This is a rule to test regex
+  input_case: exact
+  pattern: \.close\(\)
+  severity: info
+  type: Regex
+- id: test_regex_and
+  description: This is a rule to test regex_and
+  input_case: exact
+  pattern:
+  - \.loadUrl\(.*getExternalStorageDirectory\(
+  - webkit\.WebView
+  severity: error
+  type: RegexAnd
+- id: test_regex_or
+  description: This is a rule to test regex_or
+  input_case: exact
+  pattern:
+  - MODE_WORLD_READABLE|Context\.MODE_WORLD_READABLE
+  - openFileOutput\(\s*".+"\s*,\s*1\s*\)
+  severity: error
+  type: RegexOr
