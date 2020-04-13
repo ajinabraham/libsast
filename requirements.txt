@@ -1,1 +1,2 @@
-tox
+requests==2.23.0
+pyyaml==5.3.1

@@ -8,13 +8,13 @@ Severity - It defines severity of the finding.
    2. warning - Possible Security vulnerability
    3. info - Informational findings
 
-InputCase - Defines the case of data before pattern matching
+Input Case - Defines the case of data before pattern matching
 
    1. upper - Convert data to upper case before matching
    2. lower - Convert data to lower case before matching
    3. exact - No conversion
 
-Match Types - Types of pattern matchers supported
+Match Type - Types of pattern matchers supported
 
    1. Regex - if re.findall(regex1, input)
    2. RegexAnd - if re.findall(regex1, input) and re.findall(regex2, input)
@@ -25,23 +25,10 @@ Match Types - Types of pattern matchers supported
 """
 import re
 from abc import ABC, abstractclassmethod
-from enum import Enum
 
 from libsast.logger import init_logger
 
 logger = init_logger(__name__)
-
-
-class Level(Enum):
-    error = 'error'
-    warning = 'warning'
-    info = 'info'
-
-
-class InputCase(Enum):
-    upper = 'upper'
-    lower = 'lower'
-    exact = 'exact'
 
 
 class MatchCommand:
@@ -51,7 +38,8 @@ class MatchCommand:
 
     def _find_match(self, pattern_name, content, rule):
         if pattern_name not in self.patterns:
-            self.patterns[pattern_name] = pattern_name()
+            pattern_class = globals()[pattern_name]
+            self.patterns[pattern_name] = pattern_class()
         return self.patterns[pattern_name]._perform_search(content, rule)
 
 

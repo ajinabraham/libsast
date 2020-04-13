@@ -38,8 +38,8 @@ def main():
     parser.add_argument('-o', '--output',
                         help='Output filename to save JSON report.',
                         required=False)
-    parser.add_argument('-r', '--pattern-dir',
-                        help='Python pattern directory',
+    parser.add_argument('-r', '--pattern',
+                        help='YAML pattern file, directory or url',
                         required=False)
     parser.add_argument('-s', '--sgrep-dir',
                         help='sgrep rules directory',
@@ -74,12 +74,12 @@ def main():
                         required=False,
                         action='store_true')
     args = parser.parse_args()
-    if args.path and (args.pattern_dir or args.sgrep_dir):
+    if args.path and (args.pattern or args.sgrep_dir):
         options = {
             'sgrep_binary': args.sgrep_binary,
             'sgrep_rules': args.sgrep_dir,
             'sgrep_extensions': args.sgrep_file_extensions,
-            'match_rules': args.pattern_dir,
+            'match_rules': args.pattern,
             'match_extensions': args.file_extensions,
             'ignore_filenames': args.ignore_filenames,
             'ignore_extensions': args.ignore_extensions,
