@@ -19,7 +19,7 @@ def download_rule(url):
             return r.text
     except requests.exceptions.RequestException:
         logger.exception('Failed to download '
-                         'patterns from url: - %s', url)
+                         'patterns from url: %s', url)
     return False
 
 
