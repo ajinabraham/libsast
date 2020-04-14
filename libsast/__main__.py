@@ -30,18 +30,17 @@ def output(out, scan_results):
 def main():
     """Main CLI."""
     parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--path',
-                        nargs='+',
+    parser.add_argument('path',
+                        nargs='*',
                         help=('Path can be file(s) or '
-                              'directories'),
-                        required=False)
+                              'directories'))
     parser.add_argument('-o', '--output',
                         help='Output filename to save JSON report.',
                         required=False)
-    parser.add_argument('-r', '--pattern',
+    parser.add_argument('-p', '--pattern-file',
                         help='YAML pattern file, directory or url',
                         required=False)
-    parser.add_argument('-s', '--sgrep-dir',
+    parser.add_argument('-s', '--sgrep-pattern-file',
                         help='sgrep rules directory',
                         required=False)
     parser.add_argument('-b', '--sgrep-binary',
@@ -74,12 +73,12 @@ def main():
                         required=False,
                         action='store_true')
     args = parser.parse_args()
-    if args.path and (args.pattern or args.sgrep_dir):
+    if args.path and (args.pattern_file or args.sgrep_pattern_file):
         options = {
             'sgrep_binary': args.sgrep_binary,
-            'sgrep_rules': args.sgrep_dir,
+            'sgrep_rules': args.sgrep_pattern_file,
             'sgrep_extensions': args.sgrep_file_extensions,
-            'match_rules': args.pattern,
+            'match_rules': args.pattern_file,
             'match_extensions': args.file_extensions,
             'ignore_filenames': args.ignore_filenames,
             'ignore_extensions': args.ignore_extensions,

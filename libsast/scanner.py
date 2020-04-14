@@ -1,14 +1,16 @@
-#!/usr/bin/env python
 # -*- coding: utf_8 -*-
 """The libsast Scanner module."""
 
 from libsast.core_matcher.pattern_matcher import (
     PatternMatcher,
 )
+from libsast.core_sgrep.semantic_sgrep import (
+    SemanticGrep,
+)
 
 
 class Scanner:
-    def __init__(self, options, paths):
+    def __init__(self, options: dict, paths: list) -> None:
         if options:
             self.options = options
         else:
@@ -24,6 +26,13 @@ class Scanner:
             }
         self.paths = paths
 
-    def scan(self):
+    def scan(self) -> dict:
         """Start Scan."""
-        return PatternMatcher(self.options).scan(self.paths)
+        results = {}
+        if self.options.get('match_rules'):
+            results['pattern_matcher'] = PatternMatcher(
+                self.options).scan(self.paths)
+        if self.options.get('sgrep_rules'):
+            results['semantic_grep'] = SemanticGrep(
+                self.options).scan(self.paths)
+        return results
