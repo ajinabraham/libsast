@@ -1,3 +1,4 @@
+# -*- coding: utf_8 -*-
 """Logger Config."""
 import logging
 

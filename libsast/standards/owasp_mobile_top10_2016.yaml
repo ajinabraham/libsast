@@ -1,0 +1,12 @@
+---
+owasp-mobile:
+  m1: 'M1: Improper Platform Usage'
+  m2: 'M2: Insecure Data Storage'
+  m3: 'M3: Insecure Communication'
+  m4: 'M4: Insecure Authentication'
+  m5: 'M5: Insufficient Cryptography'
+  m6: 'M6: Insecure Authorization'
+  m7: 'M7: Client Code Quality'
+  m8: 'M8: Code Tampering'
+  m9: 'M9: Reverse Engineering'
+  m10: 'M10: Extraneous Functionality'

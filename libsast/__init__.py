@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf_8 -*-
 
-
 from .scanner import Scanner
 from .core_matcher.pattern_matcher import PatternMatcher
 

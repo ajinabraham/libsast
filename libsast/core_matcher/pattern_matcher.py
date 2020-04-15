@@ -12,7 +12,7 @@ logger = init_logger(__name__)
 
 
 class PatternMatcher:
-    def __init__(self, options):
+    def __init__(self, options: dict) -> None:
         self.matcher = MatchCommand()
         self.scan_rules = get_rules(options.get('match_rules'))
         if options.get('match_extensions'):
@@ -33,7 +33,7 @@ class PatternMatcher:
             self.ignore_paths = []
         self.findings = {}
 
-    def scan(self, paths):
+    def scan(self, paths: list) -> dict:
         """Scan file(s) or directory."""
         if not self.scan_rules:
             return
