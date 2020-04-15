@@ -24,15 +24,18 @@ def test_no_path():
 
 def test_pattern_matcher():
     options, paths = get_config()
-    assert libsast.PatternMatcher(options).scan(paths)['test_regex_or']
+    result = libsast.PatternMatcher(options).scan(paths)
+    assert result['test_regex_or']
 
 
 def test_scanner():
     options, paths = get_config()
-    assert libsast.Scanner(options, paths).scan()['test_regex']
+    result = libsast.Scanner(options, paths).scan()
+    assert result['pattern_matcher']['test_regex']
 
 
 def test_scanner_file():
     options, paths = get_config()
     file_path = [paths[0] + '/test_matcher.test']
-    assert libsast.Scanner(options, file_path).scan()['test_regex']
+    result = libsast.Scanner(options, file_path).scan()
+    assert result['pattern_matcher']['test_regex']

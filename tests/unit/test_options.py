@@ -7,25 +7,25 @@ from pathlib import Path
 def test_scan_test():
     options = {'match_extensions': ['.test']}
     result = scanner(options).scan()
-    assert result['test_regex']
+    assert result['pattern_matcher']['test_regex']
 
 
 def test_scan_html():
     options = {'match_extensions': ['.html']}
     result = scanner(options).scan()
-    assert result == {}
+    assert result == {'pattern_matcher': {}}
 
 
 def test_ignore_extensions():
     options = {'ignore_extensions': ['.test']}
     result = scanner(options).scan()
-    assert result == {}
+    assert result == {'pattern_matcher': {}}
 
 
 def test_ignore_filenames():
     options = {'ignore_filenames': ['test_matcher.test']}
     result = scanner(options).scan()
-    assert result == {}
+    assert result == {'pattern_matcher': {}}
 
 
 def test_ignore_paths():
@@ -34,4 +34,4 @@ def test_ignore_paths():
     paths = [files_dir.as_posix()]
     options = {'ignore_paths': paths}
     result = scanner(options).scan()
-    assert result == {}
+    assert result == {'pattern_matcher': {}}
