@@ -1,0 +1,12 @@
+---
+owasp-web:
+  a1: 'A1: Injection'
+  a2: 'A2: Broken Authentication'
+  a3: 'A3: Sensitive Data Exposure'
+  a4: 'A4: XML External Entities (XXE)'
+  a5: 'A5: Broken Access Control'
+  a6: 'A6: Security Misconfiguration'
+  a7: 'A7: Cross-Site Scripting XSS'
+  a8: 'A8: Insecure Deserialization'
+  a9: 'A9: Using Components with Known Vulnerabilities'
+  a10: Insufficient Logging & Monitoring
