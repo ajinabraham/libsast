@@ -1,13 +1,12 @@
 """Setup for libsast."""
-from setuptools import (
-    find_packages,
-    setup,
-)
+from setuptools import find_packages, setup
+
+from libsast import __version__
 
 description = ('A generic SAST core built on top of sgrep and regex')
 setup(
     name='libsast',
-    version='1.0.0',
+    version=__version__,
     description=description,
     author='Ajin Abraham',
     author_email='ajin25@gmail.com',
@@ -21,6 +20,7 @@ setup(
     packages=find_packages(include=[
         'libsast', 'libsast.*',
         'libsast.core_matcher', 'libsast.core_matcher',
+        'libsast.core_sgrep', 'libsast.core_sgrep',
     ]),
     entry_points={
         'console_scripts': [
@@ -30,5 +30,8 @@ setup(
     include_package_data=True,
     url='https://github.com/ajinabraham/libsast',
     long_description=description,
-    install_requires=[],
+    install_requires=[
+        'requests==2.23.0',
+        'pyyaml==5.3.1',
+    ],
 )
