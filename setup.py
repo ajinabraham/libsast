@@ -13,8 +13,8 @@ def get_version(rel_path):
     for line in read(rel_path).splitlines():
         if line.startswith('__version__'):
             return line.split('\'')[1]
-    else:
-        raise RuntimeError('Unable to find version string.')
+        else:
+            raise RuntimeError('Unable to find version string.')
 
 
 description = ('A generic SAST core built on top of sgrep and regex')
