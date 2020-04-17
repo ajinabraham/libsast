@@ -3,7 +3,7 @@
 import functools
 from argparse import Namespace
 
-import sgrep_main
+from semgrep import sgrep_main
 
 from libsast.logger import init_logger
 
@@ -36,13 +36,11 @@ class SemanticGrep:
             self.ignore_paths = options.get('ignore_paths')
         else:
             self.ignore_paths = []
-        self.findings = {}
         # Monkey patch build_normal_output
         sgrep_main.build_normal_output = wrap_function(
             sgrep_main.build_normal_output, self._patch)
 
     def _patch(self, oldfunc, *args, **kwargs):
-        self.findings = args[0]
         return []
 
     def scan(self, paths: list) -> dict:
@@ -72,5 +70,4 @@ class SemanticGrep:
             validate=False,
             verbose=False,
             version=False)
-        sgrep_main.main(args)
-        return self.findings
+        return sgrep_main.main(args)
