@@ -107,15 +107,15 @@ class PatternMatcher:
         """Add Code Analysis Findings."""
         for match in matches:
             crule = copy.deepcopy(rule)
-            details = {
+            file_details = {
                 'file_path': file_path,
                 'match_string': match[0],
                 'match_position': match[1],
             }
             if rule['id'] in self.findings:
-                self.findings[rule['id']]['details'].append(details)
+                self.findings[rule['id']]['files'].append(file_details)
             else:
                 self.findings[rule['id']] = {
-                    'details': [details],
-                    'rule': crule,
+                    'files': [file_details],
+                    'metadata': crule,
                 }

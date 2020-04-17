@@ -36,6 +36,10 @@ class SemanticGrep:
             self.ignore_paths = options.get('ignore_paths')
         else:
             self.ignore_paths = []
+        self.findings = {
+            'matches': {},
+            'errors': [],
+        }
         # Monkey patch build_normal_output
         sgrep_main.build_output_json = wrap_function(
             sgrep_main.build_output_json, self._patch)
@@ -70,4 +74,27 @@ class SemanticGrep:
             validate=False,
             verbose=False,
             version=False)
-        return sgrep_main.main(args)
+        self.format_output(sgrep_main.main(args))
+        return self.findings
+
+    def format_output(self, sgrep_out):
+        """Format sgrep results."""
+        self.findings['errors'] = sgrep_out['errors']
+        smatches = self.findings['matches']
+        for find in sgrep_out['results']:
+            file_details = {
+                'file_path': find['path'],
+                'match_position': (find['start']['col'], find['end']['col']),
+                'match_lines': (find['start']['line'], find['end']['line']),
+                'metavars': find['extra']['metavars'],
+            }
+            rule_id = find['check_id']
+            if rule_id in smatches:
+                smatches[rule_id]['files'].append(file_details)
+            else:
+                smatches[rule_id] = {
+                    'files': [file_details],
+                    'metadata': {
+                        'description': find['extra']['message'],
+                    },
+                }
