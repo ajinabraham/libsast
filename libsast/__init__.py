@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf_8 -*-
-
 from .core_matcher.pattern_matcher import PatternMatcher
 from .core_sgrep.semantic_sgrep import SemanticGrep
 from .scanner import Scanner

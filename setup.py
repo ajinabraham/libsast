@@ -1,12 +1,26 @@
 """Setup for libsast."""
 from setuptools import find_packages, setup
 
-from libsast import __version__
+from pathlib import Path
+
+
+def read(rel_path):
+    init = Path(__file__).resolve().parent / rel_path
+    return init.read_text('utf-8', 'ignore')
+
+
+def get_version(rel_path):
+    for line in read(rel_path).splitlines():
+        if line.startswith('__version__'):
+            return line.split('\'')[1]
+    else:
+        raise RuntimeError('Unable to find version string.')
+
 
 description = ('A generic SAST core built on top of sgrep and regex')
 setup(
     name='libsast',
-    version=__version__,
+    version=get_version('libsast/__init__.py'),
     description=description,
     author='Ajin Abraham',
     author_email='ajin25@gmail.com',
