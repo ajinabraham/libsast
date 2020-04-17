@@ -1,6 +1,5 @@
 # -*- coding: utf_8 -*-
 """Semantic Grep Core."""
-import functools
 from argparse import Namespace
 
 from semgrep import sgrep_main
@@ -8,13 +7,6 @@ from semgrep import sgrep_main
 from libsast.logger import init_logger
 
 logger = init_logger(__name__)
-
-
-def wrap_function(oldfunction, newfunction):
-    @functools.wraps(oldfunction)
-    def run(*args, **kwargs):
-        return newfunction(oldfunction, *args, **kwargs)
-    return run
 
 
 class SemanticGrep:
@@ -36,12 +28,6 @@ class SemanticGrep:
             self.ignore_paths = options.get('ignore_paths')
         else:
             self.ignore_paths = []
-        # Monkey patch build_normal_output
-        sgrep_main.build_normal_output = wrap_function(
-            sgrep_main.build_normal_output, self._patch)
-
-    def _patch(self, oldfunc, *args, **kwargs):
-        return []
 
     def scan(self, paths: list) -> dict:
         """Do sgrep scan."""
@@ -54,7 +40,7 @@ class SemanticGrep:
             exclude=[],
             exclude_tests=False,
             generate_config=False,
-            json=False,
+            json=True,
             lang=None,
             no_rewrite_rule_ids=False,
             output=None,
