@@ -1,13 +1,26 @@
 """Setup for libsast."""
-from setuptools import (
-    find_packages,
-    setup,
-)
+from setuptools import find_packages, setup
+
+from pathlib import Path
+
+
+def read(rel_path):
+    init = Path(__file__).resolve().parent / rel_path
+    return init.read_text('utf-8', 'ignore')
+
+
+def get_version(rel_path):
+    for line in read(rel_path).splitlines():
+        if line.startswith('__version__'):
+            return line.split('\'')[1]
+    else:
+        raise RuntimeError('Unable to find version string.')
+
 
 description = ('A generic SAST core built on top of sgrep and regex')
 setup(
     name='libsast',
-    version='1.0.0',
+    version=get_version('libsast/__init__.py'),
     description=description,
     author='Ajin Abraham',
     author_email='ajin25@gmail.com',
@@ -21,6 +34,7 @@ setup(
     packages=find_packages(include=[
         'libsast', 'libsast.*',
         'libsast.core_matcher', 'libsast.core_matcher',
+        'libsast.core_sgrep', 'libsast.core_sgrep',
     ]),
     entry_points={
         'console_scripts': [
@@ -30,5 +44,10 @@ setup(
     include_package_data=True,
     url='https://github.com/ajinabraham/libsast',
     long_description=description,
-    install_requires=[],
+    install_requires=[
+        'requests==2.23.0',
+        'pyyaml==5.3.1',
+    ],
+    dependency_links=[('https://github.com/ajinabraham/'
+                       'sgrep.git#egg=semgrep&subdirectory=sgrep_lint')],
 )
