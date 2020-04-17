@@ -10,7 +10,8 @@ def test_load_dir():
     rules_dir = base_dir / 'assets' / 'rules'
     options = {'match_rules': rules_dir.as_posix()}
     paths = [files_dir.as_posix()]
-    assert libsast.PatternMatcher(options).scan(paths)['test_regex_or']
+    res = libsast.Scanner(options, paths).scan()
+    assert res['pattern_matcher']['test_regex_or']
 
 
 def test_load_multiple_rules():
@@ -19,13 +20,13 @@ def test_load_multiple_rules():
     rules_dir = base_dir / 'assets' / 'multiple'
     options = {'match_rules': rules_dir.as_posix()}
     paths = [files_dir.as_posix()]
-    result = libsast.PatternMatcher(options).scan(paths)
-    assert result['test_regex_or']
-    assert result['test_regex']
-    assert result['test_regex_and']
-    assert result['test_regex_or']
-    assert result['test_regex_and_not']
-    assert result['test_regex_or']
+    res = libsast.Scanner(options, paths).scan()['pattern_matcher']
+    assert res['test_regex_or']
+    assert res['test_regex']
+    assert res['test_regex_and']
+    assert res['test_regex_or']
+    assert res['test_regex_and_not']
+    assert res['test_regex_or']
 
 
 def test_load_file():
@@ -34,7 +35,8 @@ def test_load_file():
     rule_file = base_dir / 'assets' / 'rules' / 'patterns.yaml'
     options = {'match_rules': rule_file.as_posix()}
     paths = [files_dir.as_posix()]
-    assert libsast.PatternMatcher(options).scan(paths)['test_regex_or']
+    res = libsast.Scanner(options, paths).scan()
+    assert res['pattern_matcher']['test_regex_or']
 
 
 def test_load_url():
@@ -44,7 +46,8 @@ def test_load_url():
     files_dir = base_dir / 'assets' / 'files'
     options = {'match_rules': rule_url}
     paths = [files_dir.as_posix()]
-    assert libsast.PatternMatcher(options).scan(paths)['test_regex_or']
+    res = libsast.Scanner(options, paths).scan()
+    assert res['pattern_matcher']['test_regex_or']
 
 
 def test_load_invalid_url():
@@ -54,7 +57,8 @@ def test_load_invalid_url():
     files_dir = base_dir / 'assets' / 'files'
     options = {'match_rules': rule_url}
     paths = [files_dir.as_posix()]
-    assert libsast.PatternMatcher(options).scan(paths) is None
+    res = libsast.Scanner(options, paths).scan()
+    assert res['pattern_matcher'] is None
 
 
 def test_load_file_invalid_path():
@@ -63,7 +67,8 @@ def test_load_file_invalid_path():
     rule_file = base_dir / 'assets' / 'rules' / 'patterns.yoo'
     options = {'match_rules': rule_file.as_posix()}
     paths = [files_dir.as_posix()]
-    assert libsast.PatternMatcher(options).scan(paths) is None
+    res = libsast.Scanner(options, paths).scan()
+    assert res['pattern_matcher'] is None
 
 
 def test_load_file_invalid_yaml():
@@ -72,4 +77,5 @@ def test_load_file_invalid_yaml():
     rule_file = base_dir / 'assets' / 'invalid' / 'invalid.yaml'
     options = {'match_rules': rule_file.as_posix()}
     paths = [files_dir.as_posix()]
-    assert libsast.PatternMatcher(options).scan(paths) == {}
+    res = libsast.Scanner(options, paths).scan()
+    assert res['pattern_matcher'] == {}

@@ -1,6 +1,7 @@
 # -*- coding: utf_8 -*-
 """Pattern Macher."""
 import copy
+from pathlib import Path
 
 from libsast.core_matcher.helpers import get_rules
 from libsast.core_matcher.matchers import MatchCommand
@@ -19,7 +20,8 @@ class PatternMatcher:
         """Scan file(s) or directory."""
         if not self.scan_rules:
             return
-        for file_obj in paths:
+        for sfile in paths:
+            file_obj = Path(sfile)
             data = file_obj.read_text('utf-8', 'ignore')
             self.pattern_matcher(data, file_obj.as_posix())
         return self.findings

@@ -14,27 +14,22 @@ def get_config():
 
 
 def test_no_rule():
-    assert libsast.PatternMatcher({}).scan([]) is None
+    assert libsast.Scanner({}, []).scan() == {}
 
 
 def test_no_path():
     options, _ = get_config()
-    assert libsast.PatternMatcher(options).scan([]) == {}
+    scan_res = libsast.Scanner(options, []).scan()
+    assert scan_res['pattern_matcher'] == {}
 
 
-def test_pattern_matcher():
-    options, paths = get_config()
-    result = libsast.PatternMatcher(options).scan(paths)
-    assert result['test_regex_or']
-
-
-def test_scanner():
+def test_pattern_matcher_dir():
     options, paths = get_config()
     result = libsast.Scanner(options, paths).scan()
-    assert result['pattern_matcher']['test_regex']
+    assert result['pattern_matcher']['test_regex_or']
 
 
-def test_scanner_file():
+def test_pattern_matcher_file():
     options, paths = get_config()
     file_path = [paths[0] + '/test_matcher.test']
     result = libsast.Scanner(options, file_path).scan()
