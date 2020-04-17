@@ -20,22 +20,6 @@ def wrap_function(oldfunction, newfunction):
 class SemanticGrep:
     def __init__(self, options: dict) -> None:
         self.scan_rules = options.get('sgrep_rules')
-        if options.get('match_extensions'):
-            self.exts = options.get('match_extensions')
-        else:
-            self.exts = []
-        if options.get('ignore_extensions'):
-            self.ignore_extensions = options.get('ignore_extensions')
-        else:
-            self.ignore_extensions = []
-        if options.get('ignore_filenames'):
-            self.ignore_filenames = options.get('ignore_filenames')
-        else:
-            self.ignore_filenames = []
-        if options.get('ignore_paths'):
-            self.ignore_paths = options.get('ignore_paths')
-        else:
-            self.ignore_paths = []
         self.findings = {
             'matches': {},
             'errors': [],

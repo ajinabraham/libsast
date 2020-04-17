@@ -1,5 +1,7 @@
 # -*- coding: utf_8 -*-
 """The libsast Scanner module."""
+import os
+from pathlib import Path
 
 from libsast.core_matcher.pattern_matcher import (
     PatternMatcher,
@@ -7,6 +9,9 @@ from libsast.core_matcher.pattern_matcher import (
 from libsast.core_sgrep.semantic_sgrep import (
     SemanticGrep,
 )
+from libsast.logger import init_logger
+
+logger = init_logger(__name__)
 
 
 class Scanner:
@@ -24,15 +29,66 @@ class Scanner:
                 'ignore_extensions': None,
                 'ignore_paths': None,
             }
+        if options.get('match_extensions'):
+            self.exts = options.get('match_extensions')
+        else:
+            self.exts = []
+        if options.get('ignore_extensions'):
+            self.ignore_extensions = options.get('ignore_extensions')
+        else:
+            self.ignore_extensions = []
+        if options.get('ignore_filenames'):
+            self.ignore_filenames = options.get('ignore_filenames')
+        else:
+            self.ignore_filenames = []
+        if options.get('ignore_paths'):
+            self.ignore_paths = options.get('ignore_paths')
+        else:
+            self.ignore_paths = []
         self.paths = paths
 
     def scan(self) -> dict:
         """Start Scan."""
         results = {}
+        valid_paths = self.get_scan_files(self.paths)
         if self.options.get('match_rules'):
             results['pattern_matcher'] = PatternMatcher(
-                self.options).scan(self.paths)
+                self.options).scan(valid_paths)
         if self.options.get('sgrep_rules'):
             results['semantic_grep'] = SemanticGrep(
-                self.options).scan(self.paths)
+                self.options).scan(valid_paths)
         return results
+
+    def get_scan_files(self, paths):
+        """Get files valid for scanning."""
+        if not isinstance(paths, list):
+            logger.error('A list of path is expected')
+            return []
+        all_files = set()
+        for path in paths:
+            pobj = Path(path)
+            if pobj.is_dir():
+                for root, _, files in os.walk(path):
+                    for filename in files:
+                        pfile = Path(os.path.join(root, filename))
+                        if self.validate_file(pfile):
+                            all_files.add(pfile)
+            else:
+                if self.validate_file(pobj):
+                    all_files.add(pobj)
+        return all_files
+
+    def validate_file(self, path):
+        """Check if we should scan the file."""
+        ignore_paths = any(pp in path.as_posix() for pp in self.ignore_paths)
+        ignore_files = path.name in self.ignore_filenames
+        ignore_exts = path.suffix.lower() in self.ignore_extensions
+        if (ignore_paths or ignore_files or ignore_exts):
+            return False
+        if not self.exts:
+            pass
+        elif not path.suffix.lower() in self.exts:
+            return False
+        if not path.exists() or not path.is_file():
+            return False
+        return True

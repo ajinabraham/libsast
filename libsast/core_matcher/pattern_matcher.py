@@ -1,8 +1,6 @@
 # -*- coding: utf_8 -*-
 """Pattern Macher."""
 import copy
-import os
-from pathlib import Path
 
 from libsast.core_matcher.helpers import get_rules
 from libsast.core_matcher.matchers import MatchCommand
@@ -15,62 +13,16 @@ class PatternMatcher:
     def __init__(self, options: dict) -> None:
         self.matcher = MatchCommand()
         self.scan_rules = get_rules(options.get('match_rules'))
-        if options.get('match_extensions'):
-            self.exts = options.get('match_extensions')
-        else:
-            self.exts = []
-        if options.get('ignore_extensions'):
-            self.ignore_extensions = options.get('ignore_extensions')
-        else:
-            self.ignore_extensions = []
-        if options.get('ignore_filenames'):
-            self.ignore_filenames = options.get('ignore_filenames')
-        else:
-            self.ignore_filenames = []
-        if options.get('ignore_paths'):
-            self.ignore_paths = options.get('ignore_paths')
-        else:
-            self.ignore_paths = []
         self.findings = {}
 
     def scan(self, paths: list) -> dict:
         """Scan file(s) or directory."""
         if not self.scan_rules:
             return
-        if not isinstance(paths, list):
-            logger.error('A list of path is expected')
-            return
-        all_files = set()
-        for path in paths:
-            pobj = Path(path)
-            if pobj.is_dir():
-                for root, _, files in os.walk(path):
-                    for filename in files:
-                        pfile = Path(os.path.join(root, filename))
-                        all_files.add(pfile)
-            else:
-                all_files.add(pobj)
-        for file_obj in all_files:
-            if not self.validate_file(file_obj):
-                continue
+        for file_obj in paths:
             data = file_obj.read_text('utf-8', 'ignore')
             self.pattern_matcher(data, file_obj.as_posix())
         return self.findings
-
-    def validate_file(self, path):
-        """Check if we should scan the file."""
-        ignore_paths = any(pp in path.as_posix() for pp in self.ignore_paths)
-        ignore_files = path.name in self.ignore_filenames
-        ignore_exts = path.suffix.lower() in self.ignore_extensions
-        if (ignore_paths or ignore_files or ignore_exts):
-            return False
-        if not self.exts:
-            pass
-        elif not path.suffix.lower() in self.exts:
-            return False
-        if not path.exists() or not path.is_file():
-            return False
-        return True
 
     def pattern_matcher(self, data, file_path):
         """Static Analysis Pattern Matcher."""
