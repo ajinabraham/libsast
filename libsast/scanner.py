@@ -33,7 +33,7 @@ class Scanner:
         if options.get('match_extensions'):
             self.exts = options.get('match_extensions')
         if options.get('sgrep_extensions'):
-            self.exts.union(options.get('sgrep_extensions'))
+            self.exts.update(options.get('sgrep_extensions'))
         if options.get('ignore_extensions'):
             self.ignore_extensions = options.get('ignore_extensions')
         else:
