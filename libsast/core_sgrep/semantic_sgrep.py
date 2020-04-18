@@ -79,6 +79,7 @@ class SemanticGrep:
             else:
                 metdata = find['extra']['metadata']
                 metdata['description'] = find['extra']['message']
+                metdata['severity'] = find['extra']['severity']
                 smatches[rule_id] = {
                     'files': [file_details],
                     'metadata': metdata,
