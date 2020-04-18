@@ -71,7 +71,7 @@ class SemanticGrep:
                 'file_path': find['path'],
                 'match_position': (find['start']['col'], find['end']['col']),
                 'match_lines': (find['start']['line'], find['end']['line']),
-                'match_string': find['extra']['file_lines']
+                'match_string': find['extra']['file_lines'],
             }
             rule_id = find['check_id']
             if rule_id in smatches:
