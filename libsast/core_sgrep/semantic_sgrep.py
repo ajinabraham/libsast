@@ -40,8 +40,10 @@ class SemanticGrep:
             dump_ast=False,
             error=False,
             exclude=[],
+            exclude_dir=[],
             exclude_tests=False,
             generate_config=False,
+            include=[],
             json=True,
             lang=None,
             no_rewrite_rule_ids=False,
@@ -50,7 +52,6 @@ class SemanticGrep:
             precommit=False,
             quiet=False,
             r2c=False,
-            skip_pattern_validation=False,
             strict=False,
             target=paths,
             test=False,
@@ -70,15 +71,15 @@ class SemanticGrep:
                 'file_path': find['path'],
                 'match_position': (find['start']['col'], find['end']['col']),
                 'match_lines': (find['start']['line'], find['end']['line']),
-                'metavars': find['extra']['metavars'],
+                'match_string': find['extra']['file_lines']
             }
             rule_id = find['check_id']
             if rule_id in smatches:
                 smatches[rule_id]['files'].append(file_details)
             else:
+                metdata = find['extra']['metadata']
+                metdata['description'] = find['extra']['message']
                 smatches[rule_id] = {
                     'files': [file_details],
-                    'metadata': {
-                        'description': find['extra']['message'],
-                    },
+                    'metadata': metdata,
                 }
