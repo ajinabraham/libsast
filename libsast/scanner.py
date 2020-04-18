@@ -29,10 +29,11 @@ class Scanner:
                 'ignore_extensions': None,
                 'ignore_paths': None,
             }
+        self.exts = []
         if options.get('match_extensions'):
             self.exts = options.get('match_extensions')
-        else:
-            self.exts = []
+        if options.get('sgrep_extensions'):
+            self.exts.extend(options.get('sgrep_extensions'))
         if options.get('ignore_extensions'):
             self.ignore_extensions = options.get('ignore_extensions')
         else:
