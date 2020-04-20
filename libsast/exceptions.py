@@ -45,6 +45,12 @@ class TypeKeyMissingError(LibsastException):
     pass
 
 
+class InvalidRuleFormatException(LibsastException):
+    """Pattern Matcher rule file is invalid."""
+
+    pass
+
+
 class PatternKeyMissingError(LibsastException):
     """Pattern Matcher rule does not have the key 'pattern'."""
 

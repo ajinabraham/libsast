@@ -22,7 +22,7 @@ def download_rule(url):
             r.raise_for_status()
             return r.text
     except requests.exceptions.RequestException:
-        raise RuleDownloadException
+        raise RuleDownloadException(f'Failed to download from: {url}')
     return False
 
 
@@ -31,16 +31,18 @@ def read_yaml(file_obj, text=False):
         if text:
             return yaml.safe_load(file_obj)
         return yaml.safe_load(file_obj.read_text('utf-8', 'ignore'))
-    except yaml.YAMLError:
-        raise YamlRuleParseError
-    except Exception:
-        raise YamlRuleLoadException
+    except yaml.YAMLError as exp:
+        raise YamlRuleParseError(
+            f'YAML Parse Error: {repr(exp)}')
+    except Exception as gen:
+        raise YamlRuleLoadException(
+            f'Failed to load YAML file: {repr(gen)}')
 
 
 def get_rules(rule_loc):
     """Get pattern matcher rules."""
     if not rule_loc:
-        raise MissingRuleError
+        raise MissingRuleError('Rule location is not missing.')
         return
     if rule_loc.startswith(('http://', 'https://')):
         pat = download_rule(rule_loc)
@@ -54,7 +56,9 @@ def get_rules(rule_loc):
         elif rule.is_dir() and rule.exists():
             patterns = []
             for yfile in rule.glob('**/*.yaml'):
-                patterns.extend(read_yaml(yfile))
+                rule = read_yaml(yfile)
+                if rule:
+                    patterns.extend(rule)
             return patterns
         else:
-            raise InvalidRuleError
+            raise InvalidRuleError('This path is invalid')

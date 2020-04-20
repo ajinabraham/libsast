@@ -26,21 +26,13 @@ Match Type - Types of pattern matchers supported
 import re
 from abc import ABC, abstractclassmethod
 
-from libsast.exceptions import MatcherNotFoundException
-
 
 class MatchCommand:
 
     def __init__(self):
         self.patterns = {}
-        self.supported = {'Regex', 'RegexAnd',
-                          'RegexOr', 'RegexAndNot',
-                          'RegexAndOr'}
 
     def _find_match(self, pattern_name, content, rule):
-        if pattern_name not in self.supported:
-            raise MatcherNotFoundException
-            return
         if pattern_name not in self.patterns:
             pattern_class = globals()[pattern_name]
             self.patterns[pattern_name] = pattern_class()

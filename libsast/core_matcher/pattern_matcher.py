@@ -4,17 +4,13 @@ import copy
 from pathlib import Path
 
 from libsast.core_matcher.helpers import get_rules
-from libsast.core_matcher.matchers import MatchCommand
-from libsast.exceptions import (
-    PatternKeyMissingError,
-    RuleProcessingException,
-    TypeKeyMissingError,
-)
+from libsast.core_matcher import matchers
+from libsast import exceptions
 
 
 class PatternMatcher:
     def __init__(self, options: dict) -> None:
-        self.matcher = MatchCommand()
+        self.matcher = matchers.MatchCommand()
         self.scan_rules = get_rules(options.get('match_rules'))
         self.findings = {}
 
@@ -22,26 +18,38 @@ class PatternMatcher:
         """Scan file(s) or directory."""
         if not self.scan_rules:
             return
+        self.validate_rules()
         for sfile in paths:
             file_obj = Path(sfile)
             data = file_obj.read_text('utf-8', 'ignore')
             self.pattern_matcher(data, file_obj.as_posix())
         return self.findings
 
+    def validate_rules(self):
+        """Validate Rules before scanning."""
+        for rule in self.scan_rules:
+            if not isinstance(rule, dict):
+                raise exceptions.InvalidRuleFormatException(
+                    'Pattern Matcher Rule format is invalid.')
+            if not rule.get('type'):
+                raise exceptions.TypeKeyMissingError(
+                    'The rule is missing the key \'type\'')
+            if not rule.get('pattern'):
+                raise exceptions.PatternKeyMissingError(
+                    'The rule is missing the key \'pattern\'')
+            all_mts = [m for m in dir(matchers) if m.startswith('R')]
+            pattern_name = rule['type']
+            if pattern_name not in all_mts:
+                supported = ', '.join(all_mts)
+                raise exceptions.MatcherNotFoundException(
+                    f'Matcher \'{pattern_name}\' is not supported.'
+                    f' Available matchers are {supported}',
+                )
+
     def pattern_matcher(self, data, file_path):
         """Static Analysis Pattern Matcher."""
         try:
             for rule in self.scan_rules:
-                try:
-                    rule['type']
-                except KeyError:
-                    raise TypeKeyMissingError
-                    return
-                try:
-                    rule['pattern']
-                except KeyError:
-                    raise PatternKeyMissingError
-                    return
                 case = rule.get('input_case')
                 if case == 'lower':
                     fmt_data = data.lower()
@@ -49,12 +57,14 @@ class PatternMatcher:
                     fmt_data = data.upper()
                 else:
                     fmt_data = data
-                matches = self.matcher._find_match(rule['type'], fmt_data,
-                                                   rule)
+                matches = self.matcher._find_match(
+                    rule['type'],
+                    fmt_data,
+                    rule)
                 if matches:
                     self.add_finding(file_path, rule, matches)
         except Exception:
-            raise RuleProcessingException
+            raise exceptions.RuleProcessingException('Rule processing error.')
 
     def add_finding(self, file_path, rule, matches):
         """Add Code Analysis Findings."""

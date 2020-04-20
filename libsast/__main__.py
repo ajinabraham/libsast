@@ -24,10 +24,11 @@ def output(out, scan_results):
                              sort_keys=True,
                              indent=2,
                              separators=(',', ': ')))
-    sgrep_out = scan_results.get('semantic_grep', {}).get('matches')
-    matcher_out = scan_results.get('pattern_matcher')
-    if sgrep_out or matcher_out:
-        sys.exit(1)
+    if scan_results:
+        sgrep_out = scan_results.get('semantic_grep', {}).get('matches')
+        matcher_out = scan_results.get('pattern_matcher')
+        if sgrep_out or matcher_out:
+            sys.exit(1)
     sys.exit(0)
 
 

@@ -65,7 +65,7 @@ class Scanner:
     def get_scan_files(self, paths):
         """Get files valid for scanning."""
         if not isinstance(paths, list):
-            raise InvalidPathError
+            raise InvalidPathError('Path should be a list')
             return []
         all_files = set()
         for path in paths:
