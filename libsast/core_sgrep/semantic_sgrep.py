@@ -5,10 +5,6 @@ from argparse import Namespace
 
 from semgrep import sgrep_main
 
-from libsast.logger import init_logger
-
-logger = init_logger(__name__)
-
 
 def wrap_function(oldfunction, newfunction):
     @functools.wraps(oldfunction)

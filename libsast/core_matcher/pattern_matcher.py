@@ -5,9 +5,11 @@ from pathlib import Path
 
 from libsast.core_matcher.helpers import get_rules
 from libsast.core_matcher.matchers import MatchCommand
-from libsast.logger import init_logger
-
-logger = init_logger(__name__)
+from libsast.exceptions import (
+    PatternKeyMissingError,
+    RuleProcessingException,
+    TypeKeyMissingError,
+)
 
 
 class PatternMatcher:
@@ -33,15 +35,12 @@ class PatternMatcher:
                 try:
                     rule['type']
                 except KeyError:
-                    logger.error('match_rule.py should have the '
-                                 'match \'type\' defined.')
+                    raise TypeKeyMissingError
                     return
                 try:
                     rule['pattern']
                 except KeyError:
-                    logger.error('match_rule.py should have the key'
-                                 ' \'match\' defined with the '
-                                 'pattern to match')
+                    raise PatternKeyMissingError
                     return
                 case = rule.get('input_case')
                 if case == 'lower':
@@ -55,7 +54,7 @@ class PatternMatcher:
                 if matches:
                     self.add_finding(file_path, rule, matches)
         except Exception:
-            logger.exception('Error in Code Rule Processing')
+            raise RuleProcessingException
 
     def add_finding(self, file_path, rule, matches):
         """Add Code Analysis Findings."""

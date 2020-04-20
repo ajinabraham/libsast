@@ -6,10 +6,7 @@ import json
 import sys
 
 from libsast import __version__
-from libsast.logger import init_logger
 from libsast.scanner import Scanner
-
-logger = init_logger(__name__)
 
 
 def output(out, scan_results):
@@ -23,10 +20,10 @@ def output(out, scan_results):
                       separators=(',', ': '))
     else:
         if scan_results:
-            logger.info(json.dumps(scan_results,
-                                   sort_keys=True,
-                                   indent=2,
-                                   separators=(',', ': ')))
+            print(json.dumps(scan_results,
+                             sort_keys=True,
+                             indent=2,
+                             separators=(',', ': ')))
     sgrep_out = scan_results.get('semantic_grep', {}).get('matches')
     matcher_out = scan_results.get('pattern_matcher')
     if sgrep_out or matcher_out:
@@ -94,7 +91,7 @@ def main():
         result = Scanner(options, args.path).scan()
         output(args.output, result)
     elif args.version:
-        logger.info('libsast v%s', __version__)
+        print('libsast v%s', __version__)
     else:
         parser.print_help()
 

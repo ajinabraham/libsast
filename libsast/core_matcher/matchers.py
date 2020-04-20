@@ -26,17 +26,21 @@ Match Type - Types of pattern matchers supported
 import re
 from abc import ABC, abstractclassmethod
 
-from libsast.logger import init_logger
-
-logger = init_logger(__name__)
+from libsast.exceptions import MatcherNotFoundException
 
 
 class MatchCommand:
 
     def __init__(self):
         self.patterns = {}
+        self.supported = {'Regex', 'RegexAnd',
+                          'RegexOr', 'RegexAndNot',
+                          'RegexAndOr'}
 
     def _find_match(self, pattern_name, content, rule):
+        if pattern_name not in self.supported:
+            raise MatcherNotFoundException
+            return
         if pattern_name not in self.patterns:
             pattern_class = globals()[pattern_name]
             self.patterns[pattern_name] = pattern_class()
@@ -62,7 +66,6 @@ class Regex(MatchStrategy):
 class RegexAnd(MatchStrategy):
     def _perform_search(self, content, rule):
         if isinstance(rule['pattern'], str):
-            logger.debug('wrong regex type, switching to single regex')
             return Regex().perform_search(content, rule)
         matches = set()
         for regex in rule['pattern']:
@@ -76,7 +79,6 @@ class RegexAnd(MatchStrategy):
 class RegexOr(MatchStrategy):
     def _perform_search(self, content, rule):
         if isinstance(rule['pattern'], str):
-            logger.debug('wrong regex type, switching to single regex')
             return Regex().perform_search(content, rule)
         matches = set()
         for regex in rule['pattern']:

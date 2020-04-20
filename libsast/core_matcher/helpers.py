@@ -2,13 +2,17 @@
 """Helper Functions."""
 from pathlib import Path
 
-from libsast.logger import init_logger
+from libsast.exceptions import (
+    InvalidRuleError,
+    MissingRuleError,
+    RuleDownloadException,
+    YamlRuleLoadException,
+    YamlRuleParseError,
+)
 
 import yaml
 
 import requests
-
-logger = init_logger(__name__)
 
 
 def download_rule(url):
@@ -18,8 +22,7 @@ def download_rule(url):
             r.raise_for_status()
             return r.text
     except requests.exceptions.RequestException:
-        logger.exception('Failed to download '
-                         'patterns from url: %s', url)
+        raise RuleDownloadException
     return False
 
 
@@ -29,15 +32,15 @@ def read_yaml(file_obj, text=False):
             return yaml.safe_load(file_obj)
         return yaml.safe_load(file_obj.read_text('utf-8', 'ignore'))
     except yaml.YAMLError:
-        logger.error('Failed to parse YAML')
+        raise YamlRuleParseError
     except Exception:
-        logger.exception('Error parsing YAML')
+        raise YamlRuleLoadException
 
 
 def get_rules(rule_loc):
     """Get pattern matcher rules."""
     if not rule_loc:
-        logger.error('No rule directory, file or url specified')
+        raise MissingRuleError
         return
     if rule_loc.startswith(('http://', 'https://')):
         pat = download_rule(rule_loc)
@@ -54,4 +57,4 @@ def get_rules(rule_loc):
                 patterns.extend(read_yaml(yfile))
             return patterns
         else:
-            logger.error('Not a valid file or directory: %s', rule)
+            raise InvalidRuleError

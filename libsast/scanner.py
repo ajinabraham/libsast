@@ -9,9 +9,9 @@ from libsast.core_matcher.pattern_matcher import (
 from libsast.core_sgrep.semantic_sgrep import (
     SemanticGrep,
 )
-from libsast.logger import init_logger
-
-logger = init_logger(__name__)
+from libsast.exceptions import (
+    InvalidPathError,
+)
 
 
 class Scanner:
@@ -53,7 +53,6 @@ class Scanner:
         results = {}
         valid_paths = self.get_scan_files(self.paths)
         if not valid_paths:
-            logger.error('No valid file or paths found')
             return
         if self.options.get('match_rules'):
             results['pattern_matcher'] = PatternMatcher(
@@ -66,7 +65,7 @@ class Scanner:
     def get_scan_files(self, paths):
         """Get files valid for scanning."""
         if not isinstance(paths, list):
-            logger.error('A list of path is expected')
+            raise InvalidPathError
             return []
         all_files = set()
         for path in paths:

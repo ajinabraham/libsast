@@ -3,6 +3,8 @@ from pathlib import Path
 
 import libsast
 
+import pytest
+
 
 def test_load_dir():
     base_dir = Path(__file__).parents[0]
@@ -57,8 +59,8 @@ def test_load_invalid_url():
     files_dir = base_dir / 'assets' / 'files'
     options = {'match_rules': rule_url}
     paths = [files_dir.as_posix()]
-    res = libsast.Scanner(options, paths).scan()
-    assert res['pattern_matcher'] is None
+    with pytest.raises(libsast.exceptions.RuleDownloadException):
+        libsast.Scanner(options, paths).scan()
 
 
 def test_load_file_invalid_path():
@@ -67,8 +69,8 @@ def test_load_file_invalid_path():
     rule_file = base_dir / 'assets' / 'rules' / 'patterns.yoo'
     options = {'match_rules': rule_file.as_posix()}
     paths = [files_dir.as_posix()]
-    res = libsast.Scanner(options, paths).scan()
-    assert res['pattern_matcher'] is None
+    with pytest.raises(libsast.exceptions.InvalidRuleError):
+        libsast.Scanner(options, paths).scan()
 
 
 def test_load_file_invalid_yaml():
@@ -77,5 +79,5 @@ def test_load_file_invalid_yaml():
     rule_file = base_dir / 'assets' / 'invalid' / 'invalid.yaml'
     options = {'match_rules': rule_file.as_posix()}
     paths = [files_dir.as_posix()]
-    res = libsast.Scanner(options, paths).scan()
-    assert res['pattern_matcher'] == {}
+    with pytest.raises(libsast.exceptions.RuleProcessingException):
+        libsast.Scanner(options, paths).scan()

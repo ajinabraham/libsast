@@ -19,8 +19,7 @@ def test_no_rule():
 
 def test_no_path():
     options, _ = get_config()
-    scan_res = libsast.Scanner(options, []).scan()
-    assert scan_res is None
+    assert libsast.Scanner(options, []).scan() is None
 
 
 def test_pattern_matcher_dir():
