@@ -16,13 +16,20 @@ def output(out, scan_results):
     """Output."""
     if out:
         with open(out, 'w') as outfile:
-            json.dump(scan_results, outfile, sort_keys=True,
-                      indent=4, separators=(',', ': '))
+            json.dump(scan_results,
+                      outfile,
+                      sort_keys=True,
+                      indent=2,
+                      separators=(',', ': '))
     else:
         if scan_results:
-            logger.info(json.dumps(scan_results, sort_keys=True,
-                                   indent=4, separators=(',', ': ')))
-    if scan_results:
+            logger.info(json.dumps(scan_results,
+                                   sort_keys=True,
+                                   indent=2,
+                                   separators=(',', ': ')))
+    sgrep_out = scan_results.get('semantic_grep', {}).get('matches')
+    matcher_out = scan_results.get('pattern_matcher')
+    if sgrep_out or matcher_out:
         sys.exit(1)
     sys.exit(0)
 

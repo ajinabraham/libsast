@@ -53,7 +53,7 @@ class Scanner:
         results = {}
         valid_paths = self.get_scan_files(self.paths)
         if not valid_paths:
-            logger.error('No valid paths found')
+            logger.error('No valid file or paths found')
             return
         if self.options.get('match_rules'):
             results['pattern_matcher'] = PatternMatcher(
