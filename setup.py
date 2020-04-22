@@ -45,8 +45,8 @@ setup(
     url='https://github.com/ajinabraham/libsast',
     long_description=description,
     install_requires=[
-        'requests>=2.23.0',
-        'pyyaml>=5.3.1',
+        'requests>=2.22',
+        'pyyaml>=5.3',
     ],
     dependency_links=[('https://github.com/ajinabraham/'
                        'sgrep.git#egg=semgrep&subdirectory=sgrep_lint')],
