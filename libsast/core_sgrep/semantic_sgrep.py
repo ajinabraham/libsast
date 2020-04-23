@@ -2,6 +2,7 @@
 """Semantic Grep Core."""
 import functools
 from argparse import Namespace
+from pathlib import Path
 
 from semgrep import sgrep_main
 
@@ -16,6 +17,11 @@ def wrap_function(oldfunction, newfunction):
 class SemanticGrep:
     def __init__(self, options: dict) -> None:
         self.scan_rules = options.get('sgrep_rules')
+        exts = options.get('sgrep_extensions')
+        if exts:
+            self.exts = [ext.lower() for ext in exts]
+        else:
+            self.exts = []
         self.findings = {
             'matches': {},
             'errors': [],
@@ -29,6 +35,13 @@ class SemanticGrep:
 
     def scan(self, paths: list) -> dict:
         """Do sgrep scan."""
+        if self.exts:
+            filtered = []
+            for sfile in paths:
+                if Path(sfile).suffix.lower() in self.exts:
+                    filtered.append(sfile)
+            if filtered:
+                paths = filtered
         args = Namespace(
             autofix=False,
             config=self.scan_rules,

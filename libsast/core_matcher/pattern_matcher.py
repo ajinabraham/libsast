@@ -12,6 +12,11 @@ class PatternMatcher:
     def __init__(self, options: dict) -> None:
         self.matcher = matchers.MatchCommand()
         self.scan_rules = get_rules(options.get('match_rules'))
+        exts = options.get('match_extensions')
+        if exts:
+            self.exts = [ext.lower() for ext in exts]
+        else:
+            self.exts = []
         self.findings = {}
 
     def scan(self, paths: list) -> dict:
@@ -21,6 +26,9 @@ class PatternMatcher:
         self.validate_rules()
         for sfile in paths:
             file_obj = Path(sfile)
+            if self.exts:
+                if not file_obj.suffix.lower() in self.exts:
+                    continue
             data = file_obj.read_text('utf-8', 'ignore')
             self.pattern_matcher(data, file_obj.as_posix())
         return self.findings

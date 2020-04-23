@@ -10,10 +10,16 @@ def test_scan_test():
     assert result['pattern_matcher']['test_regex']
 
 
-def test_scan_html():
+def test_scan_ext():
+    options = {'match_extensions': ['.test']}
+    result = scanner(options).scan()
+    assert result['pattern_matcher'] is not None
+
+
+def test_scan_ext_not_present():
     options = {'match_extensions': ['.html']}
     result = scanner(options).scan()
-    assert result is None
+    assert result['pattern_matcher'] == {}
 
 
 def test_ignore_extensions():
