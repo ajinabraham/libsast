@@ -28,6 +28,7 @@ class Scanner:
                 'ignore_filenames': None,
                 'ignore_extensions': None,
                 'ignore_paths': None,
+                'show_progress': False,
             }
         if options.get('ignore_extensions'):
             self.ignore_extensions = options.get('ignore_extensions')

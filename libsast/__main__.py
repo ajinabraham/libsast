@@ -73,6 +73,10 @@ def main():
                         nargs='+',
                         help='Path(s) to ignore',
                         required=False)
+    parser.add_argument('--show-progress',
+                        help='Show scan progress',
+                        required=False,
+                        action='store_true')
     parser.add_argument('-v', '--version',
                         help='Show libsast version',
                         required=False,
@@ -88,6 +92,7 @@ def main():
             'ignore_filenames': args.ignore_filenames,
             'ignore_extensions': args.ignore_extensions,
             'ignore_paths': args.ignore_paths,
+            'show_progress': args.show_progress,
         }
         result = Scanner(options, args.path).scan()
         output(args.output, result)

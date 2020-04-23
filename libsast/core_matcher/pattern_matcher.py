@@ -5,13 +5,17 @@ from pathlib import Path
 
 from libsast.core_matcher.helpers import get_rules
 from libsast.core_matcher import matchers
-from libsast import exceptions
+from libsast import (
+    common,
+    exceptions,
+)
 
 
 class PatternMatcher:
     def __init__(self, options: dict) -> None:
         self.matcher = matchers.MatchCommand()
         self.scan_rules = get_rules(options.get('match_rules'))
+        self.show_progress = options.get('show_progress')
         exts = options.get('match_extensions')
         if exts:
             self.exts = [ext.lower() for ext in exts]
@@ -24,6 +28,8 @@ class PatternMatcher:
         if not self.scan_rules:
             return
         self.validate_rules()
+        if self.show_progress:
+            paths = common.progressbar(paths, '- Pattern Matcher: ', 60)
         for sfile in paths:
             file_obj = Path(sfile)
             if self.exts:
