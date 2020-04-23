@@ -49,5 +49,5 @@ setup(
         'pyyaml>=5.3',
     ],
     dependency_links=[('https://github.com/ajinabraham/'
-                       'sgrep.git#egg=semgrep&subdirectory=sgrep_lint')],
+                       'semgrep.git#egg=semgrep&subdirectory=sgrep_lint')],
 )
