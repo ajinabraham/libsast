@@ -9,4 +9,4 @@ owasp-web:
   a7: 'A7: Cross-Site Scripting XSS'
   a8: 'A8: Insecure Deserialization'
   a9: 'A9: Using Components with Known Vulnerabilities'
-  a10: Insufficient Logging & Monitoring
+  a10: 'A10: Insufficient Logging & Monitoring
