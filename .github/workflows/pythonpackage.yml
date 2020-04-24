@@ -24,15 +24,15 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install tox
-    - name: Unit test
-      run: |
-        tox -e py38
     - name: Lint
       run: |
         tox -e lint
     - name: Bandit
       run: |
         tox -e bandit
+    - name: Unit test
+      run: |
+        tox -e py38
     - name: Clean Up
       run: |
         tox -e clean
