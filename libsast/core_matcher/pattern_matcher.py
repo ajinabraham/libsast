@@ -1,7 +1,6 @@
 # -*- coding: utf_8 -*-
 """Pattern Macher."""
 import copy
-from pathlib import Path
 
 from libsast.core_matcher.helpers import get_rules
 from libsast.core_matcher import matchers
@@ -29,14 +28,14 @@ class PatternMatcher:
             return
         self.validate_rules()
         if self.show_progress:
-            paths = common.progressbar(paths, '- Pattern Matcher: ', 60)
+            pbar = common.ProgressBar('Pattern Match', len(paths))
+            paths = pbar.progrees_loop(paths)
         for sfile in paths:
-            file_obj = Path(sfile)
             if self.exts:
-                if not file_obj.suffix.lower() in self.exts:
+                if not sfile.suffix.lower() in self.exts:
                     continue
-            data = file_obj.read_text('utf-8', 'ignore')
-            self.pattern_matcher(data, file_obj.as_posix())
+            data = sfile.read_text('utf-8', 'ignore')
+            self.pattern_matcher(data, sfile.as_posix())
         return self.findings
 
     def validate_rules(self):

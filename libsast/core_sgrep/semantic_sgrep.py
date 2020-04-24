@@ -1,22 +1,13 @@
 # -*- coding: utf_8 -*-
 """Semantic Grep Core."""
-import functools
-from argparse import Namespace
-from pathlib import Path
-
-from semgrep import sgrep_main
-
-
-def wrap_function(oldfunction, newfunction):
-    @functools.wraps(oldfunction)
-    def run(*args, **kwargs):
-        return newfunction(oldfunction, *args, **kwargs)
-    return run
+from libsast.core_sgrep.helpers import call_semgrep
+from libsast import common
 
 
 class SemanticGrep:
     def __init__(self, options: dict) -> None:
         self.scan_rules = options.get('sgrep_rules')
+        self.show_progress = options.get('show_progress')
         exts = options.get('sgrep_extensions')
         if exts:
             self.exts = [ext.lower() for ext in exts]
@@ -26,49 +17,24 @@ class SemanticGrep:
             'matches': {},
             'errors': [],
         }
-        # Monkey patch build_normal_output
-        sgrep_main.build_output_json = wrap_function(
-            sgrep_main.build_output_json, self._patch)
-
-    def _patch(self, oldfunc, *args, **kwargs):
-        return ''
 
     def scan(self, paths: list) -> dict:
         """Do sgrep scan."""
         if self.exts:
             filtered = []
             for sfile in paths:
-                if Path(sfile).suffix.lower() in self.exts:
+                if sfile.suffix.lower() in self.exts:
                     filtered.append(sfile)
             if filtered:
                 paths = filtered
-        args = Namespace(
-            autofix=False,
-            config=self.scan_rules,
-            dangerously_allow_arbitrary_code_execution_from_rules=False,
-            dump_ast=False,
-            error=False,
-            exclude=[],
-            exclude_dir=[],
-            exclude_tests=False,
-            generate_config=False,
-            include=[],
-            json=True,
-            lang=None,
-            no_rewrite_rule_ids=False,
-            output=None,
-            pattern=None,
-            precommit=False,
-            quiet=False,
-            r2c=False,
-            strict=False,
-            target=paths,
-            test=False,
-            test_ignore_todo=False,
-            validate=False,
-            verbose=False,
-            version=False)
-        self.format_output(sgrep_main.main(args))
+        if self.show_progress:
+            pbar = common.ProgressBar('Semantic Grep', len(paths))
+            sgrep_out = pbar.progress_function(
+                call_semgrep,
+                (paths, self.scan_rules))
+        else:
+            sgrep_out = call_semgrep(paths, self.scan_rules)
+        self.format_output(sgrep_out)
         return self.findings
 
     def format_output(self, sgrep_out):

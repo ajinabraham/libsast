@@ -5,4 +5,4 @@
 # TODO Write test to ensure sgrep keeps the format 
 # TODO May be add the formating option to libsast from or copy from nodejsscan
 # TODO Move to Generator model yield
-# TODO support progress for semantic grep
+# DONE support progress for semantic grep
