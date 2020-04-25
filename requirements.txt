@@ -1,1 +1,1 @@
--e "git+https://github.com/ajinabraham/semgrep.git@experimental#egg=semgrep&subdirectory=sgrep_lint"
+-e "git+https://github.com/ajinabraham/semgrep.git@experimental#egg=semgrep&subdirectory=semgrep"

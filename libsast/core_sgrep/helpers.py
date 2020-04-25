@@ -2,7 +2,7 @@
 """Semantic Grep Helpers."""
 from argparse import Namespace
 
-from semgrep import sgrep_main
+from semgrep import semgrep_main
 
 
 def call_semgrep(paths, scan_rules):
@@ -33,4 +33,4 @@ def call_semgrep(paths, scan_rules):
         validate=False,
         verbose=False,
         version=False)
-    return sgrep_main.main(args)
+    return semgrep_main.main(args)
