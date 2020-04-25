@@ -23,7 +23,6 @@ def download_rule(url):
             return r.text
     except requests.exceptions.RequestException:
         raise RuleDownloadException(f'Failed to download from: {url}')
-    return False
 
 
 def read_yaml(file_obj, text=False):
@@ -43,7 +42,6 @@ def get_rules(rule_loc):
     """Get pattern matcher rules."""
     if not rule_loc:
         raise MissingRuleError('Rule location is not missing.')
-        return
     if rule_loc.startswith(('http://', 'https://')):
         pat = download_rule(rule_loc)
         if not pat:

@@ -62,7 +62,6 @@ class Scanner:
         """Get files valid for scanning."""
         if not isinstance(paths, list):
             raise InvalidPathError('Path should be a list')
-            return []
         all_files = set()
         for path in paths:
             pobj = Path(path)
