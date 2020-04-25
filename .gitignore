@@ -91,3 +91,5 @@ ENV/
 .DS_Store
 *.pyc
 *.pyo
+
+.vscode
