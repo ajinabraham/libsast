@@ -32,7 +32,7 @@ class ProgressBar:
         ret = [None]
         index = 0
         self.expected_time = (
-            self.expected_time if self.expected_time > 19 else 20)
+            self.expected_time if self.expected_time > 34 else 53)
 
         def myrunner(function, ret, *args, **kwargs):
             ret[0] = function(*args, **kwargs)
