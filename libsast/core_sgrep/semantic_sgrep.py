@@ -48,7 +48,7 @@ class SemanticGrep:
                 'match_lines': (find['start']['line'], find['end']['line']),
                 'match_string': find['extra']['file_lines'],
             }
-            rule_id = 'rule.' + find['check_id'].rsplit('rules.', 1)[1]
+            rule_id = find['check_id'].rsplit('.', 1)[1]
             if rule_id in smatches:
                 smatches[rule_id]['files'].append(file_details)
             else:
