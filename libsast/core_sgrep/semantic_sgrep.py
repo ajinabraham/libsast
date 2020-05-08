@@ -1,5 +1,7 @@
 # -*- coding: utf_8 -*-
 """Semantic Grep Core."""
+import json
+
 from libsast.core_sgrep.helpers import call_semgrep
 from libsast import common
 
@@ -37,8 +39,9 @@ class SemanticGrep:
         self.format_output(sgrep_out)
         return self.findings
 
-    def format_output(self, sgrep_out):
+    def format_output(self, results):
         """Format sgrep results."""
+        sgrep_out = json.loads(results)
         self.findings['errors'] = sgrep_out['errors']
         smatches = self.findings['matches']
         for find in sgrep_out['results']:
@@ -46,7 +49,7 @@ class SemanticGrep:
                 'file_path': find['path'],
                 'match_position': (find['start']['col'], find['end']['col']),
                 'match_lines': (find['start']['line'], find['end']['line']),
-                'match_string': find['extra']['file_lines'],
+                'match_string': find['extra']['lines'],
             }
             rule_id = find['check_id'].rsplit('.', 1)[1]
             if rule_id in smatches:

@@ -1,8 +1,14 @@
 # -*- coding: utf_8 -*-
 """Semantic Grep Helpers."""
+import multiprocessing
 from argparse import Namespace
 
 from semgrep import semgrep_main
+
+try:
+    CPU_COUNT = multiprocessing.cpu_count()
+except NotImplementedError:
+    CPU_COUNT = 1  # CPU count is not implemented on Windows
 
 
 def call_semgrep(paths, scan_rules):
@@ -18,13 +24,15 @@ def call_semgrep(paths, scan_rules):
         exclude_tests=False,
         generate_config=False,
         include=[],
+        include_dir=[],
+        jobs=CPU_COUNT,
         json=True,
         lang=None,
         no_rewrite_rule_ids=False,
         output=None,
         pattern=None,
         precommit=False,
-        quiet=True,
+        quiet=False,
         r2c=False,
         strict=False,
         target=paths,
