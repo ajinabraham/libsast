@@ -32,7 +32,7 @@ def call_semgrep(paths, scan_rules):
         output=None,
         pattern=None,
         precommit=False,
-        quiet=False,
+        quiet=True,
         r2c=False,
         strict=False,
         target=paths,
