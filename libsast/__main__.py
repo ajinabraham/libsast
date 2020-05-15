@@ -97,7 +97,7 @@ def main():
         result = Scanner(options, args.path).scan()
         output(args.output, result)
     elif args.version:
-        print('libsast v%s', __version__)
+        print(f'libsast v{__version__}')
     else:
         parser.print_help()
 
