@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8]
+        python-version: [3.7]
 
     steps:
     - uses: actions/checkout@v2
@@ -32,7 +32,7 @@ jobs:
         tox -e bandit
     - name: Unit test
       run: |
-        tox -e py38
+        tox -e py37
     - name: Clean Up
       run: |
         tox -e clean
