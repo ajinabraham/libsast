@@ -7,7 +7,7 @@ Generic SAST for Security Engineers. Powered by regex based pattern matcher and 
 
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/ajinabraham/libsast.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/ajinabraham/libsast/context:python)
 [![Requirements Status](https://requires.io/github/ajinabraham/libsast/requirements.svg?branch=master)](https://requires.io/github/ajinabraham/libsast/requirements/?branch=master)
-![Build](https://github.com/ajinabraham/libsast/workflows/Build/badge.svg)
+[![Build](https://github.com/ajinabraham/libsast/workflows/Build/badge.svg)](https://github.com/ajinabraham/libsast/actions?query=workflow%3ABuild)
 
 ## Install
 
