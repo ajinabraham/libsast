@@ -28,7 +28,7 @@ setup(
         'Intended Audience :: Developers',
         ('License :: OSI Approved :: '
          'GNU Lesser General Public License v2 (LGPLv2)'),
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.6',
     ],
     packages=find_packages(include=[
         'libsast', 'libsast.*',
@@ -46,6 +46,6 @@ setup(
     install_requires=[
         'requests>=2.22.0',
         'pyyaml>=5.3',
-        'semgrep>=0.6.0',
+        'semgrep==0.8.0',
     ],
 )
