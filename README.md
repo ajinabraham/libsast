@@ -15,7 +15,7 @@ Generic SAST for Security Engineers. Powered by regex based pattern matcher and 
 
 Supports only Mac and Linux
 
-## Command line options
+## Command Line Options
 
 ```bash
 $ libsast
@@ -58,7 +58,7 @@ optional arguments:
 ```
 
 
-## Sample Usage
+## Example Usage
 
 ```bash
 $ libsast -s ../njsscan/njsscan/rules/semantic_grep/ -p ../njsscan/njsscan/rules/pattern_matcher/ ../njsscan/tests/assets/dot_njsscan/
