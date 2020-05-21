@@ -16,7 +16,8 @@ def get_version(rel_path):
     raise RuntimeError('Unable to find version string.')
 
 
-description = ('A generic SAST core built on top of sgrep and regex')
+description = ('A generic SAST core built on top of '
+               'semantic grep and regex')
 setup(
     name='libsast',
     version=get_version('libsast/__init__.py'),

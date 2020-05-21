@@ -55,10 +55,10 @@ class SemanticGrep:
             if rule_id in smatches:
                 smatches[rule_id]['files'].append(file_details)
             else:
-                metdata = find['extra']['metadata']
-                metdata['description'] = find['extra']['message']
-                metdata['severity'] = find['extra']['severity']
+                metadata = find['extra']['metadata']
+                metadata['description'] = find['extra']['message']
+                metadata['severity'] = find['extra']['severity']
                 smatches[rule_id] = {
                     'files': [file_details],
-                    'metadata': metdata,
+                    'metadata': metadata,
                 }
