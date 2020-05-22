@@ -128,7 +128,7 @@ $ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/p
 
 ## Write you own Static Analysis tool
 
-Write your own static analysis tools using libsast. We support 
+With libsast, you can write your own static analysis tools. libsast provides two matching engines:
 
 1. **Pattern Matcher**
 2. **Semantic Grep**
