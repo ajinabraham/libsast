@@ -1,0 +1,11 @@
+rules:
+  - id: boto-client-ip
+    patterns:
+      - pattern-inside: boto3.client(host="...")
+      - pattern-regex: '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
+    message: "boto client using IP address"
+    languages: [python]
+    severity: ERROR
+    metadata:
+      owasp: 'OWASP Category'
+      cwe: 'CWE Category'

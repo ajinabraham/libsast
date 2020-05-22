@@ -21,7 +21,6 @@ class Scanner:
         else:
             self.options = {
                 'sgrep_rules': None,
-                'sgrep_binary': None,
                 'sgrep_extensions': None,
                 'match_rules': None,
                 'match_extensions': None,

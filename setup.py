@@ -43,7 +43,8 @@ setup(
     },
     include_package_data=True,
     url='https://github.com/ajinabraham/libsast',
-    long_description=description,
+    long_description=read('README.md'),
+    long_description_content_type='text/markdown',
     install_requires=[
         'requests>=2.22.0',
         'pyyaml>=5.3',

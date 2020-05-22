@@ -25,13 +25,13 @@ def test_scan_ext_not_present():
 def test_ignore_extensions():
     options = {'ignore_extensions': ['.test']}
     result = scanner(options).scan()
-    assert result is None
+    assert result['pattern_matcher'] == {}
 
 
 def test_ignore_filenames():
     options = {'ignore_filenames': ['test_matcher.test']}
     result = scanner(options).scan()
-    assert result is None
+    assert result['pattern_matcher'] == {}
 
 
 def test_ignore_paths():

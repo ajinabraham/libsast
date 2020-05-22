@@ -13,7 +13,7 @@ def test_cli_pattern_match():
             'python',
             'libsast',
             '-p',
-            'tests/unit/assets/rules/patterns.yaml',
+            'tests/unit/assets/rules/pattern_matcher/patterns.yaml',
             'tests/unit/assets/files/'],
             stderr=subprocess.STDOUT,
         )

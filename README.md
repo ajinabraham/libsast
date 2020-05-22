@@ -60,73 +60,27 @@ optional arguments:
 
 ## Example Usage
 
-```bash
-$ libsast -s ../njsscan/njsscan/rules/semantic_grep/ -p ../njsscan/njsscan/rules/pattern_matcher/ ../njsscan/tests/assets/dot_njsscan/
+```json
+$ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/pattern_matcher/ tests/unit/assets/files/
 {
   "pattern_matcher": {
-    "handlebar_mustache_template": {
+    "test_regex": {
       "files": [
         {
-          "file_path": "../njsscan/tests/assets/dot_njsscan/ignore_ext.hbs",
+          "file_path": "tests/unit/assets/files/test_matcher.test",
           "match_position": [
-            52,
-            62
+            1143,
+            1151
           ],
-          "match_string": "{{{html}}}"
+          "match_string": ".close()"
         }
       ],
       "metadata": {
-        "cwe": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
-        "description": "The Handlebar.js/Mustache.js template has an unescaped variable. Untrusted user input passed to this variable results in Cross Site Scripting (XSS).",
-        "id": "handlebar_mustache_template",
+        "description": "This is a rule to test regex",
+        "id": "test_regex",
         "input_case": "exact",
-        "owasp": "A1: Injection",
-        "pattern": "{{{.+}}}|{{[ ]*&[\\w]+.*}}",
-        "severity": "ERROR",
-        "type": "Regex"
-      }
-    },
-    "pug_jade_template": {
-      "files": [
-        {
-          "file_path": "../njsscan/tests/assets/dot_njsscan/no_ext_scan",
-          "match_position": [
-            18,
-            24
-          ],
-          "match_string": "!{'}'}"
-        }
-      ],
-      "metadata": {
-        "cwe": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
-        "description": "The Pug.js/Jade.js template has an unescaped variable. Untrusted user input passed to this variable results in Cross Site Scripting (XSS).",
-        "id": "pug_jade_template",
-        "input_case": "exact",
-        "owasp": "A1: Injection",
-        "pattern": "!{.+}",
-        "severity": "ERROR",
-        "type": "Regex"
-      }
-    },
-    "underscore_template": {
-      "files": [
-        {
-          "file_path": "../njsscan/tests/assets/dot_njsscan/scan.new",
-          "match_position": [
-            285,
-            307
-          ],
-          "match_string": "_.unescape(escapedStr)"
-        }
-      ],
-      "metadata": {
-        "cwe": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
-        "description": "The Underscore unescape function with untrusted user input results in Cross Site Scripting (XSS).",
-        "id": "underscore_template",
-        "input_case": "exact",
-        "owasp": "A1: Injection",
-        "pattern": "_.unescape\\(.+\\)",
-        "severity": "ERROR",
+        "pattern": "\\.close\\(\\)",
+        "severity": "info",
         "type": "Regex"
       }
     }
@@ -134,125 +88,25 @@ $ libsast -s ../njsscan/njsscan/rules/semantic_grep/ -p ../njsscan/njsscan/rules
   "semantic_grep": {
     "errors": [],
     "matches": {
-      "express_xss": {
+      "boto-client-ip": {
         "files": [
           {
-            "file_path": "../njsscan/tests/assets/dot_njsscan/skip.js",
+            "file_path": "tests/unit/assets/files/test_file.py",
             "match_lines": [
-              7,
-              10
+              3,
+              3
             ],
             "match_position": [
-              9,
-              52
+              24,
+              31
             ],
-            "match_string": "        var str = new Buffer(req.cookies.profile, 'base64').toString();\n\n        var obj = serialize.unserialize(str);\n\n        if (obj.username) {\n\n            res.send(\"Hello \" + escape(obj.username));"
+            "match_string": "8.8.8.8"
           }
         ],
         "metadata": {
-          "cwe": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
-          "description": "Untrusted User Input in Response will result in Reflected Cross Site Scripting Vulnerability.",
-          "owasp": "A1: Injection",
-          "severity": "ERROR"
-        }
-      },
-      "node_aes_ecb": {
-        "files": [
-          {
-            "file_path": "../njsscan/tests/assets/dot_njsscan/lorem_scan.js",
-            "match_lines": [
-              14,
-              14
-            ],
-            "match_position": [
-              16,
-              86
-            ],
-            "match_string": "let decipher = crypto.createDecipheriv('aes-128-ecb', Buffer.from(ENCRYPTION_KEY), iv);"
-          }
-        ],
-        "metadata": {
-          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
-          "description": "AES with ECB mode is deterministic in nature and not suitable for encrypting large amount of repetitive data.",
-          "owasp": "A9: Using Components with Known Vulnerabilities",
-          "severity": "ERROR"
-        }
-      },
-      "node_curl_ssl_verify_disable": {
-        "files": [
-          {
-            "file_path": "../njsscan/tests/assets/dot_njsscan/skip_dir/skip_me.js",
-            "match_lines": [
-              45,
-              50
-            ],
-            "match_position": [
-              5,
-              35
-            ],
-            "match_string": "    curl(url,\n\n        {\n\n            SSL_VERIFYPEER: 0\n\n        },\n\n        function (err) {\n\n            response.end(this.body);"
-          }
-        ],
-        "metadata": {
-          "cwe": "CWE-599: Missing Validation of OpenSSL Certificate",
-          "description": "SSL Certificate verification for node-curl is disabled.",
-          "owasp": "A6: Security Misconfiguration",
-          "severity": "ERROR"
-        }
-      },
-      "node_deserialize": {
-        "files": [
-          {
-            "file_path": "../njsscan/tests/assets/dot_njsscan/skip.js",
-            "match_lines": [
-              8,
-              8
-            ],
-            "match_position": [
-              19,
-              44
-            ],
-            "match_string": "        var obj = serialize.unserialize(str);"
-          }
-        ],
-        "metadata": {
-          "cwe": "CWE-502: Deserialization of Untrusted Data",
-          "description": "User controlled data in 'unserialize()' or 'deserialize()' function can result in Object Injection or Remote Code Injection.",
-          "owasp": "A8: Insecure Deserialization",
-          "severity": "ERROR"
-        }
-      },
-      "node_tls_reject": {
-        "files": [
-          {
-            "file_path": "../njsscan/tests/assets/dot_njsscan/skip_dir/skip_me.js",
-            "match_lines": [
-              9,
-              9
-            ],
-            "match_position": [
-              9,
-              58
-            ],
-            "match_string": "        process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';"
-          },
-          {
-            "file_path": "../njsscan/tests/assets/dot_njsscan/skip_dir/skip_me.js",
-            "match_lines": [
-              18,
-              18
-            ],
-            "match_position": [
-              9,
-              55
-            ],
-            "match_string": "        process.env.NODE_TLS_REJECT_UNAUTHORIZED = \"0\";"
-          }
-        ],
-        "metadata": {
-          "cwe": "CWE-295: Improper Certificate Validation",
-          "description": "Setting 'NODE_TLS_REJECT_UNAUTHORIZED' to 0 will allow node server to accept self signed certificates and is not an secure behaviour.",
-          "owasp": "A6: Security Misconfiguration",
+          "cwe": "CWE Category",
+          "description": "boto client using IP address",
+          "owasp": "OWASP Category",
           "severity": "ERROR"
         }
       }
@@ -271,3 +125,89 @@ $ libsast -s ../njsscan/njsscan/rules/semantic_grep/ -p ../njsscan/njsscan/rules
 >>> scanner.scan()
 {'pattern_matcher': {'handlebar_mustache_template': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/ignore_ext.hbs', 'match_string': '{{{html}}}', 'match_position': (52, 62)}], 'metadata': {'id': 'handlebar_mustache_template', 'description': 'The Handlebar.js/Mustache.js template has an unescaped variable. Untrusted user input passed to this variable results in Cross Site Scripting (XSS).', 'type': 'Regex', 'pattern': '{{{.+}}}|{{[ ]*&[\\w]+.*}}', 'severity': 'ERROR', 'input_case': 'exact', 'cwe': "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')", 'owasp': 'A1: Injection'}}}, 'semantic_grep': {'matches': {'node_aes_ecb': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/lorem_scan.js', 'match_position': (16, 86), 'match_lines': (14, 14), 'match_string': "let decipher = crypto.createDecipheriv('aes-128-ecb', Buffer.from(ENCRYPTION_KEY), iv);"}], 'metadata': {'owasp': 'A9: Using Components with Known Vulnerabilities', 'cwe': 'CWE-327: Use of a Broken or Risky Cryptographic Algorithm', 'description': 'AES with ECB mode is deterministic in nature and not suitable for encrypting large amount of repetitive data.', 'severity': 'ERROR'}}, 'node_deserialize': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/skip.js', 'match_position': (19, 44), 'match_lines': (8, 8), 'match_string': '        var obj = serialize.unserialize(str);'}], 'metadata': {'owasp': 'A8: Insecure Deserialization', 'cwe': 'CWE-502: Deserialization of Untrusted Data', 'description': "User controlled data in 'unserialize()' or 'deserialize()' function can result in Object Injection or Remote Code Injection.", 'severity': 'ERROR'}}, 'express_xss': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/skip.js', 'match_position': (9, 52), 'match_lines': (7, 10), 'match_string': '        var str = new Buffer(req.cookies.profile, \'base64\').toString();\n\n        var obj = serialize.unserialize(str);\n\n        if (obj.username) {\n\n            res.send("Hello " + escape(obj.username));'}], 'metadata': {'owasp': 'A1: Injection', 'cwe': "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')", 'description': 'Untrusted User Input in Response will result in Reflected Cross Site Scripting Vulnerability.', 'severity': 'ERROR'}}, 'node_tls_reject': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/skip_dir/skip_me.js', 'match_position': (9, 58), 'match_lines': (9, 9), 'match_string': "        process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';"}, {'file_path': '../njsscan/tests/assets/dot_njsscan/skip_dir/skip_me.js', 'match_position': (9, 55), 'match_lines': (18, 18), 'match_string': '        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";'}], 'metadata': {'owasp': 'A6: Security Misconfiguration', 'cwe': 'CWE-295: Improper Certificate Validation', 'description': "Setting 'NODE_TLS_REJECT_UNAUTHORIZED' to 0 will allow node server to accept self signed certificates and is not an secure behaviour.", 'severity': 'ERROR'}}, 'node_curl_ssl_verify_disable': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/skip_dir/skip_me.js', 'match_position': (5, 35), 'match_lines': (45, 50), 'match_string': '    curl(url,\n\n        {\n\n            SSL_VERIFYPEER: 0\n\n        },\n\n        function (err) {\n\n            response.end(this.body);'}], 'metadata': {'owasp': 'A6: Security Misconfiguration', 'cwe': 'CWE-599: Missing Validation of OpenSSL Certificate', 'description': 'SSL Certificate verification for node-curl is disabled.', 'severity': 'ERROR'}}}, 'errors': []}}
 ```
+
+## Write you own Static Analysis tool
+
+Write your own static analysis tools using libsast. We support 
+
+1. **Pattern Matcher**
+2. **Semantic Grep**
+
+### Pattern Matcher
+
+Currently Pattern Matcher supports any language.
+
+Use [Regex 101](https://regex101.com/r/nGbAay/1) to write simple Python Regex rule patterns.
+
+A sample rule looks like
+
+```yaml
+- id: test_regex_or
+  description: This is a rule to test regex_or
+  input_case: exact
+  pattern:
+  - MODE_WORLD_READABLE|Context\.MODE_WORLD_READABLE
+  - openFileOutput\(\s*".+"\s*,\s*1\s*\)
+  severity: error
+  type: RegexOr
+  owasp: 'OWASP Category'
+```
+A rule consist of 
+
+* `id` : A unique id for the rule
+* `description`: A description for the rule
+* `input_case`: It can be `exact`, `upper` or `lower`. Data will converted to lower case/upper case/as it is before comparing with the regex.
+* `pattern`: List of patterns depends on `type`.
+* `severity`: It can be `error`, `warning` or `info`
+* `type`: Pattern Matcher supports `Regex`, `RegexAnd`, `RegexOr`, `RegexAndOr`, `RegexAndNot`
+* `custom_field`: Define your own custom fields that you can use as metadata
+
+```bash
+1. Regex - if re.findall(regex1, input)
+2. RegexAnd - if re.findall(regex1, input) and re.findall(regex2, input)
+3. RegexOr - if re.findall(regex1, input) or re.findall(regex2, input)
+4. RegexAndOr -  if (string1 in input)
+                and ((string2 in input) or (string3 in input))
+5. RegexAndNot - if(string1 in input and string2 not in input)
+```
+Example: [Pattern Matcher Rule](https://github.com/ajinabraham/libsast/blob/master/tests/unit/assets/rules/pattern_matcher/patterns.yaml)
+
+Test your pattern matcher rules
+
+`$ libsast -p tests/unit/assets/rules/pattern_matcher/patterns.yaml tests/unit/assets/files/`
+
+### Semantic Grep
+
+Semantic Grep uses [semgrep](https://github.com/returntocorp/semgrep), a fast and syntax-aware semantic code pattern search for many languages: like grep but for code.
+
+Currently it supports Python, JavaScript, Go and C
+
+Use [Semgrep.live](https://semgrep.live/vAb) to write semantic grep rule patterns.
+
+A sample rule for Python code looks like
+
+```yaml
+rules:
+  - id: boto-client-ip
+    patterns:
+      - pattern-inside: boto3.client(host="...")
+      - pattern-regex: '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
+    message: "boto client using IP address"
+    languages: [python]
+    severity: ERROR
+    metadata:
+      owasp: 'OWASP Category'
+      cwe: 'CWE Category'
+```
+
+See semgrep documentation [here](https://github.com/returntocorp/semgrep/blob/develop/docs/configuration-files.md).
+
+Example: [Semantic Grep Rule](https://github.com/ajinabraham/libsast/blob/master/tests/unit/assets/rules/semantic_grep/sgrep.yaml)
+
+Test your semgrep rules
+
+`$ libsast -s tests/unit/assets/rules/semantic_grep/sgrep.yaml tests/unit/assets/files/`
+
+## Realworld Implementations
+
+* [njsscan](https://github.com/ajinabraham/njsscan) SAST is built with libsast pattern matcher and semantic grep.
