@@ -156,7 +156,7 @@ A rule consist of
 
 * `id` : A unique id for the rule
 * `description`: A description for the rule
-* `input_case`: It can be `exact`, `upper` or `lower`. Data will converted to lower case/upper case/as it is before comparing with the regex.
+* `input_case`: It can be `exact`, `upper` or `lower`. Data will be converted to lower case/upper case/as it is before comparing with the regex.
 * `pattern`: List of patterns depends on `type`.
 * `severity`: It can be `error`, `warning` or `info`
 * `type`: Pattern Matcher supports `Regex`, `RegexAnd`, `RegexOr`, `RegexAndOr`, `RegexAndNot`
@@ -180,9 +180,9 @@ Test your pattern matcher rules
 
 Semantic Grep uses [semgrep](https://github.com/returntocorp/semgrep), a fast and syntax-aware semantic code pattern search for many languages: like grep but for code.
 
-Currently it supports Python, JavaScript, Go and C
+Currently it supports Python, Java, JavaScript, Go and C.
 
-Use [Semgrep.live](https://semgrep.live/vAb) to write semantic grep rule patterns.
+Use [semgrep.live](https://semgrep.live/vAb) to write semantic grep rule patterns.
 
 A sample rule for Python code looks like
 
