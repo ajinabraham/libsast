@@ -24,7 +24,6 @@ def call_semgrep(paths, scan_rules):
         include_dir=[],
         exclude=[],
         exclude_dir=[],
-        exclude_tests=False,
         json_format=True,
         sarif=False,
         output_destination=None,
