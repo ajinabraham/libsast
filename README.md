@@ -1,5 +1,7 @@
 Generic SAST for Security Engineers. Powered by regex based pattern matcher and semantic aware [semgrep](https://github.com/returntocorp/semgrep).
 
+Made with ![Love](https://cloud.githubusercontent.com/assets/4301109/16754758/82e3a63c-4813-11e6-9430-6015d98aeaab.png) in India [![Tweet](https://img.shields.io/twitter/url?url=https://github.com/ajinabraham/libsast)](https://twitter.com/intent/tweet/?text=Generic%20SAST%20for%20Security%20Engineers.%20Powered%20by%20regex%20based%20pattern%20matcher%20and%20semantic%20aware%20semgrep%20by%20%40ajinabraham%20%40OpenSecurity_IN&url=https://github.com/ajinabraham/libsast)
+
 [![PyPI version](https://badge.fury.io/py/libsast.svg)](https://badge.fury.io/py/libsast)
 [![platform](https://img.shields.io/badge/platform-osx%2Flinux-green.svg)](https://github.com/ajinabraham/libsast)
 [![License](https://img.shields.io/:license-lgpl2.1-blue.svg)](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html)
