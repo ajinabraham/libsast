@@ -17,7 +17,7 @@ def call_semgrep(paths, scan_rules):
         pattern=None,
         lang=None,
         config=scan_rules,
-        generate_config=False,
+        debugging_json=False,
         no_rewrite_rule_ids=False,
         jobs=CPU_COUNT,
         include=[],
