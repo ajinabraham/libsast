@@ -1,8 +1,16 @@
 # -*- coding: utf_8 -*-
 """Semantic Grep Helpers."""
 import multiprocessing
+from io import StringIO
+import json
 
-from semgrep import semgrep_main
+
+from semgrep.constants import OutputFormat
+from semgrep.output import (
+    OutputHandler,
+    OutputSettings,
+)
+from semgrep import semgrep_main, util
 
 try:
     CPU_COUNT = multiprocessing.cpu_count()
@@ -10,25 +18,27 @@ except NotImplementedError:
     CPU_COUNT = 1  # CPU count is not implemented on Windows
 
 
-def call_semgrep(paths, scan_rules):
+def invoke_semgrep(paths, scan_rules, **kwargs):
     """Call Semgrep."""
-    return semgrep_main.main(
-        target=paths,
+    util.set_flags(False, True, False)  # Verbose, Quiet, Force_color
+    io_capture = StringIO()
+    output_handler = OutputHandler(
+        OutputSettings(
+            output_format=OutputFormat.JSON,
+            output_destination=None,
+            error_on_findings=False,
+            strict=False,
+        ),
+        stdout=io_capture,
+    )
+    semgrep_main.main(
+        output_handler=output_handler,
+        target=[pt.as_posix() for pt in paths],
+        jobs=CPU_COUNT,
         pattern=None,
         lang=None,
         config=scan_rules,
-        debugging_json=False,
-        no_rewrite_rule_ids=False,
-        jobs=CPU_COUNT,
-        include=[],
-        include_dir=[],
-        exclude=[],
-        exclude_dir=[],
-        json_format=True,
-        sarif=False,
-        output_destination=None,
-        quiet=True,
-        strict=False,
-        exit_on_error=False,
-        autofix=False,
-        dangerously_allow_arbitrary_code_execution_from_rules=False)
+        **kwargs,
+    )
+    output_handler.close()
+    return json.loads(io_capture.getvalue())

@@ -8,4 +8,5 @@ def test_matchers():
     assert result['pattern_matcher']['test_regex_and']
     assert result['pattern_matcher']['test_regex_or']
     assert result['pattern_matcher']['test_regex_and_not']
-    assert result['pattern_matcher']['test_regex_or']
+    assert result['pattern_matcher']['test_regex_and_or']
+    assert result['pattern_matcher']['test_regex_multiline']

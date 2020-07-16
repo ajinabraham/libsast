@@ -63,13 +63,16 @@ optional arguments:
 ## Example Usage
 
 ```json
-$ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/pattern_matcher/ tests/unit/assets/files/
 {
   "pattern_matcher": {
     "test_regex": {
       "files": [
         {
           "file_path": "tests/unit/assets/files/test_matcher.test",
+          "match_lines": [
+            28,
+            28
+          ],
           "match_position": [
             1143,
             1151
@@ -85,18 +88,227 @@ $ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/p
         "severity": "info",
         "type": "Regex"
       }
+    },
+    "test_regex_and": {
+      "files": [
+        {
+          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "match_lines": [
+            7,
+            7
+          ],
+          "match_position": [
+            194,
+            256
+          ],
+          "match_string": ".loadUrl(\"file:///\" + Environment.getExternalStorageDirectory("
+        },
+        {
+          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "match_lines": [
+            3,
+            3
+          ],
+          "match_position": [
+            52,
+            66
+          ],
+          "match_string": "webkit.WebView"
+        }
+      ],
+      "metadata": {
+        "description": "This is a rule to test regex_and",
+        "id": "test_regex_and",
+        "input_case": "exact",
+        "pattern": [
+          "\\.loadUrl\\(.*getExternalStorageDirectory\\(",
+          "webkit\\.WebView"
+        ],
+        "severity": "error",
+        "type": "RegexAnd"
+      }
+    },
+    "test_regex_and_not": {
+      "files": [
+        {
+          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "match_lines": [
+            42,
+            42
+          ],
+          "match_position": [
+            1417,
+            1426
+          ],
+          "match_string": "WKWebView"
+        },
+        {
+          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "match_lines": [
+            40,
+            40
+          ],
+          "match_position": [
+            1365,
+            1374
+          ],
+          "match_string": "WKWebView"
+        }
+      ],
+      "metadata": {
+        "description": "This is a rule to test regex_and_not",
+        "id": "test_regex_and_not",
+        "input_case": "exact",
+        "pattern": [
+          "WKWebView",
+          "\\.javaScriptEnabled=false"
+        ],
+        "severity": "warning",
+        "type": "RegexAndNot"
+      }
+    },
+    "test_regex_and_or": {
+      "files": [
+        {
+          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "match_lines": [
+            58,
+            58
+          ],
+          "match_position": [
+            1975,
+            1990
+          ],
+          "match_string": "sendTextMessage"
+        },
+        {
+          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "match_lines": [
+            50,
+            50
+          ],
+          "match_position": [
+            1553,
+            1573
+          ],
+          "match_string": "telephony.SmsManager"
+        }
+      ],
+      "metadata": {
+        "description": "This is a rule to test regex_and_or",
+        "id": "test_regex_and_or",
+        "input_case": "exact",
+        "pattern": [
+          "telephony.SmsManager",
+          [
+            "sendMultipartTextMessage",
+            "sendTextMessage",
+            "vnd.android-dir/mms-sms"
+          ]
+        ],
+        "severity": "warning",
+        "type": "RegexAndOr"
+      }
+    },
+    "test_regex_multiline": {
+      "files": [
+        {
+          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "match_lines": [
+            52,
+            52
+          ],
+          "match_position": [
+            1588,
+            1686
+          ],
+          "match_string": "public void onRequestPermissionsResult(int requestCode,String permissions[], int[] grantResults) {"
+        },
+        {
+          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "match_lines": [
+            10,
+            11
+          ],
+          "match_position": [
+            299,
+            370
+          ],
+          "match_string": "public static ForgeAccount add(Context context, ForgeAccount account) {"
+        }
+      ],
+      "metadata": {
+        "description": "This is a rule to test regex",
+        "id": "test_regex_multiline",
+        "input_case": "exact",
+        "pattern": "((?:public.+)+)",
+        "severity": "info",
+        "type": "Regex"
+      }
+    },
+    "test_regex_or": {
+      "files": [
+        {
+          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "match_lines": [
+            26,
+            26
+          ],
+          "match_position": [
+            1042,
+            1069
+          ],
+          "match_string": "Context.MODE_WORLD_READABLE"
+        }
+      ],
+      "metadata": {
+        "description": "This is a rule to test regex_or",
+        "id": "test_regex_or",
+        "input_case": "exact",
+        "pattern": [
+          "MODE_WORLD_READABLE|Context\\.MODE_WORLD_READABLE",
+          "openFileOutput\\(\\s*\".+\"\\s*,\\s*1\\s*\\)"
+        ],
+        "severity": "error",
+        "type": "RegexOr"
+      }
     }
   },
   "semantic_grep": {
-    "errors": [],
+    "errors": [
+      {
+        "code": 3,
+        "help": "If the code appears to be valid, this may be a semgrep bug.",
+        "level": "warn",
+        "long_msg": "Could not parse test_file.cpython-37-pytest-5.4.2.pyc as python",
+        "short_msg": "parse error",
+        "spans": [
+          {
+            "context_end": null,
+            "context_start": null,
+            "end": {
+              "col": 5,
+              "line": 1
+            },
+            "file": "test_file.cpython-37-pytest-5.4.2.pyc",
+            "source_hash": "b59a27ae0ab7799f6304901e395a559d0e01027d90202d068ded5912f6c5795d",
+            "start": {
+              "col": 4,
+              "line": 1
+            }
+          }
+        ],
+        "type": "SourceParseError"
+      }
+    ],
     "matches": {
       "boto-client-ip": {
         "files": [
           {
-            "file_path": "tests/unit/assets/files/test_file.py",
+            "file_path": "tests/unit/assets/files/example_file.py",
             "match_lines": [
-              3,
-              3
+              4,
+              4
             ],
             "match_position": [
               24,

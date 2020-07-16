@@ -38,3 +38,9 @@
     - vnd.android-dir/mms-sms
   severity: warning
   type: RegexAndOr
+- id: test_regex_multiline
+  description: This is a rule to test regex
+  input_case: exact
+  pattern: ((?:public.+)+)
+  severity: info
+  type: Regex

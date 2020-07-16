@@ -27,6 +27,25 @@ import re
 from abc import ABC, abstractclassmethod
 
 
+def get_match_lines(content, pos):
+    """Get Match lines from position."""
+    start_line = 0
+    filepos = 0
+    skip = False
+    for idx, line in enumerate(content.split('\n'), 1):
+        filepos += len(line) + 1
+        if filepos >= pos[0] and filepos >= pos[1] and not skip:
+            # Match is on the same line
+            return (idx, idx)
+        elif filepos >= pos[0] and not skip:
+            # Multiline match, find start line
+            skip = True
+            start_line = idx
+        if filepos >= pos[1] and skip:
+            # Multiline march, find end line
+            return (start_line, idx)
+
+
 class MatchCommand:
 
     def __init__(self):
@@ -51,7 +70,9 @@ class Regex(MatchStrategy):
         matches = set()
         for match in re.compile(rule['pattern']).finditer(content):
             if match.group():
-                matches.add((match.group(), match.span()))
+                match_pos = match.span()
+                match_lines = get_match_lines(content, match_pos)
+                matches.add((match.group(), match_pos, match_lines))
         return matches
 
 
@@ -64,7 +85,9 @@ class RegexAnd(MatchStrategy):
             for match in re.compile(regex).finditer(content):
                 if not match.group():
                     return False
-                matches.add((match.group(), match.span()))
+                match_pos = match.span()
+                match_lines = get_match_lines(content, match_pos)
+                matches.add((match.group(), match_pos, match_lines))
         return matches
 
 
@@ -76,7 +99,9 @@ class RegexOr(MatchStrategy):
         for regex in rule['pattern']:
             for match in re.compile(regex).finditer(content):
                 if match.group():
-                    matches.add((match.group(), match.span()))
+                    match_pos = match.span()
+                    match_lines = get_match_lines(content, match_pos)
+                    matches.add((match.group(), match_pos, match_lines))
         return matches
 
 
@@ -90,7 +115,9 @@ class RegexAndNot(MatchStrategy):
                 return False
         for match in regex_present:
             if match.group():
-                matches.add((match.group(), match.span()))
+                match_pos = match.span()
+                match_lines = get_match_lines(content, match_pos)
+                matches.add((match.group(), match_pos, match_lines))
         return matches
 
 
@@ -103,14 +130,18 @@ class RegexAndOr(MatchStrategy):
         for regex in or_list:
             for match in re.compile(regex).finditer(content):
                 if match.group():
-                    or_matches.add((match.group(), match.span()))
+                    match_pos = match.span()
+                    match_lines = get_match_lines(content, match_pos)
+                    or_matches.add((match.group(), match_pos, match_lines))
                     break_parent_loop = True
                     break
             if break_parent_loop:
                 break
         for match in re.compile(rule['pattern'][0]).finditer(content):
             if match.group():
-                matches.add((match.group(), match.span()))
+                match_pos = match.span()
+                match_lines = get_match_lines(content, match_pos)
+                matches.add((match.group(), match_pos, match_lines))
         if matches and or_matches:
             matches.update(or_matches)
         else:

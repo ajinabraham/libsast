@@ -87,6 +87,7 @@ class PatternMatcher:
                 'file_path': file_path,
                 'match_string': match[0],
                 'match_position': match[1],
+                'match_lines': match[2],
             }
             if rule['id'] in self.findings:
                 self.findings[rule['id']]['files'].append(file_details)

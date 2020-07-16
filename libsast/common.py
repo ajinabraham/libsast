@@ -31,9 +31,8 @@ class ProgressBar:
         """Show progress for function."""
         ret = [None]
         index = 0
-        self.expected_time = (
-            self.expected_time if self.expected_time > 34 else 53)
-
+        # Hack determined by size of rule files
+        self.expected_time = self.expected_time * 6
         def myrunner(function, ret, *args, **kwargs):
             ret[0] = function(*args, **kwargs)
         self.progress_print(0)

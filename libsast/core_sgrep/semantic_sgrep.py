@@ -1,8 +1,6 @@
 # -*- coding: utf_8 -*-
 """Semantic Grep Core."""
-import json
-
-from libsast.core_sgrep.helpers import call_semgrep
+from libsast.core_sgrep.helpers import invoke_semgrep
 from libsast import common
 
 
@@ -32,19 +30,18 @@ class SemanticGrep:
         if self.show_progress:
             pbar = common.ProgressBar('Semantic Grep', len(paths))
             sgrep_out = pbar.progress_function(
-                call_semgrep,
+                invoke_semgrep,
                 (paths, self.scan_rules))
         else:
-            sgrep_out = call_semgrep(paths, self.scan_rules)
+            sgrep_out = invoke_semgrep(paths, self.scan_rules)
         self.format_output(sgrep_out)
         return self.findings
 
     def format_output(self, results):
         """Format sgrep results."""
-        sgrep_out = json.loads(results)
-        self.findings['errors'] = sgrep_out['errors']
+        self.findings['errors'] = results['errors']
         smatches = self.findings['matches']
-        for find in sgrep_out['results']:
+        for find in results['results']:
             file_details = {
                 'file_path': find['path'],
                 'match_position': (find['start']['col'], find['end']['col']),

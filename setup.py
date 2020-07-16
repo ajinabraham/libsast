@@ -48,6 +48,6 @@ setup(
     install_requires=[
         'requests>=2.22.0',
         'pyyaml>=5.3',
-        'semgrep==0.10.1',
+        'semgrep==0.15.0',
     ],
 )
