@@ -63,6 +63,7 @@ optional arguments:
 ## Example Usage
 
 ```json
+$ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/pattern_matcher/ tests/unit/assets/files/
 {
   "pattern_matcher": {
     "test_regex": {
