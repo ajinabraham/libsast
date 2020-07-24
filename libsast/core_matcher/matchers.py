@@ -1,28 +1,5 @@
 # -*- coding: utf_8 -*-
-"""
-Alogrithms for Matching Pattern.
-
-Severity - It defines severity of the finding.
-
-   1. error - Critical Security vulnerability
-   2. warning - Possible Security vulnerability
-   3. info - Informational findings
-
-Input Case - Defines the case of data before pattern matching
-
-   1. upper - Convert data to upper case before matching
-   2. lower - Convert data to lower case before matching
-   3. exact - No conversion
-
-Match Type - Types of pattern matchers supported
-
-   1. Regex - if re.findall(regex1, input)
-   2. RegexAnd - if re.findall(regex1, input) and re.findall(regex2, input)
-   3. RegexOr - if re.findall(regex1, input) or re.findall(regex2, input)
-   4. RegexAndOr -  if (string1 in input)
-                    and ((string2 in input) or (string3 in input))
-   5. RegexAndNot - if(string1 in input and string2 not in input)
-"""
+"""Alogrithms for Matching Pattern."""
 import re
 from abc import ABC, abstractclassmethod
 

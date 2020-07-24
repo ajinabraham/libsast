@@ -44,3 +44,7 @@
   pattern: ((?:public.+)+)
   severity: info
   type: Regex
+  owasp-mobile: m1
+  owasp-web: a10
+  cwe: cwe-1002
+  masvs: storage-3

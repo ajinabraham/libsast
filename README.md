@@ -22,7 +22,6 @@ Supports only Mac and Linux
 ```bash
 $ libsast
 usage: libsast [-h] [-o OUTPUT] [-p PATTERN_FILE] [-s SGREP_PATTERN_FILE]
-               [-b SGREP_BINARY]
                [--sgrep-file-extensions SGREP_FILE_EXTENSIONS [SGREP_FILE_EXTENSIONS ...]]
                [--file-extensions FILE_EXTENSIONS [FILE_EXTENSIONS ...]]
                [--ignore-filenames IGNORE_FILENAMES [IGNORE_FILENAMES ...]]
@@ -42,8 +41,6 @@ optional arguments:
                         YAML pattern file, directory or url
   -s SGREP_PATTERN_FILE, --sgrep-pattern-file SGREP_PATTERN_FILE
                         sgrep rules directory
-  -b SGREP_BINARY, --sgrep-binary SGREP_BINARY
-                        sgrep binary location
   --sgrep-file-extensions SGREP_FILE_EXTENSIONS [SGREP_FILE_EXTENSIONS ...]
                         File extensions that should be scanned with sgrep
   --file-extensions FILE_EXTENSIONS [FILE_EXTENSIONS ...]
@@ -334,7 +331,7 @@ $ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/p
 
 ```python
 >>> from libsast import Scanner
->>> options = {'match_rules': '/Users/ajinabraham/Code/njsscan/njsscan/rules/pattern_matcher', 'sgrep_rules': '/Users/ajinabraham/Code/njsscan/njsscan/rules/semantic_grep', 'sgrep_binary': None, 'sgrep_extensions': {'', '.js'}, 'match_extensions': {'.hbs', '.sh', '.ejs', '.toml', '.mustache', '.tmpl', '.jade', '.json', '.ect', '.vue', '.yml', '.hdbs', '.tl', '.html', '.haml', '.dust', '.pug', '.tpl'}, 'ignore_filenames': {'bootstrap.min.js', '.DS_Store', 'bootstrap-tour.js', 'd3.min.js', 'tinymce.js', 'codemirror.js', 'tinymce.min.js', 'react-dom.production.min.js', 'react.js', 'jquery.min.js', 'react.production.min.js', 'codemirror-compressed.js', 'axios.min.js', 'angular.min.js', 'raphael-min.js', 'vue.min.js'}, 'ignore_extensions': {'.7z', '.exe', '.rar', '.zip', '.a', '.o', '.tz'}, 'ignore_paths': {'__MACOSX', 'jquery', 'fixtures', 'node_modules', 'bower_components', 'example', 'spec'}, 'show_progress': False}
+>>> options = {'match_rules': '/Users/ajinabraham/Code/njsscan/njsscan/rules/pattern_matcher', 'sgrep_rules': '/Users/ajinabraham/Code/njsscan/njsscan/rules/semantic_grep', 'sgrep_extensions': {'', '.js'}, 'match_extensions': {'.hbs', '.sh', '.ejs', '.toml', '.mustache', '.tmpl', '.jade', '.json', '.ect', '.vue', '.yml', '.hdbs', '.tl', '.html', '.haml', '.dust', '.pug', '.tpl'}, 'ignore_filenames': {'bootstrap.min.js', '.DS_Store', 'bootstrap-tour.js', 'd3.min.js', 'tinymce.js', 'codemirror.js', 'tinymce.min.js', 'react-dom.production.min.js', 'react.js', 'jquery.min.js', 'react.production.min.js', 'codemirror-compressed.js', 'axios.min.js', 'angular.min.js', 'raphael-min.js', 'vue.min.js'}, 'ignore_extensions': {'.7z', '.exe', '.rar', '.zip', '.a', '.o', '.tz'}, 'ignore_paths': {'__MACOSX', 'jquery', 'fixtures', 'node_modules', 'bower_components', 'example', 'spec'}, 'show_progress': False}
 >>> paths = ['../njsscan/tests/assets/dot_njsscan/']
 >>> scanner = Scanner(options, paths)
 >>> scanner.scan()
@@ -378,18 +375,24 @@ A rule consist of
 * `custom_field`: Define your own custom fields that you can use as metadata
 
 ```bash
-1. Regex - if re.findall(regex1, input)
-2. RegexAnd - if re.findall(regex1, input) and re.findall(regex2, input)
-3. RegexOr - if re.findall(regex1, input) or re.findall(regex2, input)
-4. RegexAndOr -  if (string1 in input)
-                and ((string2 in input) or (string3 in input))
-5. RegexAndNot - if(string1 in input and string2 not in input)
+1. Regex - if regex1 in input
+2. RegexAnd - if regex1 in input and regex2 in input
+3. RegexOr - if regex1 in input or regex2 in input
+4. RegexAndOr -  if regex1 in input and (regex2 in input or regex3 in input)
+5. RegexAndNot - if regex1 in input and not regex2 in input
 ```
 Example: [Pattern Matcher Rule](https://github.com/ajinabraham/libsast/blob/master/tests/unit/assets/rules/pattern_matcher/patterns.yaml)
 
 Test your pattern matcher rules
 
 `$ libsast -p tests/unit/assets/rules/pattern_matcher/patterns.yaml tests/unit/assets/files/`
+
+#### Inbuilt Standard Mapping Support
+
+* [OWASP Web Top 10](https://github.com/ajinabraham/libsast/blob/master/libsast/standards/owasp_web_top10_2017.yaml)
+* [OWASP Mobile Top 10](https://github.com/ajinabraham/libsast/blob/master/libsast/standards/owasp_mobile_top10_2016.yaml)
+* [OWASP MASVS](https://github.com/ajinabraham/libsast/blob/master/libsast/standards/owasp_masvs.yaml)
+* [CWE](https://github.com/ajinabraham/libsast/blob/master/libsast/standards/cwe.yaml)
 
 ### Semantic Grep
 

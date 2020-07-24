@@ -6,11 +6,9 @@ from libsast.exceptions import (
     InvalidRuleError,
     MissingRuleError,
     RuleDownloadException,
-    YamlRuleLoadException,
-    YamlRuleParseError,
 )
-
-import yaml
+from libsast.common import read_yaml
+from libsast.standards import get_mapping
 
 import requests
 
@@ -25,38 +23,31 @@ def download_rule(url):
         raise RuleDownloadException(f'Failed to download from: {url}')
 
 
-def read_yaml(file_obj, text=False):
-    try:
-        if text:
-            return yaml.safe_load(file_obj)
-        return yaml.safe_load(file_obj.read_text('utf-8', 'ignore'))
-    except yaml.YAMLError as exp:
-        raise YamlRuleParseError(
-            f'YAML Parse Error: {repr(exp)}')
-    except Exception as gen:
-        raise YamlRuleLoadException(
-            f'Failed to load YAML file: {repr(gen)}')
-
-
-def get_rules(rule_loc):
+def get_rules(rule_loc):  # noqa: R701
     """Get pattern matcher rules."""
     if not rule_loc:
-        raise MissingRuleError('Rule location is not missing.')
+        raise MissingRuleError('Rule location is missing.')
     if rule_loc.startswith(('http://', 'https://')):
         pat = download_rule(rule_loc)
         if not pat:
             return
-        return read_yaml(pat, True)
+        rules = read_yaml(pat, True)
+        if not rules:
+            return
+        return get_mapping(rules)
+    rule = Path(rule_loc)
+    if rule.is_file() and rule.exists():
+        rules = read_yaml(rule)
+        if not rules:
+            return
+        return get_mapping(rules)
+    elif rule.is_dir() and rule.exists():
+        patterns = []
+        for yfile in rule.glob('**/*.yaml'):
+            rules = read_yaml(yfile)
+            if rules:
+                rules = get_mapping(rules)
+                patterns.extend(rules)
+        return patterns
     else:
-        rule = Path(rule_loc)
-        if rule.is_file() and rule.exists():
-            return read_yaml(rule)
-        elif rule.is_dir() and rule.exists():
-            patterns = []
-            for yfile in rule.glob('**/*.yaml'):
-                rule = read_yaml(yfile)
-                if rule:
-                    patterns.extend(rule)
-            return patterns
-        else:
-            raise InvalidRuleError('This path is invalid')
+        raise InvalidRuleError('This path is invalid')

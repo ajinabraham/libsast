@@ -2,6 +2,17 @@
 from setuptools import find_packages, setup
 
 from pathlib import Path
+import platform
+
+
+def get_requires():
+    requires = [
+        'requests>=2.22.0',
+        'pyyaml>=5.3',
+    ]
+    if platform.system() != 'Windows':
+        requires.append('semgrep==0.16.0')
+    return requires
 
 
 def read(rel_path):
@@ -45,9 +56,5 @@ setup(
     url='https://github.com/ajinabraham/libsast',
     long_description=read('README.md'),
     long_description_content_type='text/markdown',
-    install_requires=[
-        'requests>=2.22.0',
-        'pyyaml>=5.3',
-        'semgrep==0.15.0',
-    ],
+    install_requires=get_requires(),
 )

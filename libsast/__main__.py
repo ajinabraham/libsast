@@ -48,9 +48,6 @@ def main():
     parser.add_argument('-s', '--sgrep-pattern-file',
                         help='sgrep rules directory',
                         required=False)
-    parser.add_argument('-b', '--sgrep-binary',
-                        help='sgrep binary location',
-                        required=False)
     parser.add_argument('--sgrep-file-extensions',
                         nargs='+',
                         help=('File extensions that should be scanned'
@@ -84,7 +81,6 @@ def main():
     args = parser.parse_args()
     if args.path and (args.pattern_file or args.sgrep_pattern_file):
         options = {
-            'sgrep_binary': args.sgrep_binary,
             'sgrep_rules': args.sgrep_pattern_file,
             'sgrep_extensions': args.sgrep_file_extensions,
             'match_rules': args.pattern_file,

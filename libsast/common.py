@@ -3,6 +3,13 @@
 import sys
 from threading import Thread
 
+from libsast.exceptions import (
+    YamlRuleLoadException,
+    YamlRuleParseError,
+)
+
+import yaml
+
 
 class ProgressBar:
     def __init__(self, prefix, expected_time, size=60, output=sys.stderr):
@@ -49,3 +56,16 @@ class ProgressBar:
         self.output.write('\n')
         self.output.flush()
         return ret[0]
+
+
+def read_yaml(file_obj, text=False):
+    try:
+        if text:
+            return yaml.safe_load(file_obj)
+        return yaml.safe_load(file_obj.read_text('utf-8', 'ignore'))
+    except yaml.YAMLError as exp:
+        raise YamlRuleParseError(
+            f'YAML Parse Error: {repr(exp)}')
+    except Exception as gen:
+        raise YamlRuleLoadException(
+            f'Failed to load YAML file: {repr(gen)}')
