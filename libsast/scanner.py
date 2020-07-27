@@ -65,11 +65,9 @@ class Scanner:
         for path in paths:
             pobj = Path(path)
             if pobj.is_dir():
-                for root, _, files in os.walk(path):
-                    for filename in files:
-                        pfile = Path(os.path.join(root, filename))
-                        if self.validate_file(pfile):
-                            all_files.add(pfile)
+                for pfile in pobj.rglob('*'):
+                    if self.validate_file(pfile):
+                        all_files.add(pfile)
             else:
                 if self.validate_file(pobj):
                     all_files.add(pobj)
