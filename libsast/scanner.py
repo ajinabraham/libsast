@@ -1,6 +1,5 @@
 # -*- coding: utf_8 -*-
 """The libsast Scanner module."""
-import os
 from pathlib import Path
 
 from libsast.core_matcher.pattern_matcher import (
