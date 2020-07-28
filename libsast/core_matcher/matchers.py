@@ -119,8 +119,6 @@ class RegexAndOr(MatchStrategy):
                 match_pos = match.span()
                 match_lines = get_match_lines(content, match_pos)
                 matches.add((match.group(), match_pos, match_lines))
-        if matches and or_matches:
-            or_matches.update(matches)
-        else:
+        if not (matches and or_matches):
             return False
         return or_matches
