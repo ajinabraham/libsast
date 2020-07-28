@@ -429,3 +429,4 @@ Test your semgrep rules
 ## Realworld Implementations
 
 * [njsscan](https://github.com/ajinabraham/njsscan) SAST is built with libsast pattern matcher and semantic grep.
+* [MobSF](https://mobsf.github.io/Mobile-Security-Framework-MobSF/) Static Code Analyzer for Android and iOS mobile applications.
