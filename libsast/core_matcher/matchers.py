@@ -120,7 +120,7 @@ class RegexAndOr(MatchStrategy):
                 match_lines = get_match_lines(content, match_pos)
                 matches.add((match.group(), match_pos, match_lines))
         if matches and or_matches:
-            matches.update(or_matches)
+            or_matches.update(matches)
         else:
             return False
-        return matches
+        return or_matches
