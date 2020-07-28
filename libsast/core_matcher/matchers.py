@@ -59,10 +59,9 @@ class RegexAnd(MatchStrategy):
             return Regex().perform_search(content, rule)
         matches = set()
         for regex in rule['pattern']:
-            match_obj = re.compile(regex).finditer(content)
-            if not any(True for _ in match_obj):
-                return False
-            for match in match_obj:
+            for match in re.compile(regex).finditer(content):
+                if not match.group():
+                    return False
                 match_pos = match.span()
                 match_lines = get_match_lines(content, match_pos)
                 matches.add((match.group(), match_pos, match_lines))
