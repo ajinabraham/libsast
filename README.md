@@ -92,18 +92,6 @@ $ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/p
         {
           "file_path": "tests/unit/assets/files/test_matcher.test",
           "match_lines": [
-            7,
-            7
-          ],
-          "match_position": [
-            194,
-            256
-          ],
-          "match_string": ".loadUrl(\"file:///\" + Environment.getExternalStorageDirectory("
-        },
-        {
-          "file_path": "tests/unit/assets/files/test_matcher.test",
-          "match_lines": [
             3,
             3
           ],
@@ -112,6 +100,18 @@ $ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/p
             66
           ],
           "match_string": "webkit.WebView"
+        },
+        {
+          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "match_lines": [
+            7,
+            7
+          ],
+          "match_position": [
+            194,
+            256
+          ],
+          "match_string": ".loadUrl(\"file:///\" + Environment.getExternalStorageDirectory("
         }
       ],
       "metadata": {
@@ -131,24 +131,24 @@ $ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/p
         {
           "file_path": "tests/unit/assets/files/test_matcher.test",
           "match_lines": [
-            42,
-            42
-          ],
-          "match_position": [
-            1417,
-            1426
-          ],
-          "match_string": "WKWebView"
-        },
-        {
-          "file_path": "tests/unit/assets/files/test_matcher.test",
-          "match_lines": [
             40,
             40
           ],
           "match_position": [
             1365,
             1374
+          ],
+          "match_string": "WKWebView"
+        },
+        {
+          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "match_lines": [
+            42,
+            42
+          ],
+          "match_position": [
+            1417,
+            1426
           ],
           "match_string": "WKWebView"
         }
@@ -236,9 +236,13 @@ $ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/p
         }
       ],
       "metadata": {
+        "cwe": "cwe-1002",
         "description": "This is a rule to test regex",
         "id": "test_regex_multiline",
         "input_case": "exact",
+        "masvs": "MSTG-STORAGE-3",
+        "owasp-mobile": "M1: Improper Platform Usage",
+        "owasp-web": "A10: Insufficient Logging & Monitoring",
         "pattern": "((?:public.+)+)",
         "severity": "info",
         "type": "Regex"
@@ -278,21 +282,21 @@ $ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/p
         "code": 3,
         "help": "If the code appears to be valid, this may be a semgrep bug.",
         "level": "warn",
-        "long_msg": "Could not parse test_file.cpython-37-pytest-5.4.2.pyc as python",
+        "long_msg": "Could not parse test_matcher.test as python",
         "short_msg": "parse error",
         "spans": [
           {
             "context_end": null,
             "context_start": null,
             "end": {
-              "col": 5,
-              "line": 1
+              "col": 24,
+              "line": 40
             },
-            "file": "test_file.cpython-37-pytest-5.4.2.pyc",
-            "source_hash": "b59a27ae0ab7799f6304901e395a559d0e01027d90202d068ded5912f6c5795d",
+            "file": "test_matcher.test",
+            "source_hash": "f48c9332082e0c0cb2ec67dcfa2244ef5b76eec9a5b192f8261cd3ee3ae3ac00",
             "start": {
-              "col": 4,
-              "line": 1
+              "col": 23,
+              "line": 40
             }
           }
         ],
@@ -335,7 +339,7 @@ $ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/p
 >>> paths = ['../njsscan/tests/assets/dot_njsscan/']
 >>> scanner = Scanner(options, paths)
 >>> scanner.scan()
-{'pattern_matcher': {'handlebar_mustache_template': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/ignore_ext.hbs', 'match_string': '{{{html}}}', 'match_position': (52, 62)}], 'metadata': {'id': 'handlebar_mustache_template', 'description': 'The Handlebar.js/Mustache.js template has an unescaped variable. Untrusted user input passed to this variable results in Cross Site Scripting (XSS).', 'type': 'Regex', 'pattern': '{{{.+}}}|{{[ ]*&[\\w]+.*}}', 'severity': 'ERROR', 'input_case': 'exact', 'cwe': "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')", 'owasp': 'A1: Injection'}}}, 'semantic_grep': {'matches': {'node_aes_ecb': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/lorem_scan.js', 'match_position': (16, 86), 'match_lines': (14, 14), 'match_string': "let decipher = crypto.createDecipheriv('aes-128-ecb', Buffer.from(ENCRYPTION_KEY), iv);"}], 'metadata': {'owasp': 'A9: Using Components with Known Vulnerabilities', 'cwe': 'CWE-327: Use of a Broken or Risky Cryptographic Algorithm', 'description': 'AES with ECB mode is deterministic in nature and not suitable for encrypting large amount of repetitive data.', 'severity': 'ERROR'}}, 'node_deserialize': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/skip.js', 'match_position': (19, 44), 'match_lines': (8, 8), 'match_string': '        var obj = serialize.unserialize(str);'}], 'metadata': {'owasp': 'A8: Insecure Deserialization', 'cwe': 'CWE-502: Deserialization of Untrusted Data', 'description': "User controlled data in 'unserialize()' or 'deserialize()' function can result in Object Injection or Remote Code Injection.", 'severity': 'ERROR'}}, 'express_xss': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/skip.js', 'match_position': (9, 52), 'match_lines': (7, 10), 'match_string': '        var str = new Buffer(req.cookies.profile, \'base64\').toString();\n\n        var obj = serialize.unserialize(str);\n\n        if (obj.username) {\n\n            res.send("Hello " + escape(obj.username));'}], 'metadata': {'owasp': 'A1: Injection', 'cwe': "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')", 'description': 'Untrusted User Input in Response will result in Reflected Cross Site Scripting Vulnerability.', 'severity': 'ERROR'}}, 'node_tls_reject': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/skip_dir/skip_me.js', 'match_position': (9, 58), 'match_lines': (9, 9), 'match_string': "        process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';"}, {'file_path': '../njsscan/tests/assets/dot_njsscan/skip_dir/skip_me.js', 'match_position': (9, 55), 'match_lines': (18, 18), 'match_string': '        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";'}], 'metadata': {'owasp': 'A6: Security Misconfiguration', 'cwe': 'CWE-295: Improper Certificate Validation', 'description': "Setting 'NODE_TLS_REJECT_UNAUTHORIZED' to 0 will allow node server to accept self signed certificates and is not an secure behaviour.", 'severity': 'ERROR'}}, 'node_curl_ssl_verify_disable': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/skip_dir/skip_me.js', 'match_position': (5, 35), 'match_lines': (45, 50), 'match_string': '    curl(url,\n\n        {\n\n            SSL_VERIFYPEER: 0\n\n        },\n\n        function (err) {\n\n            response.end(this.body);'}], 'metadata': {'owasp': 'A6: Security Misconfiguration', 'cwe': 'CWE-599: Missing Validation of OpenSSL Certificate', 'description': 'SSL Certificate verification for node-curl is disabled.', 'severity': 'ERROR'}}}, 'errors': []}}
+{'pattern_matcher': {'handlebar_mustache_template': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/ignore_ext.hbs', 'match_string': '{{{html}}}', 'match_position': (52, 62), 'match_lines': (1, 1)}], 'metadata': {'id': 'handlebar_mustache_template', 'description': 'The Handlebar.js/Mustache.js template has an unescaped variable. Untrusted user input passed to this variable results in Cross Site Scripting (XSS).', 'type': 'Regex', 'pattern': '{{{.+}}}|{{[ ]*&[\\w]+.*}}', 'severity': 'ERROR', 'input_case': 'exact', 'cwe': "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')", 'owasp': 'A1: Injection'}}}, 'semantic_grep': {'matches': {'node_aes_ecb': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/lorem_scan.js', 'match_position': (16, 87), 'match_lines': (14, 14), 'match_string': "let decipher = crypto.createDecipheriv('aes-128-ecb', Buffer.from(ENCRYPTION_KEY), iv);"}], 'metadata': {'owasp': 'A9: Using Components with Known Vulnerabilities', 'cwe': 'CWE-327: Use of a Broken or Risky Cryptographic Algorithm', 'description': 'AES with ECB mode is deterministic in nature and not suitable for encrypting large amount of repetitive data.', 'severity': 'ERROR'}}, 'node_tls_reject': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/skip_dir/skip_me.js', 'match_position': (9, 58), 'match_lines': (9, 9), 'match_string': "        process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';"}, {'file_path': '../njsscan/tests/assets/dot_njsscan/skip_dir/skip_me.js', 'match_position': (9, 55), 'match_lines': (18, 18), 'match_string': '        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";'}], 'metadata': {'owasp': 'A6: Security Misconfiguration', 'cwe': 'CWE-295: Improper Certificate Validation', 'description': "Setting 'NODE_TLS_REJECT_UNAUTHORIZED' to 0 will allow node server to accept self signed certificates and is not a secure behaviour.", 'severity': 'ERROR'}}, 'node_curl_ssl_verify_disable': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/skip_dir/skip_me.js', 'match_position': (5, 11), 'match_lines': (45, 51), 'match_string': '    curl(url,\n\n        {\n\n            SSL_VERIFYPEER: 0\n\n        },\n\n        function (err) {\n\n            response.end(this.body);\n\n        })'}], 'metadata': {'owasp': 'A6: Security Misconfiguration', 'cwe': 'CWE-599: Missing Validation of OpenSSL Certificate', 'description': 'SSL Certificate verification for node-curl is disabled.', 'severity': 'ERROR'}}, 'regex_injection_dos': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/lorem_scan.js', 'match_position': (5, 37), 'match_lines': (25, 27), 'match_string': '    var key = req.param("key");\n\n    // Regex created from user input\n\n    var re = new RegExp("\\\\b" + key);'}], 'metadata': {'owasp': 'A1: Injection', 'cwe': 'CWE-400: Uncontrolled Resource Consumption', 'description': 'User controlled data in RegExp() can make the application vulnerable to layer 7 DoS.', 'severity': 'ERROR'}}, 'express_xss': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/skip.js', 'match_position': (9, 55), 'match_lines': (7, 10), 'match_string': '        var str = new Buffer(req.cookies.profile, \'base64\').toString();\n\n        var obj = serialize.unserialize(str);\n\n        if (obj.username) {\n\n            res.send("Hello " + escape(obj.username));'}], 'metadata': {'owasp': 'A1: Injection', 'cwe': "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')", 'description': 'Untrusted User Input in Response will result in Reflected Cross Site Scripting Vulnerability.', 'severity': 'ERROR'}}, 'generic_path_traversal': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/lorem_scan.js', 'match_position': (5, 35), 'match_lines': (36, 37), 'match_string': "    var filePath = path.join(__dirname, '/' + req.query.load);\n\n    fileSystem.readFile(filePath); // ignore: generic_path_traversal"}, {'file_path': '../njsscan/tests/assets/dot_njsscan/lorem_scan.js', 'match_position': (5, 35), 'match_lines': (42, 43), 'match_string': "    var filePath = path.join(__dirname, '/' + req.query.load);\n\n    fileSystem.readFile(filePath); // detect this"}], 'metadata': {'owasp': 'A5: Broken Access Control', 'cwe': 'CWE-23: Relative Path Traversal', 'description': 'Untrusted user input in readFile()/readFileSync() can endup in Directory Traversal Attacks.', 'severity': 'ERROR'}}, 'express_open_redirect': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/lorem_scan.js', 'match_position': (5, 26), 'match_lines': (49, 51), 'match_string': '    var target = req.param("target");\n\n    // BAD: sanitization doesn\'t apply here\n\n    res.redirect(target); //ignore: express_open_redirect'}], 'metadata': {'owasp': 'A1: Injection', 'cwe': "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')", 'description': 'Untrusted user input in redirect() can result in Open Redirect vulnerability.', 'severity': 'ERROR'}}, 'node_deserialize': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/skip.js', 'match_position': (19, 45), 'match_lines': (8, 8), 'match_string': '        var obj = serialize.unserialize(str);'}], 'metadata': {'owasp': 'A8: Insecure Deserialization', 'cwe': 'CWE-502: Deserialization of Untrusted Data', 'description': "User controlled data in 'unserialize()' or 'deserialize()' function can result in Object Injection or Remote Code Injection.", 'severity': 'ERROR'}}}, 'errors': [{'type': 'SourceParseError', 'code': 3, 'short_msg': 'parse error', 'long_msg': 'Could not parse .njsscan as javascript', 'level': 'warn', 'spans': [{'start': {'line': 2, 'col': 20}, 'end': {'line': 2, 'col': 21}, 'source_hash': 'c60298be568bfb1325d92cbb3c0bc1450a25b85bb2e4000bdc3267c05f1c8c73', 'file': '.njsscan', 'context_start': None, 'context_end': None}], 'help': 'If the code appears to be valid, this may be a semgrep bug.'}, {'type': 'SourceParseError', 'code': 3, 'short_msg': 'parse error', 'long_msg': 'Could not parse no_ext_scan as javascript', 'level': 'warn', 'spans': [{'start': {'line': 1, 'col': 3}, 'end': {'line': 1, 'col': 5}, 'source_hash': 'f002e2a715be216987dd1b134e7b9fa6eef28e3caa82dead0109c4cdc489e089', 'file': 'no_ext_scan', 'context_start': None, 'context_end': None}], 'help': 'If the code appears to be valid, this may be a semgrep bug.'}]}}
 ```
 
 ## Write you own Static Analysis tool
