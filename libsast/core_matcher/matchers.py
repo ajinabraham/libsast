@@ -121,4 +121,5 @@ class RegexAndOr(MatchStrategy):
                 matches.add((match.group(), match_pos, match_lines))
         if not (matches and or_matches):
             return False
-        return or_matches
+        matches.update(or_matches)
+        return matches
