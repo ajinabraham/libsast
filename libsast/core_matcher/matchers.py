@@ -59,12 +59,14 @@ class RegexAnd(MatchStrategy):
             return Regex().perform_search(content, rule)
         matches = set()
         for regex in rule['pattern']:
+            empty_iter_detected = True
             for match in re.compile(regex).finditer(content):
-                if not match.group():
-                    return False
+                empty_iter_detected = False
                 match_pos = match.span()
                 match_lines = get_match_lines(content, match_pos)
                 matches.add((match.group(), match_pos, match_lines))
+            if empty_iter_detected:
+                return False
         return matches
 
 
