@@ -11,7 +11,7 @@ def get_requires():
         'pyyaml>=5.3',
     ]
     if platform.system() != 'Windows':
-        requires.append('semgrep==0.16.0')
+        requires.append('semgrep==0.17.0')
     return requires
 
 

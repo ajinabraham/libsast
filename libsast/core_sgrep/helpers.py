@@ -36,6 +36,7 @@ def invoke_semgrep(paths, scan_rules, **kwargs):
         pattern=None,
         lang=None,
         config=scan_rules,
+        timeout=6,
         **kwargs,
     )
     output_handler.close()
