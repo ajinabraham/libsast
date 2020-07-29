@@ -2,16 +2,14 @@
 from setuptools import find_packages, setup
 
 from pathlib import Path
-import platform
 
 
 def get_requires():
     requires = [
         'requests>=2.22.0',
         'pyyaml>=5.3',
+        'semgrep==0.17.0;platform_system!="Windows"',
     ]
-    if platform.system() != 'Windows':
-        requires.append('semgrep==0.17.0')
     return requires
 
 
@@ -28,7 +26,7 @@ def get_version(rel_path):
 
 
 description = ('A generic SAST core built on top of '
-               'semantic grep and regex')
+               'semgrep and regex')
 setup(
     name='libsast',
     version=get_version('libsast/__init__.py'),
