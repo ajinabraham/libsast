@@ -15,7 +15,7 @@ Made with ![Love](https://cloud.githubusercontent.com/assets/4301109/16754758/82
 
 `pip install libsast`
 
-Supports only Mac and Linux
+Pattern Matcher is cross-platform, but Semgrep supports only Mac and Linux.
 
 ## Command Line Options
 
