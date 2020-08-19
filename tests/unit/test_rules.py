@@ -113,3 +113,14 @@ def test_load_file_missing_pattern():
     paths = [files_dir.as_posix()]
     with pytest.raises(libsast.exceptions.PatternKeyMissingError):
         libsast.Scanner(options, paths).scan()
+
+
+def test_ignore_comments():
+    base_dir = Path(__file__).parents[0]
+    files_dir = base_dir / 'assets' / 'files' / 'comments.java'
+    rule_file = base_dir / 'assets' / 'rules'
+    rule_file = rule_file / 'pattern_matcher' / 'patterns.yaml'
+    options = {'match_rules': rule_file.as_posix()}
+    paths = [files_dir.as_posix()]
+    res = libsast.Scanner(options, paths).scan()
+    assert res['pattern_matcher'] == {}

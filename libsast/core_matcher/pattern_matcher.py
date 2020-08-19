@@ -1,6 +1,8 @@
 # -*- coding: utf_8 -*-
 """Pattern Macher."""
 import copy
+import re
+from itertools import chain
 
 from libsast.core_matcher.helpers import get_rules
 from libsast.core_matcher import matchers
@@ -59,17 +61,33 @@ class PatternMatcher:
                     f' Available matchers are {supported}',
                 )
 
+    def strip_comments(self, data):
+        """Remove Comments."""
+        to_replace = set()
+        single_line = re.compile(r'//.+', re.MULTILINE)
+        multi_line = re.compile(r'/\*(.|\s)+?\*/', re.MULTILINE)
+        repl_regex = re.compile(r'\S', re.MULTILINE)
+        matches = chain(
+            single_line.finditer(data),
+            multi_line.finditer(data))
+        for match in matches:
+            if match.group():
+                to_replace.add(match.group())
+        for itm in to_replace:
+            dummy = repl_regex.sub(' ', itm)
+            data = data.replace(itm, dummy)
+        return data
+
     def pattern_matcher(self, data, file_path):
         """Static Analysis Pattern Matcher."""
         try:
             for rule in self.scan_rules:
                 case = rule.get('input_case')
                 if case == 'lower':
-                    fmt_data = data.lower()
+                    data = data.lower()
                 elif case == 'upper':
-                    fmt_data = data.upper()
-                else:
-                    fmt_data = data
+                    data = data.upper()
+                fmt_data = self.strip_comments(data)
                 matches = self.matcher._find_match(
                     rule['type'],
                     fmt_data,
