@@ -4,7 +4,7 @@ import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
 WebView engine = (WebView) (findViewById(R.id.webView1));
-engine.loadUrl("file:///" + Environment.getExternalStorageDirectory().getPath() + "testing.html");
+engine.loadUrl("file:/" + Environment.getExternalStorageDirectory().getPath() + "testing.html");
 
 
 //RegexOr
