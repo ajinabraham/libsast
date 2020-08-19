@@ -18,7 +18,6 @@ def invoke_semgrep(paths, scan_rules, **kwargs):
     except NotImplementedError:
         cpu_count = 1  # CPU count is not implemented on Windows
     util.set_flags(False, True, False)  # Verbose, Quiet, Force_color
-
     io_capture = StringIO()
     output_handler = OutputHandler(
         OutputSettings(
@@ -26,6 +25,7 @@ def invoke_semgrep(paths, scan_rules, **kwargs):
             output_destination=None,
             error_on_findings=False,
             strict=False,
+            timeout_threshold=3,
         ),
         stdout=io_capture,
     )
@@ -37,6 +37,7 @@ def invoke_semgrep(paths, scan_rules, **kwargs):
         lang=None,
         config=scan_rules,
         timeout=5,
+        timeout_threshold=3,
         **kwargs,
     )
     output_handler.close()
