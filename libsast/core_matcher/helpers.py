@@ -60,6 +60,9 @@ def comment_replacer(matches, data):
     repl_regex = re.compile(r'\S', re.MULTILINE)
     for match in matches:
         if match.group():
+            if match.group().strip() == '//':
+                # ignore comment starters
+                continue
             to_replace.add(match.group())
     for itm in to_replace:
         dummy = repl_regex.sub(' ', itm)

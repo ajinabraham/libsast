@@ -60,20 +60,20 @@ optional arguments:
 ## Example Usage
 
 ```json
-$ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/pattern_matcher/ tests/unit/assets/files/
+$ libsast -s tests/assets/rules/semantic_grep/ -p tests/assets/rules/pattern_matcher/ tests/assets/files/
 {
   "pattern_matcher": {
     "test_regex": {
       "files": [
         {
-          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "file_path": "tests/assets/files/test_matcher.test",
           "match_lines": [
             28,
             28
           ],
           "match_position": [
-            1143,
-            1151
+            1141,
+            1149
           ],
           "match_string": ".close()"
         }
@@ -90,7 +90,7 @@ $ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/p
     "test_regex_and": {
       "files": [
         {
-          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "file_path": "tests/assets/files/test_matcher.test",
           "match_lines": [
             3,
             3
@@ -102,16 +102,16 @@ $ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/p
           "match_string": "webkit.WebView"
         },
         {
-          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "file_path": "tests/assets/files/test_matcher.test",
           "match_lines": [
             7,
             7
           ],
           "match_position": [
             194,
-            256
+            254
           ],
-          "match_string": ".loadUrl(\"file:///\" + Environment.getExternalStorageDirectory("
+          "match_string": ".loadUrl(\"file:/\" + Environment.getExternalStorageDirectory("
         }
       ],
       "metadata": {
@@ -129,26 +129,26 @@ $ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/p
     "test_regex_and_not": {
       "files": [
         {
-          "file_path": "tests/unit/assets/files/test_matcher.test",
-          "match_lines": [
-            40,
-            40
-          ],
-          "match_position": [
-            1365,
-            1374
-          ],
-          "match_string": "WKWebView"
-        },
-        {
-          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "file_path": "tests/assets/files/test_matcher.test",
           "match_lines": [
             42,
             42
           ],
           "match_position": [
-            1417,
-            1426
+            1415,
+            1424
+          ],
+          "match_string": "WKWebView"
+        },
+        {
+          "file_path": "tests/assets/files/test_matcher.test",
+          "match_lines": [
+            40,
+            40
+          ],
+          "match_position": [
+            1363,
+            1372
           ],
           "match_string": "WKWebView"
         }
@@ -168,28 +168,28 @@ $ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/p
     "test_regex_and_or": {
       "files": [
         {
-          "file_path": "tests/unit/assets/files/test_matcher.test",
-          "match_lines": [
-            58,
-            58
-          ],
-          "match_position": [
-            1975,
-            1990
-          ],
-          "match_string": "sendTextMessage"
-        },
-        {
-          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "file_path": "tests/assets/files/test_matcher.test",
           "match_lines": [
             50,
             50
           ],
           "match_position": [
-            1553,
-            1573
+            1551,
+            1571
           ],
           "match_string": "telephony.SmsManager"
+        },
+        {
+          "file_path": "tests/assets/files/test_matcher.test",
+          "match_lines": [
+            58,
+            58
+          ],
+          "match_position": [
+            1973,
+            1988
+          ],
+          "match_string": "sendTextMessage"
         }
       ],
       "metadata": {
@@ -211,26 +211,26 @@ $ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/p
     "test_regex_multiline": {
       "files": [
         {
-          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "file_path": "tests/assets/files/test_matcher.test",
           "match_lines": [
             52,
             52
           ],
           "match_position": [
-            1588,
-            1686
+            1586,
+            1684
           ],
           "match_string": "public void onRequestPermissionsResult(int requestCode,String permissions[], int[] grantResults) {"
         },
         {
-          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "file_path": "tests/assets/files/test_matcher.test",
           "match_lines": [
             10,
             11
           ],
           "match_position": [
-            299,
-            370
+            297,
+            368
           ],
           "match_string": "public static ForgeAccount add(Context context, ForgeAccount account) {"
         }
@@ -251,14 +251,14 @@ $ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/p
     "test_regex_or": {
       "files": [
         {
-          "file_path": "tests/unit/assets/files/test_matcher.test",
+          "file_path": "tests/assets/files/test_matcher.test",
           "match_lines": [
             26,
             26
           ],
           "match_position": [
-            1042,
-            1069
+            1040,
+            1067
           ],
           "match_string": "Context.MODE_WORLD_READABLE"
         }
@@ -293,10 +293,34 @@ $ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/p
               "line": 40
             },
             "file": "test_matcher.test",
-            "source_hash": "f48c9332082e0c0cb2ec67dcfa2244ef5b76eec9a5b192f8261cd3ee3ae3ac00",
+            "source_hash": "84d2247435a86d69a88bc7d9d63cd03454490865c6271d5a4815a3d717f8d8d9",
             "start": {
               "col": 23,
               "line": 40
+            }
+          }
+        ],
+        "type": "SourceParseError"
+      },
+      {
+        "code": 3,
+        "help": "If the code appears to be valid, this may be a semgrep bug.",
+        "level": "warn",
+        "long_msg": "Could not parse test_matcher.test as javascript",
+        "short_msg": "parse error",
+        "spans": [
+          {
+            "context_end": null,
+            "context_start": null,
+            "end": {
+              "col": 1,
+              "line": 1
+            },
+            "file": "test_matcher.test",
+            "source_hash": "84d2247435a86d69a88bc7d9d63cd03454490865c6271d5a4815a3d717f8d8d9",
+            "start": {
+              "col": 1,
+              "line": 1
             }
           }
         ],
@@ -307,7 +331,7 @@ $ libsast -s tests/unit/assets/rules/semantic_grep/ -p tests/unit/assets/rules/p
       "boto-client-ip": {
         "files": [
           {
-            "file_path": "tests/unit/assets/files/example_file.py",
+            "file_path": "tests/assets/files/example_file.py",
             "match_lines": [
               4,
               4
@@ -385,11 +409,11 @@ A rule consist of
 4. RegexAndOr -  if regex1 in input and (regex2 in input or regex3 in input)
 5. RegexAndNot - if regex1 in input and not regex2 in input
 ```
-Example: [Pattern Matcher Rule](https://github.com/ajinabraham/libsast/blob/master/tests/unit/assets/rules/pattern_matcher/patterns.yaml)
+Example: [Pattern Matcher Rule](https://github.com/ajinabraham/libsast/blob/master/tests/assets/rules/pattern_matcher/patterns.yaml)
 
 Test your pattern matcher rules
 
-`$ libsast -p tests/unit/assets/rules/pattern_matcher/patterns.yaml tests/unit/assets/files/`
+`$ libsast -p tests/assets/rules/pattern_matcher/patterns.yaml tests/assets/files/`
 
 #### Inbuilt Standard Mapping Support
 
@@ -424,13 +448,14 @@ rules:
 
 See semgrep documentation [here](https://github.com/returntocorp/semgrep/blob/develop/docs/configuration-files.md).
 
-Example: [Semantic Grep Rule](https://github.com/ajinabraham/libsast/blob/master/tests/unit/assets/rules/semantic_grep/sgrep.yaml)
+Example: [Semantic Grep Rule](https://github.com/ajinabraham/libsast/blob/master/tests/assets/rules/semantic_grep/sgrep.yaml)
 
 Test your semgrep rules
 
-`$ libsast -s tests/unit/assets/rules/semantic_grep/sgrep.yaml tests/unit/assets/files/`
+`$ libsast -s tests/assets/rules/semantic_grep/sgrep.yaml tests/assets/files/`
 
 ## Realworld Implementations
 
 * [njsscan](https://github.com/ajinabraham/njsscan) SAST is built with libsast pattern matcher and semantic grep.
+* [nodejsscan](https://github.com/ajinabraham/nodejsscan) nodejsscan is a static security code scanner for Node.js applications.
 * [MobSF](https://mobsf.github.io/Mobile-Security-Framework-MobSF/) Static Code Analyzer for Android and iOS mobile applications.
