@@ -428,7 +428,7 @@ Semantic Grep uses [semgrep](https://github.com/returntocorp/semgrep), a fast an
 
 Currently it supports Python, Java, JavaScript, Go and C.
 
-Use [semgrep.live](https://semgrep.live/vAb) to write semantic grep rule patterns.
+Use [semgrep.dev](https://semgrep.dev/vAb) to write semantic grep rule patterns.
 
 A sample rule for Python code looks like
 
