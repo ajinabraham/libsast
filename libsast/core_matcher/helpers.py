@@ -1,5 +1,6 @@
 # -*- coding: utf_8 -*-
 """Helper Functions."""
+import re
 from pathlib import Path
 
 from libsast.exceptions import (
@@ -51,3 +52,31 @@ def get_rules(rule_loc):  # noqa: R701
         return patterns
     else:
         raise InvalidRuleError('This path is invalid')
+
+
+def comment_replacer(matches, data):
+    """Replace Comments from data."""
+    to_replace = set()
+    repl_regex = re.compile(r'\S', re.MULTILINE)
+    for match in matches:
+        if match.group():
+            to_replace.add(match.group())
+    for itm in to_replace:
+        dummy = repl_regex.sub(' ', itm)
+        data = data.replace(itm, dummy)
+    return data
+
+
+def strip_comments(data):
+    """Remove Comments.
+
+    Replace multiline comments first and
+    then replace single line comments.
+    """
+    single_line = re.compile(r'//.+', re.MULTILINE)
+    multi_line = re.compile(r'/\*(.|\s)+?\*/', re.MULTILINE)
+    mmatches = multi_line.finditer(data)
+    data = comment_replacer(mmatches, data)
+    smatches = single_line.finditer(data)
+    data = comment_replacer(smatches, data)
+    return data
