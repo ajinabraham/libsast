@@ -39,7 +39,7 @@ class ProgressBar:
         ret = [None]
         index = 0
         # Hack determined by size of rule files
-        self.expected_time = self.expected_time * 6
+        self.expected_time = self.expected_time * 350
 
         def myrunner(function, ret, *args, **kwargs):
             ret[0] = function(*args, **kwargs)

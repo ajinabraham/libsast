@@ -5,7 +5,7 @@ import libsast
 
 
 def get_config():
-    base_dir = Path(__file__).parents[0]
+    base_dir = Path(__file__).parents[1]
     rules_dir = base_dir / 'assets' / 'rules' / 'pattern_matcher'
     files_dir = base_dir / 'assets' / 'files'
     options = {'match_rules': rules_dir.as_posix()}

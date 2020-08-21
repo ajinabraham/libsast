@@ -13,8 +13,8 @@ def test_cli_pattern_match():
             'python',
             'libsast',
             '-p',
-            'tests/unit/assets/rules/pattern_matcher/patterns.yaml',
-            'tests/unit/assets/files/'],
+            'tests/assets/rules/pattern_matcher/patterns.yaml',
+            'tests/assets/files/'],
             stderr=subprocess.STDOUT,
         )
     except subprocess.CalledProcessError as exc:

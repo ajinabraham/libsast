@@ -1,7 +1,7 @@
 # -*- coding: utf_8 -*-
 """Pattern Macher."""
-import copy
 import re
+from copy import deepcopy
 from itertools import chain
 
 from libsast.core_matcher.helpers import get_rules
@@ -100,7 +100,7 @@ class PatternMatcher:
     def add_finding(self, file_path, rule, matches):
         """Add Code Analysis Findings."""
         for match in matches:
-            crule = copy.deepcopy(rule)
+            crule = deepcopy(rule)
             file_details = {
                 'file_path': file_path,
                 'match_string': match[0],

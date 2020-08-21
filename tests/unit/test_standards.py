@@ -7,7 +7,7 @@ import libsast
 def test_standards_mapping():
     a10 = 'A10: Insufficient Logging & Monitoring'
     m1 = 'M1: Improper Platform Usage'
-    base_dir = Path(__file__).parents[0]
+    base_dir = Path(__file__).parents[1]
     files_dir = base_dir / 'assets' / 'files'
     rules_dir = base_dir / 'assets' / 'rules' / 'pattern_matcher'
     options = {'match_rules': rules_dir.as_posix()}

@@ -35,7 +35,7 @@ def test_ignore_filenames():
 
 
 def test_ignore_paths():
-    base_dir = Path(__file__).parents[0]
+    base_dir = Path(__file__).parents[1]
     files_dir = base_dir / 'assets' / 'files'
     paths = [files_dir.as_posix()]
     options = {'ignore_paths': paths}
