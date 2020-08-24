@@ -77,7 +77,7 @@ def strip_comments(data):
     then replace single line comments.
     """
     single_line = re.compile(r'//.+', re.MULTILINE)
-    multi_line = re.compile(r'/\*(.|\s)+?\*/', re.MULTILINE)
+    multi_line = re.compile(r'/\*([\S|\s]+?)\*/', re.MULTILINE)
     mmatches = multi_line.finditer(data)
     data = comment_replacer(mmatches, data)
     smatches = single_line.finditer(data)
