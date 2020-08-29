@@ -68,10 +68,12 @@ class PatternMatcher:
             for rule in self.scan_rules:
                 case = rule.get('input_case')
                 if case == 'lower':
-                    data = data.lower()
+                    tmp_data = data.lower()
                 elif case == 'upper':
-                    data = data.upper()
-                fmt_data = strip_comments(data)
+                    tmp_data = data.upper()
+                else:
+                    tmp_data = data
+                fmt_data = strip_comments(tmp_data)
                 matches = self.matcher._find_match(
                     rule['type'],
                     fmt_data,
