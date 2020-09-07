@@ -7,7 +7,7 @@ from .scanner import Scanner
 __title__ = 'libsast'
 __authors__ = 'Ajin Abraham'
 __copyright__ = 'Copyright 2020 Ajin Abraham, OpenSecurity'
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 __version_info__ = tuple(int(i) for i in __version__.split('.'))
 __all__ = [
     'Scanner',
