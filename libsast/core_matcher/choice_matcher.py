@@ -71,7 +71,7 @@ class ChoiceMatcher:
             options = set()
             for sfile in scan_paths:
                 ext = sfile.suffix.lower()
-                if ext not in self.exts:
+                if self.exts and ext not in self.exts:
                     continue
                 data = sfile.read_text('utf-8', 'ignore')
                 if ext in ('.html', '.xml'):

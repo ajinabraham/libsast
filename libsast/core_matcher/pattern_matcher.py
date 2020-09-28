@@ -36,7 +36,7 @@ class PatternMatcher:
             paths = pbar.progrees_loop(paths)
         for sfile in paths:
             ext = sfile.suffix.lower()
-            if ext not in self.exts:
+            if self.exts and ext not in self.exts:
                 continue
             data = sfile.read_text('utf-8', 'ignore')
             self.pattern_matcher(data, sfile, ext)
