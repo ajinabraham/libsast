@@ -5,6 +5,9 @@ from pathlib import Path
 from libsast.core_matcher.pattern_matcher import (
     PatternMatcher,
 )
+from libsast.core_matcher.choice_matcher import (
+    ChoiceMatcher,
+)
 from libsast.core_sgrep.semantic_sgrep import (
     SemanticGrep,
 )
@@ -23,6 +26,9 @@ class Scanner:
                 'sgrep_extensions': None,
                 'match_rules': None,
                 'match_extensions': None,
+                'choice_rules': None,
+                'choice_extensions': None,
+                'alternative_path': None,
                 'ignore_filenames': None,
                 'ignore_extensions': None,
                 'ignore_paths': None,
@@ -50,6 +56,9 @@ class Scanner:
             return
         if self.options.get('match_rules'):
             results['pattern_matcher'] = PatternMatcher(
+                self.options).scan(valid_paths)
+        if self.options.get('choice_rules'):
+            results['choice_matcher'] = ChoiceMatcher(
                 self.options).scan(valid_paths)
         if self.options.get('sgrep_rules'):
             results['semantic_grep'] = SemanticGrep(

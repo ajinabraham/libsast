@@ -83,3 +83,33 @@ def strip_comments(data):
     smatches = single_line.finditer(data)
     data = comment_replacer(smatches, data)
     return data
+
+
+def strip_comments2(data):
+    """Remove Comments 2.
+
+    Replace comments for HTML/XML
+    """
+    multi_line = re.compile(r'<!--([\S|\s]+?)-->', re.MULTILINE)
+    mmatches = multi_line.finditer(data)
+    data = comment_replacer(mmatches, data)
+    return data
+
+
+def get_match_lines(content, pos):
+    """Get Match lines from position."""
+    start_line = 0
+    filepos = 0
+    skip = False
+    for idx, line in enumerate(content.split('\n'), 1):
+        filepos += len(line) + 1
+        if filepos >= pos[0] and filepos >= pos[1] and not skip:
+            # Match is on the same line
+            return (idx, idx)
+        elif filepos >= pos[0] and not skip:
+            # Multiline match, find start line
+            skip = True
+            start_line = idx
+        if filepos >= pos[1] and skip:
+            # Multiline march, find end line
+            return (start_line, idx)

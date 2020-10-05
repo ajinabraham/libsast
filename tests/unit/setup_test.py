@@ -10,6 +10,10 @@ def scanner(options):
     paths = [files_dir.as_posix()]
     rules_dir = base_dir / 'assets' / 'rules' / 'pattern_matcher'
     sgrep_dir = base_dir / 'assets' / 'rules' / 'semantic_grep'
+    choice_dir = base_dir / 'assets' / 'rules' / 'choice_matcher'
     options['match_rules'] = rules_dir.as_posix()
     options['sgrep_rules'] = sgrep_dir.as_posix()
+    options['choice_rules'] = choice_dir.as_posix()
+    options['choice_extensions'] = {'.python'}
+    options['alternative_path'] = files_dir / 'alternate.python'
     return libsast.Scanner(options, paths)

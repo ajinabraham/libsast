@@ -5,6 +5,7 @@ from copy import deepcopy
 from libsast.core_matcher.helpers import (
     get_rules,
     strip_comments,
+    strip_comments2,
 )
 from libsast.core_matcher import matchers
 from libsast import (
@@ -27,18 +28,18 @@ class PatternMatcher:
 
     def scan(self, paths: list) -> dict:
         """Scan file(s) or directory."""
-        if not self.scan_rules:
+        if not (self.scan_rules and paths):
             return
         self.validate_rules()
         if self.show_progress:
             pbar = common.ProgressBar('Pattern Match', len(paths))
             paths = pbar.progrees_loop(paths)
         for sfile in paths:
-            if self.exts:
-                if not sfile.suffix.lower() in self.exts:
-                    continue
+            ext = sfile.suffix.lower()
+            if self.exts and ext not in self.exts:
+                continue
             data = sfile.read_text('utf-8', 'ignore')
-            self.pattern_matcher(data, sfile.as_posix())
+            self.pattern_matcher(data, sfile, ext)
         return self.findings
 
     def validate_rules(self):
@@ -62,7 +63,7 @@ class PatternMatcher:
                     f' Available matchers are {supported}',
                 )
 
-    def pattern_matcher(self, data, file_path):
+    def pattern_matcher(self, data, file_path, ext):
         """Static Analysis Pattern Matcher."""
         try:
             for rule in self.scan_rules:
@@ -73,7 +74,10 @@ class PatternMatcher:
                     tmp_data = data.upper()
                 else:
                     tmp_data = data
-                fmt_data = strip_comments(tmp_data)
+                if ext in ('.html', '.xml'):
+                    fmt_data = strip_comments2(tmp_data)
+                else:
+                    fmt_data = strip_comments(tmp_data)
                 matches = self.matcher._find_match(
                     rule['type'],
                     fmt_data,
@@ -88,7 +92,7 @@ class PatternMatcher:
         for match in matches:
             crule = deepcopy(rule)
             file_details = {
-                'file_path': file_path,
+                'file_path': file_path.as_posix(),
                 'match_string': match[0],
                 'match_position': match[1],
                 'match_lines': match[2],

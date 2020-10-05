@@ -3,24 +3,7 @@
 import re
 from abc import ABC, abstractclassmethod
 
-
-def get_match_lines(content, pos):
-    """Get Match lines from position."""
-    start_line = 0
-    filepos = 0
-    skip = False
-    for idx, line in enumerate(content.split('\n'), 1):
-        filepos += len(line) + 1
-        if filepos >= pos[0] and filepos >= pos[1] and not skip:
-            # Match is on the same line
-            return (idx, idx)
-        elif filepos >= pos[0] and not skip:
-            # Multiline match, find start line
-            skip = True
-            start_line = idx
-        if filepos >= pos[1] and skip:
-            # Multiline march, find end line
-            return (start_line, idx)
+from libsast.core_matcher.helpers import get_match_lines
 
 
 class MatchCommand:

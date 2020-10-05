@@ -1,0 +1,4 @@
+
+socket(124)
+
+os.open(foo)
