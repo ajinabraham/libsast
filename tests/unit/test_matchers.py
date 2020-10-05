@@ -2,7 +2,7 @@
 from .setup_test import scanner
 
 
-def test_matchers():
+def test_pattern_matcher():
     result = scanner({}).scan()
     assert result['pattern_matcher']['test_regex']
     assert result['pattern_matcher']['test_regex_and']
@@ -10,3 +10,10 @@ def test_matchers():
     assert result['pattern_matcher']['test_regex_and_not']
     assert result['pattern_matcher']['test_regex_and_or']
     assert result['pattern_matcher']['test_regex_multiline']
+
+
+def test_choice_matcher():
+    result = scanner({}).scan()
+    assert result['choice_matcher']['rule1']
+    assert result['choice_matcher']['rule2']
+    assert result['choice_matcher']['rule3']

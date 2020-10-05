@@ -23,9 +23,10 @@ def test_scan_ext_not_present():
 
 
 def test_ignore_extensions():
-    options = {'ignore_extensions': ['.test']}
+    options = {'ignore_extensions': ['.test', '.python']}
     result = scanner(options).scan()
     assert result['pattern_matcher'] == {}
+    assert result['choice_matcher'] != {}
 
 
 def test_ignore_filenames():

@@ -1,0 +1,5 @@
+import urllib
+urllib.open('http://foo')
+
+
+import re
