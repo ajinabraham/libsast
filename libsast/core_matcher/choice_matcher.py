@@ -68,7 +68,7 @@ class ChoiceMatcher:
         """Run a Single Choice Matcher rule on all files."""
         try:
             matches = set()
-            options = set()
+            all_matches = set()
             for sfile in scan_paths:
                 ext = sfile.suffix.lower()
                 if self.exts and ext not in self.exts:
@@ -81,25 +81,27 @@ class ChoiceMatcher:
                 match = choices.find_choices(data, rule)
                 if match:
                     if isinstance(match, set):
-                        options.update(match)
-                    elif isinstance(match, int):
-                        matches.add(match)
-            self.add_finding(rule, matches, options)
+                        # all
+                        all_matches.update(match)
+                    elif isinstance(match, list):
+                        # or, and
+                        matches.add(match[0])
+            self.add_finding(rule, matches, all_matches)
         except Exception:
             raise exceptions.RuleProcessingException('Rule processing error.')
 
-    def add_finding(self, rule, matches, options):
+    def add_finding(self, rule, matches, all_matches):
         """Add Choice Findings."""
-        if options:
-            selection = rule['selection'].format(list(options))
-            self.findings[rule['id']] = self.get_meta(rule, selection)
+        if all_matches:
+            selection = rule['selection'].format(list(all_matches))
         elif matches:
             select = rule['choice'][min(matches)][1]
             selection = rule['selection'].format(select)
-            self.findings[rule['id']] = self.get_meta(rule, selection)
         elif rule.get('else'):
             selection = rule['selection'].format(rule['else'])
-            self.findings[rule['id']] = self.get_meta(rule, selection)
+        else:
+            return
+        self.findings[rule['id']] = self.get_meta(rule, selection)
 
     def get_meta(self, rule, selection):
         """Get Finding Meta."""
