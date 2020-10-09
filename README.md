@@ -1,3 +1,5 @@
+# libsast
+
 Generic SAST for Security Engineers. Powered by regex based pattern matcher and semantic aware [semgrep](https://github.com/returntocorp/semgrep).
 
 Made with ![Love](https://cloud.githubusercontent.com/assets/4301109/16754758/82e3a63c-4813-11e6-9430-6015d98aeaab.png) in India [![Tweet](https://img.shields.io/twitter/url?url=https://github.com/ajinabraham/libsast)](https://twitter.com/intent/tweet/?text=Generic%20SAST%20for%20Security%20Engineers.%20Powered%20by%20regex%20based%20pattern%20matcher%20and%20semantic%20aware%20semgrep%20by%20%40ajinabraham%20%40OpenSecurity_IN&url=https://github.com/ajinabraham/libsast)
@@ -10,6 +12,11 @@ Made with ![Love](https://cloud.githubusercontent.com/assets/4301109/16754758/82
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/ajinabraham/libsast.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/ajinabraham/libsast/context:python)
 [![Requirements Status](https://requires.io/github/ajinabraham/libsast/requirements.svg?branch=master)](https://requires.io/github/ajinabraham/libsast/requirements/?branch=master)
 [![Build](https://github.com/ajinabraham/libsast/workflows/Build/badge.svg)](https://github.com/ajinabraham/libsast/actions?query=workflow%3ABuild)
+
+### Support libsast
+
+* **Donate via Paypal:** [![Donate via Paypal](https://user-images.githubusercontent.com/4301109/76471686-c43b0500-63c9-11ea-8225-2a305efb3d87.gif)](https://paypal.me/ajinabraham)
+* **Sponsor the Project:** [![Github Sponsors](https://user-images.githubusercontent.com/4301109/95517226-9e410780-098e-11eb-9ef5-7b8c7561d725.png)](https://github.com/sponsors/ajinabraham)
 
 ## Install
 
