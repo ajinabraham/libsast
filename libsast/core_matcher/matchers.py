@@ -6,6 +6,15 @@ from abc import ABC, abstractclassmethod
 from libsast.core_matcher.helpers import get_match_lines
 
 
+def get_pos(match):
+    """Handle zero index."""
+    span = match.span()
+    if span[0] == 0:
+        span = list(span)
+        span[0] = 1
+    return tuple(span)
+
+
 class MatchCommand:
 
     def __init__(self):
@@ -30,7 +39,7 @@ class Regex(MatchStrategy):
         matches = set()
         for match in re.compile(rule['pattern']).finditer(content):
             if match.group():
-                match_pos = match.span()
+                match_pos = get_pos(match)
                 match_lines = get_match_lines(content, match_pos)
                 matches.add((match.group(), match_pos, match_lines))
         return matches
@@ -45,7 +54,7 @@ class RegexAnd(MatchStrategy):
             empty_iter_detected = True
             for match in re.compile(regex).finditer(content):
                 empty_iter_detected = False
-                match_pos = match.span()
+                match_pos = get_pos(match)
                 match_lines = get_match_lines(content, match_pos)
                 matches.add((match.group(), match_pos, match_lines))
             if empty_iter_detected:
@@ -61,7 +70,7 @@ class RegexOr(MatchStrategy):
         for regex in rule['pattern']:
             for match in re.compile(regex).finditer(content):
                 if match.group():
-                    match_pos = match.span()
+                    match_pos = get_pos(match)
                     match_lines = get_match_lines(content, match_pos)
                     matches.add((match.group(), match_pos, match_lines))
         return matches
@@ -77,7 +86,7 @@ class RegexAndNot(MatchStrategy):
                 return False
         for match in regex_present:
             if match.group():
-                match_pos = match.span()
+                match_pos = get_pos(match)
                 match_lines = get_match_lines(content, match_pos)
                 matches.add((match.group(), match_pos, match_lines))
         return matches
@@ -92,7 +101,7 @@ class RegexAndOr(MatchStrategy):
         for regex in or_list:
             for match in re.compile(regex).finditer(content):
                 if match.group():
-                    match_pos = match.span()
+                    match_pos = get_pos(match)
                     match_lines = get_match_lines(content, match_pos)
                     or_matches.add((match.group(), match_pos, match_lines))
                     break_parent_loop = True
@@ -101,7 +110,7 @@ class RegexAndOr(MatchStrategy):
                 break
         for match in re.compile(rule['pattern'][0]).finditer(content):
             if match.group():
-                match_pos = match.span()
+                match_pos = get_pos(match)
                 match_lines = get_match_lines(content, match_pos)
                 matches.add((match.group(), match_pos, match_lines))
         if not (matches and or_matches):
