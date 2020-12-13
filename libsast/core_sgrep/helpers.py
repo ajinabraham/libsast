@@ -27,6 +27,8 @@ def invoke_semgrep(paths, scan_rules, **kwargs):
             verbose_errors=False,
             strict=False,
             timeout_threshold=3,
+            json_stats=False,
+            output_per_finding_max_lines_limit=None,
         ),
         stdout=io_capture,
     )
