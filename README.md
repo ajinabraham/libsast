@@ -453,7 +453,7 @@ rules:
       cwe: 'CWE Category'
 ```
 
-See semgrep documentation [here](https://github.com/returntocorp/semgrep/blob/develop/docs/configuration-files.md).
+See semgrep documentation [here](https://semgrep.dev/docs/writing-rules/rule-syntax/).
 
 Example: [Semantic Grep Rule](https://github.com/ajinabraham/libsast/blob/master/tests/assets/rules/semantic_grep/sgrep.yaml)
 
