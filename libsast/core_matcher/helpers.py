@@ -13,6 +13,11 @@ from libsast.standards import get_mapping
 
 import requests
 
+# Default Single Line
+DEF_SINGLE = re.compile(r'//.+', re.MULTILINE)
+DEF_MULTI = re.compile(r'/\*([\S|\s]+?)\*/', re.MULTILINE)
+XML_CMT = re.compile(r'<!--([\S|\s]+?)-->', re.MULTILINE)
+
 
 def download_rule(url):
     """Download Pattern File."""
@@ -60,8 +65,12 @@ def comment_replacer(matches, data):
     repl_regex = re.compile(r'\S', re.MULTILINE)
     for match in matches:
         if match.group():
-            if match.group().strip() == '//':
+            stripm = match.group().strip()
+            if stripm == '//':
                 # ignore comment starters
+                continue
+            if ':' + stripm in data:
+                # possible URLs http://, do not strip
                 continue
             to_replace.add(match.group())
     for itm in to_replace:
@@ -76,8 +85,8 @@ def strip_comments(data):
     Replace multiline comments first and
     then replace single line comments.
     """
-    single_line = re.compile(r'//.+', re.MULTILINE)
-    multi_line = re.compile(r'/\*([\S|\s]+?)\*/', re.MULTILINE)
+    single_line = DEF_SINGLE
+    multi_line = DEF_MULTI
     mmatches = multi_line.finditer(data)
     data = comment_replacer(mmatches, data)
     smatches = single_line.finditer(data)
@@ -90,7 +99,7 @@ def strip_comments2(data):
 
     Replace comments for HTML/XML
     """
-    multi_line = re.compile(r'<!--([\S|\s]+?)-->', re.MULTILINE)
+    multi_line = XML_CMT
     mmatches = multi_line.finditer(data)
     data = comment_replacer(mmatches, data)
     return data
