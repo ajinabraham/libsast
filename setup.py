@@ -8,7 +8,7 @@ def get_requires():
     requires = [
         'requests>=2.22.0',
         'pyyaml>=5.3',
-        'semgrep==0.35.0;platform_system!="Windows"',
+        'semgrep==0.37.0;platform_system!="Windows"',
     ]
     return requires
 
