@@ -75,7 +75,6 @@ class ChoiceMatcher:
                     continue
                 if sfile.stat().st_size / 1000 / 1000 > 25:
                     # Skip scanning files greater than 25 MB
-                    print(f'Skipping large file {sfile.as_posix()}')
                     continue
                 data = sfile.read_text('utf-8', 'ignore')
                 if ext in ('.html', '.xml'):
