@@ -38,6 +38,10 @@ class PatternMatcher:
             ext = sfile.suffix.lower()
             if self.exts and ext not in self.exts:
                 continue
+            if sfile.stat().st_size / 1000 / 1000 > 25:
+                # Skip scanning files greater than 25 MB
+                print(f'Skipping large file {sfile.as_posix()}')
+                continue
             data = sfile.read_text('utf-8', 'ignore')
             self.pattern_matcher(data, sfile, ext)
         return self.findings
