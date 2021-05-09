@@ -8,7 +8,7 @@ def get_requires():
     requires = [
         'requests>=2.22.0',
         'pyyaml>=5.3',
-        'semgrep==0.47.0;platform_system!="Windows"',
+        'semgrep==0.50.1;platform_system!="Windows"',
     ]
     return requires
 
@@ -37,7 +37,7 @@ setup(
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         ('License :: OSI Approved :: '
-         'GNU Lesser General Public License v2 (LGPLv2)'),
+         'GNU Lesser General Public License v3 or later (LGPLv3+)'),
         'Programming Language :: Python :: 3.6',
     ],
     packages=find_packages(include=[
