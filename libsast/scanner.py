@@ -34,6 +34,10 @@ class Scanner:
                 'ignore_paths': None,
                 'show_progress': False,
             }
+        if options.get('sgrep_extensions'):
+            self.sgrep_extensions = options.get('sgrep_extensions')
+        else:
+            self.sgrep_extensions = []
         if options.get('ignore_extensions'):
             self.ignore_extensions = options.get('ignore_extensions')
         else:
@@ -86,7 +90,12 @@ class Scanner:
         ignore_paths = any(pp in path.as_posix() for pp in self.ignore_paths)
         ignore_files = path.name in self.ignore_filenames
         ignore_exts = path.suffix.lower() in self.ignore_extensions
-        if (ignore_paths or ignore_files or ignore_exts):
+        if self.sgrep_extensions:
+            valid_exts = path.suffix.lower() in self.sgrep_extensions
+        else:
+            # Do not use extension check when no extensions are supplied
+            valid_exts = True
+        if (ignore_paths or ignore_files or ignore_exts or not valid_exts):
             return False
         if not path.exists() or not path.is_file():
             return False
