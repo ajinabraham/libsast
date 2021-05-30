@@ -437,7 +437,7 @@ cwe:
   cwe-749: "CWE-749 Exposed Dangerous Method or Function"
   cwe-754: "CWE-754 Improper Check for Unusual or Exceptional Conditions"
   cwe-756: "CWE-756 Missing Custom Error Page"
-  cwe-757: "CWE-757 Selection of Less-Secure Algorithm During Negotiat"
+  cwe-757: "CWE-757 Selection of Less-Secure Algorithm During Negotiation"
   cwe-759: "CWE-759 Use of a One-Way Hash without a Salt"
   cwe-76: "CWE-76 Improper Neutralization of Equivalent Special Elements"
   cwe-763: "CWE-763 Release of Invalid Pointer or Reference"

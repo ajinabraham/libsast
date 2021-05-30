@@ -72,6 +72,9 @@ def comment_replacer(matches, data):
             if ':' + stripm in data:
                 # possible URLs http://, do not strip
                 continue
+            if 'ignore:' in data:
+                # preserve ignore tags
+                continue
             to_replace.add(match.group())
     for itm in to_replace:
         dummy = repl_regex.sub(' ', itm)
