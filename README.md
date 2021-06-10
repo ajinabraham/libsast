@@ -466,3 +466,4 @@ Test your semgrep rules
 * [njsscan](https://github.com/ajinabraham/njsscan) SAST is built with libsast pattern matcher and semantic grep.
 * [nodejsscan](https://github.com/ajinabraham/nodejsscan) nodejsscan is a static security code scanner for Node.js applications.
 * [MobSF](https://mobsf.github.io/Mobile-Security-Framework-MobSF/) Static Code Analyzer for Android and iOS mobile applications.
+* [mobsfscan](https://github.com/MobSF/mobsfscan) mobsfscan is a static security code scanner for Mobile applications built for Android (Java, Kotlin) & iOS (Swift, Objective C).
