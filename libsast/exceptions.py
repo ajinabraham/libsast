@@ -2,74 +2,74 @@
 """The libsast Exceptions."""
 
 
-class LibsastException(Exception):
+class LibsastError(Exception):
     """Base class for all exceptions thrown by libsast."""
 
     def __init__(self, message=None):
         super().__init__(message)
 
 
-class InvalidPathError(LibsastException):
+class InvalidPathError(LibsastError):
     """Invalid Path Supplied to libsast."""
 
     pass
 
 
-class YamlRuleParseError(LibsastException):
+class YamlRuleParseError(LibsastError):
     """Failed to parse YAML rule."""
 
     pass
 
 
-class YamlRuleLoadException(LibsastException):
+class YamlRuleLoadError(LibsastError):
     """Failed to load YAML rule file."""
 
     pass
 
 
-class MissingRuleError(LibsastException):
+class MissingRuleError(LibsastError):
     """Rule not provided."""
 
     pass
 
 
-class InvalidRuleError(LibsastException):
+class InvalidRuleError(LibsastError):
     """No rule directory, file or url specified."""
 
     pass
 
 
-class TypeKeyMissingError(LibsastException):
+class TypeKeyMissingError(LibsastError):
     """Pattern Matcher rule does not have the key 'type'."""
 
     pass
 
 
-class InvalidRuleFormatException(LibsastException):
+class InvalidRuleFormatError(LibsastError):
     """Pattern Matcher rule file is invalid."""
 
     pass
 
 
-class PatternKeyMissingError(LibsastException):
+class PatternKeyMissingError(LibsastError):
     """Pattern Matcher rule does not have the key 'pattern'."""
 
     pass
 
 
-class RuleDownloadException(LibsastException):
+class RuleDownloadError(LibsastError):
     """Failed to download rule."""
 
     pass
 
 
-class RuleProcessingException(LibsastException):
+class RuleProcessingError(LibsastError):
     """Failed to download rule."""
 
     pass
 
 
-class MatcherNotFoundException(LibsastException):
+class MatcherNotFoundError(LibsastError):
     """Pattern Matcher not found."""
 
     pass

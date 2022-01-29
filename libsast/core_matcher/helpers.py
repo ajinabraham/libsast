@@ -6,7 +6,7 @@ from pathlib import Path
 from libsast.exceptions import (
     InvalidRuleError,
     MissingRuleError,
-    RuleDownloadException,
+    RuleDownloadError,
 )
 from libsast.common import read_yaml
 from libsast.standards import get_mapping
@@ -26,7 +26,7 @@ def download_rule(url):
             r.raise_for_status()
             return r.text
     except requests.exceptions.RequestException:
-        raise RuleDownloadException(f'Failed to download from: {url}')
+        raise RuleDownloadError(f'Failed to download from: {url}')
 
 
 def get_rules(rule_loc):  # noqa: R701

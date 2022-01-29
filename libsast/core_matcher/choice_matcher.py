@@ -46,7 +46,7 @@ class ChoiceMatcher:
         """Validate Rules before scanning."""
         for rule in self.scan_rules:
             if not isinstance(rule, dict):
-                raise exceptions.InvalidRuleFormatException(
+                raise exceptions.InvalidRuleFormatError(
                     'Choice Matcher Rule format is invalid.')
             if not rule.get('id'):
                 raise exceptions.TypeKeyMissingError(
@@ -91,7 +91,7 @@ class ChoiceMatcher:
                         matches.add(match[0])
             self.add_finding(rule, matches, all_matches)
         except Exception:
-            raise exceptions.RuleProcessingException('Rule processing error.')
+            raise exceptions.RuleProcessingError('Rule processing error.')
 
     def add_finding(self, rule, matches, all_matches):
         """Add Choice Findings."""

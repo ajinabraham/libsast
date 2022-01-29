@@ -4,7 +4,7 @@ import sys
 from threading import Thread
 
 from libsast.exceptions import (
-    YamlRuleLoadException,
+    YamlRuleLoadError,
     YamlRuleParseError,
 )
 
@@ -67,5 +67,5 @@ def read_yaml(file_obj, text=False):
         raise YamlRuleParseError(
             f'YAML Parse Error: {repr(exp)}')
     except Exception as gen:
-        raise YamlRuleLoadException(
+        raise YamlRuleLoadError(
             f'Failed to load YAML file: {repr(gen)}')

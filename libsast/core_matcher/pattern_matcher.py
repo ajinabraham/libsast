@@ -50,7 +50,7 @@ class PatternMatcher:
         """Validate Rules before scanning."""
         for rule in self.scan_rules:
             if not isinstance(rule, dict):
-                raise exceptions.InvalidRuleFormatException(
+                raise exceptions.InvalidRuleFormatError(
                     'Pattern Matcher Rule format is invalid.')
             if not rule.get('type'):
                 raise exceptions.TypeKeyMissingError(
@@ -62,7 +62,7 @@ class PatternMatcher:
             pattern_name = rule['type']
             if pattern_name not in all_mts:
                 supported = ', '.join(all_mts)
-                raise exceptions.MatcherNotFoundException(
+                raise exceptions.MatcherNotFoundError(
                     f'Matcher \'{pattern_name}\' is not supported.'
                     f' Available matchers are {supported}',
                 )
@@ -89,7 +89,7 @@ class PatternMatcher:
                 if matches:
                     self.add_finding(file_path, rule, matches)
         except Exception:
-            raise exceptions.RuleProcessingException('Rule processing error.')
+            raise exceptions.RuleProcessingError('Rule processing error.')
 
     def add_finding(self, file_path, rule, matches):
         """Add Code Analysis Findings."""

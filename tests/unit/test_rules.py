@@ -61,7 +61,7 @@ def test_load_invalid_url():
     files_dir = base_dir / 'assets' / 'files'
     options = {'match_rules': rule_url}
     paths = [files_dir.as_posix()]
-    with pytest.raises(libsast.exceptions.RuleDownloadException):
+    with pytest.raises(libsast.exceptions.RuleDownloadError):
         libsast.Scanner(options, paths).scan()
 
 
@@ -91,7 +91,7 @@ def test_load_file_invalid_type():
     rule_file = base_dir / 'assets' / 'invalid' / 'invalid_type.yaml'
     options = {'match_rules': rule_file.as_posix()}
     paths = [files_dir.as_posix()]
-    with pytest.raises(libsast.exceptions.MatcherNotFoundException):
+    with pytest.raises(libsast.exceptions.MatcherNotFoundError):
         libsast.Scanner(options, paths).scan()
 
 
