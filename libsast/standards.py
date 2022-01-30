@@ -30,8 +30,16 @@ def get_mapping(rules):
     std_map = get_standards()
     new_rules = []
     for rule in rules:
-        for key in rule.keys():
-            if key in std_map.keys():
-                rule[key] = std_map[key].get(rule[key], rule[key])
+        if not rule.get('metadata'):
+            new_rules.append(rule)
+            continue
+        meta_keys = rule['metadata'].keys()
+        for mkey in meta_keys:
+            if mkey not in std_map.keys():
+                continue
+            to_expand = rule['metadata'][mkey]
+            expanded = std_map[mkey].get(to_expand)
+            if expanded:
+                rule['metadata'][mkey] = expanded
         new_rules.append(rule)
     return new_rules

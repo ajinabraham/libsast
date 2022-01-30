@@ -1,11 +1,11 @@
 - id: test_regex
-  description: This is a rule to test regex
+  message: This is a rule to test regex
   input_case: exact
   pattern: \.close\(\)
   severity: info
   type: Regex
 - id: test_regex_and
-  description: This is a rule to test regex_and
+  message: This is a rule to test regex_and
   input_case: exact
   pattern:
   - \.loadUrl\(.*getExternalStorageDirectory\(
@@ -13,7 +13,7 @@
   severity: error
   type: RegexAnd
 - id: test_regex_or
-  description: This is a rule to test regex_or
+  message: This is a rule to test regex_or
   input_case: exact
   pattern:
   - MODE_WORLD_READABLE|Context\.MODE_WORLD_READABLE
@@ -21,7 +21,7 @@
   severity: error
   type: RegexOr
 - id: test_regex_and_not
-  description: This is a rule to test regex_and_not
+  message: This is a rule to test regex_and_not
   input_case: exact
   pattern:
   - WKWebView
@@ -29,7 +29,7 @@
   severity: warning
   type: RegexAndNot
 - id: test_regex_and_or
-  description: This is a rule to test regex_and_or
+  message: This is a rule to test regex_and_or
   input_case: exact
   pattern:
   - telephony.SmsManager
@@ -38,13 +38,15 @@
     - vnd.android-dir/mms-sms
   severity: warning
   type: RegexAndOr
-- id: test_regex_multiline
-  description: This is a rule to test regex
+- id: test_regex_multiline_and_metadata
+  message: This is a rule to test regex
   input_case: exact
   pattern: ((?:public.+)+)
   severity: info
   type: Regex
-  owasp-mobile: m1
-  owasp-web: a10
-  cwe: cwe-1002
-  masvs: storage-3
+  metadata:
+    owasp-mobile: m1
+    owasp-web: a10
+    cwe: cwe-1051
+    masvs: storage-3
+    foo: bar

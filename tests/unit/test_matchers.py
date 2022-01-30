@@ -9,7 +9,7 @@ def test_pattern_matcher():
     assert result['pattern_matcher']['test_regex_or']
     assert result['pattern_matcher']['test_regex_and_not']
     assert result['pattern_matcher']['test_regex_and_or']
-    assert result['pattern_matcher']['test_regex_multiline']
+    assert result['pattern_matcher']['test_regex_multiline_and_metadata']
 
 
 def test_choice_matcher():

@@ -104,7 +104,13 @@ class PatternMatcher:
             if rule['id'] in self.findings:
                 self.findings[rule['id']]['files'].append(file_details)
             else:
+                metadata = crule.get('metadata')
+                if metadata:
+                    metadata['description'] = crule['message']
+                    metadata['severity'] = crule['severity']
+                else:
+                    metadata = {}
                 self.findings[rule['id']] = {
                     'files': [file_details],
-                    'metadata': crule,
+                    'metadata': metadata,
                 }
