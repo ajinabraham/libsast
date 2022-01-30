@@ -8,7 +8,7 @@ rules:
       - python
     severity: ERROR
     metadata:
-      owasp: a8
+      owasp-web: a8
       cwe: cwe-1050
   - id: node_deserialize
     patterns:

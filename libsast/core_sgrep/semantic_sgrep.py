@@ -1,7 +1,10 @@
 # -*- coding: utf_8 -*-
 """Semantic Grep Core."""
 from libsast.core_sgrep.helpers import invoke_semgrep
-from libsast import common
+from libsast import (
+    common,
+    standards,
+)
 
 
 class SemanticGrep:
@@ -17,6 +20,7 @@ class SemanticGrep:
             'matches': {},
             'errors': [],
         }
+        self.standards = standards.get_standards()
 
     def scan(self, paths: list) -> dict:
         """Do sgrep scan."""
@@ -59,3 +63,15 @@ class SemanticGrep:
                     'files': [file_details],
                     'metadata': metadata,
                 }
+                self.expand_mappings(smatches[rule_id])
+
+    def expand_mappings(self, meta):
+        """Expand libsast standard mappings."""
+        meta_keys = meta['metadata'].keys()
+        for mkey in meta_keys:
+            if mkey not in self.standards.keys():
+                continue
+            to_expand = meta['metadata'][mkey]
+            expanded = self.standards[mkey].get(to_expand)
+            if expanded:
+                meta['metadata'][mkey] = expanded

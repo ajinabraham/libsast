@@ -85,14 +85,7 @@ $ libsast -s tests/assets/rules/semantic_grep/ -p tests/assets/rules/pattern_mat
           "match_string": ".close()"
         }
       ],
-      "metadata": {
-        "description": "This is a rule to test regex",
-        "id": "test_regex",
-        "input_case": "exact",
-        "pattern": "\\.close\\(\\)",
-        "severity": "info",
-        "type": "Regex"
-      }
+      "metadata": {}
     },
     "test_regex_and": {
       "files": [
@@ -121,17 +114,7 @@ $ libsast -s tests/assets/rules/semantic_grep/ -p tests/assets/rules/pattern_mat
           "match_string": ".loadUrl(\"file:/\" + Environment.getExternalStorageDirectory("
         }
       ],
-      "metadata": {
-        "description": "This is a rule to test regex_and",
-        "id": "test_regex_and",
-        "input_case": "exact",
-        "pattern": [
-          "\\.loadUrl\\(.*getExternalStorageDirectory\\(",
-          "webkit\\.WebView"
-        ],
-        "severity": "error",
-        "type": "RegexAnd"
-      }
+      "metadata": {}
     },
     "test_regex_and_not": {
       "files": [
@@ -160,17 +143,7 @@ $ libsast -s tests/assets/rules/semantic_grep/ -p tests/assets/rules/pattern_mat
           "match_string": "WKWebView"
         }
       ],
-      "metadata": {
-        "description": "This is a rule to test regex_and_not",
-        "id": "test_regex_and_not",
-        "input_case": "exact",
-        "pattern": [
-          "WKWebView",
-          "\\.javaScriptEnabled=false"
-        ],
-        "severity": "warning",
-        "type": "RegexAndNot"
-      }
+      "metadata": {}
     },
     "test_regex_and_or": {
       "files": [
@@ -199,23 +172,9 @@ $ libsast -s tests/assets/rules/semantic_grep/ -p tests/assets/rules/pattern_mat
           "match_string": "sendTextMessage"
         }
       ],
-      "metadata": {
-        "description": "This is a rule to test regex_and_or",
-        "id": "test_regex_and_or",
-        "input_case": "exact",
-        "pattern": [
-          "telephony.SmsManager",
-          [
-            "sendMultipartTextMessage",
-            "sendTextMessage",
-            "vnd.android-dir/mms-sms"
-          ]
-        ],
-        "severity": "warning",
-        "type": "RegexAndOr"
-      }
+      "metadata": {}
     },
-    "test_regex_multiline": {
+    "test_regex_multiline_and_metadata": {
       "files": [
         {
           "file_path": "tests/assets/files/test_matcher.test",
@@ -243,16 +202,13 @@ $ libsast -s tests/assets/rules/semantic_grep/ -p tests/assets/rules/pattern_mat
         }
       ],
       "metadata": {
-        "cwe": "cwe-1002",
+        "cwe": "CWE-1051 Initialization with Hard-Coded Network Resource Configuration Data",
         "description": "This is a rule to test regex",
-        "id": "test_regex_multiline",
-        "input_case": "exact",
+        "foo": "bar",
         "masvs": "MSTG-STORAGE-3",
         "owasp-mobile": "M1: Improper Platform Usage",
         "owasp-web": "A10: Insufficient Logging & Monitoring",
-        "pattern": "((?:public.+)+)",
-        "severity": "info",
-        "type": "Regex"
+        "severity": "info"
       }
     },
     "test_regex_or": {
@@ -270,69 +226,18 @@ $ libsast -s tests/assets/rules/semantic_grep/ -p tests/assets/rules/pattern_mat
           "match_string": "Context.MODE_WORLD_READABLE"
         }
       ],
-      "metadata": {
-        "description": "This is a rule to test regex_or",
-        "id": "test_regex_or",
-        "input_case": "exact",
-        "pattern": [
-          "MODE_WORLD_READABLE|Context\\.MODE_WORLD_READABLE",
-          "openFileOutput\\(\\s*\".+\"\\s*,\\s*1\\s*\\)"
-        ],
-        "severity": "error",
-        "type": "RegexOr"
-      }
+      "metadata": {}
     }
   },
   "semantic_grep": {
     "errors": [
       {
         "code": 3,
-        "help": "If the code appears to be valid, this may be a semgrep bug.",
         "level": "warn",
-        "long_msg": "Could not parse test_matcher.test as python",
-        "short_msg": "parse error",
-        "spans": [
-          {
-            "context_end": null,
-            "context_start": null,
-            "end": {
-              "col": 24,
-              "line": 40
-            },
-            "file": "test_matcher.test",
-            "source_hash": "84d2247435a86d69a88bc7d9d63cd03454490865c6271d5a4815a3d717f8d8d9",
-            "start": {
-              "col": 23,
-              "line": 40
-            }
-          }
-        ],
-        "type": "SourceParseError"
+        "message": "Semgrep Core WARN - Lexical error in file tests/assets/files/test_matcher.test:40\n\tunrecognized symbols: !",
+        "path": "tests/assets/files/test_matcher.test",
+        "type": "Lexical error"
       },
-      {
-        "code": 3,
-        "help": "If the code appears to be valid, this may be a semgrep bug.",
-        "level": "warn",
-        "long_msg": "Could not parse test_matcher.test as javascript",
-        "short_msg": "parse error",
-        "spans": [
-          {
-            "context_end": null,
-            "context_start": null,
-            "end": {
-              "col": 1,
-              "line": 1
-            },
-            "file": "test_matcher.test",
-            "source_hash": "84d2247435a86d69a88bc7d9d63cd03454490865c6271d5a4815a3d717f8d8d9",
-            "start": {
-              "col": 1,
-              "line": 1
-            }
-          }
-        ],
-        "type": "SourceParseError"
-      }
     ],
     "matches": {
       "boto-client-ip": {
@@ -347,13 +252,13 @@ $ libsast -s tests/assets/rules/semantic_grep/ -p tests/assets/rules/pattern_mat
               24,
               31
             ],
-            "match_string": "8.8.8.8"
+            "match_string": "c = boto3.client(host='8.8.8.8')"
           }
         ],
         "metadata": {
-          "cwe": "CWE Category",
+          "cwe": "CWE-1050 Excessive Platform Resource Consumption within a Loop",
           "description": "boto client using IP address",
-          "owasp": "OWASP Category",
+          "owasp-web": "A8: Insecure Deserialization",
           "severity": "ERROR"
         }
       }
@@ -390,24 +295,27 @@ A sample rule looks like
 
 ```yaml
 - id: test_regex_or
-  description: This is a rule to test regex_or
+  message: This is a rule to test regex_or
   input_case: exact
   pattern:
   - MODE_WORLD_READABLE|Context\.MODE_WORLD_READABLE
   - openFileOutput\(\s*".+"\s*,\s*1\s*\)
   severity: error
   type: RegexOr
-  owasp: 'OWASP Category'
+  metadata:
+    owasp-web: a1
+    reference: http://foo.bar
+    foo: Some extra metadata
 ```
 A rule consist of 
 
-* `id` : A unique id for the rule
-* `description`: A description for the rule
+* `id` : A unique id for the rule.
+* `message`: A description for the rule.
 * `input_case`: It can be `exact`, `upper` or `lower`. Data will be converted to lower case/upper case/as it is before comparing with the regex.
 * `pattern`: List of patterns depends on `type`.
-* `severity`: It can be `error`, `warning` or `info`
-* `type`: Pattern Matcher supports `Regex`, `RegexAnd`, `RegexOr`, `RegexAndOr`, `RegexAndNot`
-* `custom_field`: Define your own custom fields that you can use as metadata
+* `severity`: It can be `error`, `warning` or `info`.
+* `type`: Pattern Matcher supports `Regex`, `RegexAnd`, `RegexOr`, `RegexAndOr`, `RegexAndNot`.
+* `metadata (optional)`: Define your own custom fields that you can use as metadata along with standard mappings. 
 
 ```bash
 1. Regex - if regex1 in input
@@ -423,6 +331,12 @@ Test your pattern matcher rules
 `$ libsast -p tests/assets/rules/pattern_matcher/patterns.yaml tests/assets/files/`
 
 #### Inbuilt Standard Mapping Support
+
+Metadata fields also support [libsast standard mapping](https://github.com/ajinabraham/libsast/tree/master/libsast/standards).
+
+For example, the metadata field `owasp-web: a1` will get expanded at runtime as `owasp-web: 'A1: Injection'`. 
+
+*Currently Supports*
 
 * [OWASP Web Top 10](https://github.com/ajinabraham/libsast/blob/master/libsast/standards/owasp_web_top10_2017.yaml)
 * [OWASP Mobile Top 10](https://github.com/ajinabraham/libsast/blob/master/libsast/standards/owasp_mobile_top10_2016.yaml)
@@ -449,8 +363,10 @@ rules:
     languages: [python]
     severity: ERROR
     metadata:
-      owasp: 'OWASP Category'
-      cwe: 'CWE Category'
+      owasp-web: a2
+      owasp-mobile: m7
+      cwe: cwe-1048
+      foo: Some extra metadata
 ```
 
 See semgrep documentation [here](https://semgrep.dev/docs/writing-rules/rule-syntax/).
