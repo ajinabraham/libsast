@@ -315,7 +315,7 @@ A rule consist of
 * `pattern`: List of patterns depends on `type`.
 * `severity`: It can be `error`, `warning` or `info`.
 * `type`: Pattern Matcher supports `Regex`, `RegexAnd`, `RegexOr`, `RegexAndOr`, `RegexAndNot`.
-* `metadata (optional)`: Define your own custom fields that you can use as metadata along with standard mappings. 
+* `metadata` (optional): Define your own custom fields that you can use as metadata along with standard mappings. 
 
 ```bash
 1. Regex - if regex1 in input
