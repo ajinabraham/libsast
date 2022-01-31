@@ -110,8 +110,10 @@ class ChoiceMatcher:
         """Get Finding Meta."""
         meta_dict = {}
         meta_dict['choice'] = selection
+        meta_dict['description'] = rule['message']
         for key in rule:
             if key in ('choice',
+                       'message',
                        'id',
                        'type',
                        'choice_type',
