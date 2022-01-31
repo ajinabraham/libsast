@@ -1,5 +1,5 @@
 - id: test_regex
-description: This is a rule to test regex
+message: This is a rule to test regex
 input_case: exact
 pattern: \.close\(\)
 severity: info

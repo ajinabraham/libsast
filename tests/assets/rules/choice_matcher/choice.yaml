@@ -1,7 +1,7 @@
 - id: rule1
   type: code
   choice_type: or
-  description: Rule Desc
+  message: Rule Desc
   selection: 'The rule has place holder {}'
   choice:
     - - import os
@@ -12,7 +12,7 @@
 - id: rule2
   type: code
   choice_type: and
-  description: Rule Desc to show and match
+  message: Rule Desc to show and match
   selection: 'The rule has placeholder {}'
   choice:
     - - - requests
@@ -25,7 +25,7 @@
 - id: rule3
   type: no-code
   choice_type: all
-  description: Some desc for non code rule
+  message: Some desc for non code rule
   selection: 'The rule place holder {}.'
   choice:
     - - os\.open\(

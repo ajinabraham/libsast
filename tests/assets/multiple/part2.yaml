@@ -1,5 +1,5 @@
 - id: test_regex_and_not
-  description: This is a rule to test regex_and_not
+  message: This is a rule to test regex_and_not
   input_case: exact
   pattern:
   - WKWebView
@@ -7,7 +7,7 @@
   severity: warning
   type: RegexAndNot
 - id: test_regex_and_or
-  description: This is a rule to test regex_and_or
+  message: This is a rule to test regex_and_or
   input_case: exact
   pattern:
   - telephony.SmsManager
