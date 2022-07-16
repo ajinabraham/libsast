@@ -21,7 +21,10 @@ def invoke_semgrep(paths, scan_rules, **kwargs):
     # Semgrep output formatting
     state = get_state()
     state.terminal.configure(
-        verbose=False, debug=False, quiet=True, force_color=False
+        verbose=False,
+        debug=False,
+        quiet=True,
+        force_color=False,
     )
     logging.getLogger('semgrep').propagate = False
     output_settings = OutputSettings(
