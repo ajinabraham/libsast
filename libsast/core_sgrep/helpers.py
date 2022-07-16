@@ -1,6 +1,7 @@
 # -*- coding: utf_8 -*-
 """Semantic Grep Helpers."""
 import json
+import logging
 import platform
 import multiprocessing
 
@@ -9,7 +10,8 @@ def invoke_semgrep(paths, scan_rules, **kwargs):
     """Call Semgrep."""
     if platform.system() == 'Windows':
         return None
-    from semgrep import semgrep_main, util
+    from semgrep import semgrep_main
+    from semgrep.state import get_state
     from semgrep.constants import OutputFormat
     from semgrep.output import OutputHandler, OutputSettings
     try:
@@ -17,29 +19,34 @@ def invoke_semgrep(paths, scan_rules, **kwargs):
     except NotImplementedError:
         cpu_count = 1  # CPU count is not implemented on Windows
     # Semgrep output formatting
-    util.set_flags(
+    state = get_state()
+    state.terminal.configure(
         verbose=False,
         debug=False,
         quiet=True,
-        force_color=False)
+        force_color=False,
+    )
+    logging.getLogger('semgrep').propagate = False
     output_settings = OutputSettings(
         output_format=OutputFormat.JSON,
         output_destination=None,
+        output_per_finding_max_lines_limit=None,
+        output_per_line_max_chars_limit=None,
         error_on_findings=False,
         verbose_errors=False,
         strict=False,
         timeout_threshold=3,
-        json_stats=False,
-        output_per_finding_max_lines_limit=None,
     )
     output_handler = OutputHandler(output_settings)
     (
         filtered_matches_by_rule,
-        _all_targets,
-        _filtered_rules,
-        _profiler,
-        _profiling_data,
-        _shown_severities,
+        _,
+        _,
+        _,
+        _,
+        _,
+        _,
+        _,
     ) = semgrep_main.main(
         output_handler=output_handler,
         target=[pt.as_posix() for pt in paths],

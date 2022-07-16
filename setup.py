@@ -6,9 +6,9 @@ from pathlib import Path
 
 def get_requires():
     requires = [
-        'requests>=2.22.0',
-        'pyyaml>=5.3',
-        'semgrep==0.80.0;platform_system!="Windows"',
+        'requests>=2.27.1',
+        'pyyaml>=6.0',
+        'semgrep==0.104.0;platform_system!="Windows"',
     ]
     return requires
 
@@ -38,7 +38,7 @@ setup(
         'Intended Audience :: Developers',
         ('License :: OSI Approved :: '
          'GNU Lesser General Public License v3 or later (LGPLv3+)'),
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
     packages=find_packages(include=[
         'libsast', 'libsast.*',
