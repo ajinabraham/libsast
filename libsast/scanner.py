@@ -83,7 +83,8 @@ class Scanner:
 
     def validate_file(self, path):
         """Check if we should scan the file."""
-        ignore_paths = any(pp in path.as_posix() for pp in self.ignore_paths)
+        ignore_paths = any(
+            Path(pp).as_posix() in path.as_posix() for pp in self.ignore_paths)
         ignore_files = path.name in self.ignore_filenames
         ignore_exts = path.suffix.lower() in self.ignore_extensions
         if (ignore_paths or ignore_files or ignore_exts):
