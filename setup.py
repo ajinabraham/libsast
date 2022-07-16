@@ -6,9 +6,9 @@ from pathlib import Path
 
 def get_requires():
     requires = [
-        'requests>=2.22.0',
-        'pyyaml>=5.3',
-        'semgrep==0.80.0;platform_system!="Windows"',
+        'requests>=2.28.1',
+        'pyyaml>=6.0',
+        'semgrep==0.104.0;platform_system!="Windows"',
     ]
     return requires
 
