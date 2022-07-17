@@ -1,6 +1,7 @@
 # -*- coding: utf_8 -*-
 """Pattern Macher."""
 from copy import deepcopy
+from operator import itemgetter
 
 from libsast.core_matcher.helpers import (
     get_rules,
@@ -111,3 +112,7 @@ class PatternMatcher:
                     'files': [file_details],
                     'metadata': metadata,
                 }
+        to_sort = self.findings[rule['id']]['files']
+        self.findings[rule['id']]['files'] = sorted(
+            to_sort,
+            key=itemgetter('file_path', 'match_string', 'match_lines'))
