@@ -22,7 +22,10 @@ XML_CMT = re.compile(r'<!--([\S|\s]+?)-->', re.MULTILINE)
 def download_rule(url):
     """Download Pattern File."""
     try:
-        with requests.get(url, allow_redirects=True) as r:
+        with requests.get(
+                url,
+                allow_redirects=True,
+                timeout=10) as r:
             r.raise_for_status()
             return r.text
     except requests.exceptions.RequestException:
