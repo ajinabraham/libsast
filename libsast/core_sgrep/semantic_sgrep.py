@@ -43,7 +43,9 @@ class SemanticGrep:
 
     def format_output(self, results):
         """Format sgrep results."""
-        self.findings['errors'] = results['errors']
+        errs = self.findings.get('errors')
+        if errs:
+            self.findings['errors'] = errs
         smatches = self.findings['matches']
         for find in results['results']:
             file_details = {

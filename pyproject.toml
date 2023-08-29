@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "libsast"
+version = "1.5.3"
+description = "A generic SAST library built on top of semgrep and regex"
+keywords = ["libsast", "SAST", "Python SAST", "SAST API", "Regex SAST", "Pattern Matcher"]
+authors = ["Ajin Abraham <ajin@opensecurity.in>"]
+license = "LGPL-3.0-or-later"
+readme = "README.md"
+repository = "https://github.com/ajinabraham/libsast"
+documentation = "https://github.com/ajinabraham/libsast/blob/master/README.md"
+packages = [{ include = "libsast", format = ["sdist", "wheel"]}]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Security",
+    "Topic :: Software Development :: Quality Assurance",
+]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/ajinabraham/libsast/issues"
+
+[tool.poetry.scripts]
+libsast = "libsast.__main__:main"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = ">=2.27.1"
+pyyaml = ">=6.0"
+semgrep = {version = "0.117.0", markers = "sys_platform != 'win32'"}
+
+[tool.poetry.group.dev.dependencies]
+bandit = "*"
+pytest = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

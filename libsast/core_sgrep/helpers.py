@@ -47,6 +47,10 @@ def invoke_semgrep(paths, scan_rules, **kwargs):
         _,
         _,
         _,
+        _,
+        _,
+        _,
+        _,
     ) = semgrep_main.main(
         output_handler=output_handler,
         target=[pt.as_posix() for pt in paths],
