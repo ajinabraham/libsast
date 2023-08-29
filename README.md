@@ -7,7 +7,7 @@ Made with ![Love](https://cloud.githubusercontent.com/assets/4301109/16754758/82
 [![PyPI version](https://badge.fury.io/py/libsast.svg)](https://badge.fury.io/py/libsast)
 [![platform](https://img.shields.io/badge/platform-windows%2Fosx%2Flinux-green.svg)](https://github.com/ajinabraham/libsast)
 [![License](https://img.shields.io/:license-lgpl3+-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0.en.html)
-[![python](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/)
+[![python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Build](https://github.com/ajinabraham/libsast/workflows/Build/badge.svg)](https://github.com/ajinabraham/libsast/actions?query=workflow%3ABuild)
 
 ### Support libsast

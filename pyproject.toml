@@ -23,7 +23,7 @@ classifiers = [
 libsast = "libsast.__main__:main"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 requests = ">=2.27.1"
 pyyaml = ">=6.0"
 semgrep = {version = "0.117.0", markers = "sys_platform != 'win32'"}
