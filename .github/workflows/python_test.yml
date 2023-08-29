@@ -31,6 +31,9 @@ jobs:
     - name: Lint
       run: |
         tox -e lint
+    - name: Install libsast
+      run: |
+        poetry install --no-interaction --no-ansi
     - name: Bandit Scan
       run: |
         poetry run bandit libsast -r
