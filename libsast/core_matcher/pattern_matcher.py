@@ -2,6 +2,9 @@
 """Pattern Macher."""
 from copy import deepcopy
 from operator import itemgetter
+from multiprocessing import (
+    Pool,
+)
 
 from libsast.core_matcher.helpers import (
     get_rules,
@@ -35,16 +38,19 @@ class PatternMatcher:
         if self.show_progress:
             pbar = common.ProgressBar('Pattern Match', len(paths))
             paths = pbar.progrees_loop(paths)
+        scan_list = set()
         for sfile in paths:
-            ext = sfile.suffix.lower()
-            if self.exts and ext not in self.exts:
+            if self.exts and sfile.suffix.lower() not in self.exts:
                 continue
             if sfile.stat().st_size / 1000 / 1000 > 5:
                 # Skip scanning files greater than 5 MB
                 print(f'Skipping large file {sfile.as_posix()}')
                 continue
-            data = sfile.read_text('utf-8', 'ignore')
-            self.pattern_matcher(data, sfile, ext)
+            scan_list.add(sfile)
+        # Multiprocess Pool
+        with Pool() as pool:
+            results = pool.map(self.pattern_matcher, scan_list, chunksize=1)
+        self.add_finding(results)
         return self.findings
 
     def validate_rules(self):
@@ -68,9 +74,11 @@ class PatternMatcher:
                     f' Available matchers are {supported}',
                 )
 
-    def pattern_matcher(self, data, file_path, ext):
+    def pattern_matcher(self, file_path):
         """Static Analysis Pattern Matcher."""
+        result = []
         try:
+            data = file_path.read_text('utf-8', 'ignore')
             for rule in self.scan_rules:
                 case = rule.get('input_case')
                 if case == 'lower':
@@ -79,7 +87,7 @@ class PatternMatcher:
                     tmp_data = data.upper()
                 else:
                     tmp_data = data
-                if ext in ('.html', '.xml'):
+                if file_path.suffix.lower() in ('.html', '.xml'):
                     fmt_data = strip_comments2(tmp_data)
                 else:
                     fmt_data = strip_comments(tmp_data)
@@ -88,30 +96,40 @@ class PatternMatcher:
                     fmt_data,
                     rule)
                 if matches:
-                    self.add_finding(file_path, rule, matches)
+                    result.append({
+                        'file': file_path.as_posix(),
+                        'rule': rule,
+                        'matches': matches,
+                    })
         except Exception:
             raise exceptions.RuleProcessingError('Rule processing error.')
+        return result
 
-    def add_finding(self, file_path, rule, matches):
+    def add_finding(self, results):
         """Add Code Analysis Findings."""
-        for match in matches:
-            crule = deepcopy(rule)
-            file_details = {
-                'file_path': file_path.as_posix(),
-                'match_string': match[0],
-                'match_position': match[1],
-                'match_lines': match[2],
-            }
-            if rule['id'] in self.findings:
-                self.findings[rule['id']]['files'].append(file_details)
-            else:
-                metadata = crule.get('metadata', {})
-                metadata['description'] = crule['message']
-                metadata['severity'] = crule['severity']
-                self.findings[rule['id']] = {
-                    'files': [file_details],
-                    'metadata': metadata,
-                }
+        for res_list in results:
+            if not res_list:
+                continue
+            for match_dict in res_list:
+                for match in match_dict['matches']:
+                    rule = match_dict['rule']
+                    crule = deepcopy(rule)
+                    file_details = {
+                        'file_path': match_dict['file'],
+                        'match_string': match[0],
+                        'match_position': match[1],
+                        'match_lines': match[2],
+                    }
+                    if rule['id'] in self.findings:
+                        self.findings[rule['id']]['files'].append(file_details)
+                    else:
+                        metadata = crule.get('metadata', {})
+                        metadata['description'] = crule['message']
+                        metadata['severity'] = crule['severity']
+                        self.findings[rule['id']] = {
+                            'files': [file_details],
+                            'metadata': metadata,
+                        }
         to_sort = self.findings[rule['id']]['files']
         self.findings[rule['id']]['files'] = sorted(
             to_sort,
