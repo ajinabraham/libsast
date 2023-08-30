@@ -1,5 +1,7 @@
 # -*- coding: utf_8 -*-
 """Pattern Macher."""
+import os
+import sys
 from copy import deepcopy
 from operator import itemgetter
 from multiprocessing import (
@@ -48,7 +50,11 @@ class PatternMatcher:
                 continue
             files_to_scan.add(sfile)
         # Multiprocess Pool
-        with Pool() as pool:
+        worker_count = os.cpu_count()
+        if sys.platform == "win32":
+            # Work around https://bugs.python.org/issue26903
+            worker_count = min(worker_count, 61)
+        with Pool(worker_count) as pool:
             results = pool.map(
                 self.pattern_matcher,
                 files_to_scan,
