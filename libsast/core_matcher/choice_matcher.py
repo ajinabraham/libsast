@@ -1,5 +1,7 @@
 # -*- coding: utf_8 -*-
 """Choice Macher."""
+import os
+import sys
 from pathlib import Path
 from multiprocessing import (
     Pool,
@@ -46,7 +48,11 @@ class ChoiceMatcher:
             choice_args.append((scan_paths, rule))
 
         # Multiprocess Pool
-        with Pool() as pool:
+        worker_count = os.cpu_count()
+        if sys.platform == 'win32':
+            # Work around https://bugs.python.org/issue26903
+            worker_count = min(worker_count, 61)
+        with Pool(worker_count) as pool:
             results = pool.starmap(
                 self.choice_matcher,
                 choice_args,
