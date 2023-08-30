@@ -51,7 +51,7 @@ class PatternMatcher:
             files_to_scan.add(sfile)
         # Multiprocess Pool
         worker_count = os.cpu_count()
-        if sys.platform == "win32":
+        if sys.platform == 'win32':
             # Work around https://bugs.python.org/issue26903
             worker_count = min(worker_count, 61)
         with Pool(worker_count) as pool:
