@@ -43,14 +43,14 @@ class ChoiceMatcher:
             if rule['type'] != 'code' and self.alternative_path:
                 # Scan only alternative path
                 scan_paths = [Path(self.alternative_path)]
-            choice_args.append([scan_paths, rule])
+            choice_args.append((scan_paths, rule))
 
         # Multiprocess Pool
         with Pool() as pool:
-            results = pool.map(
+            results = pool.starmap(
                 self.choice_matcher,
                 choice_args,
-                chunksize=1)
+                chunksize=10)
         self.add_finding(results)
         return self.findings
 

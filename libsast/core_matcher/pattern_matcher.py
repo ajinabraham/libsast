@@ -52,7 +52,7 @@ class PatternMatcher:
             results = pool.map(
                 self.pattern_matcher,
                 files_to_scan,
-                chunksize=1)
+                chunksize=10)
         self.add_finding(results)
         return self.findings
 
