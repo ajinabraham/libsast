@@ -38,7 +38,7 @@ class PatternMatcher:
         if self.show_progress:
             pbar = common.ProgressBar('Pattern Match', len(paths))
             paths = pbar.progrees_loop(paths)
-        scan_list = set()
+        files_to_scan = set()
         for sfile in paths:
             if self.exts and sfile.suffix.lower() not in self.exts:
                 continue
@@ -46,10 +46,13 @@ class PatternMatcher:
                 # Skip scanning files greater than 5 MB
                 print(f'Skipping large file {sfile.as_posix()}')
                 continue
-            scan_list.add(sfile)
+            files_to_scan.add(sfile)
         # Multiprocess Pool
         with Pool() as pool:
-            results = pool.map(self.pattern_matcher, scan_list, chunksize=1)
+            results = pool.map(
+                self.pattern_matcher,
+                files_to_scan,
+                chunksize=1)
         self.add_finding(results)
         return self.findings
 
@@ -111,8 +114,8 @@ class PatternMatcher:
             if not res_list:
                 continue
             for match_dict in res_list:
+                rule = match_dict['rule']
                 for match in match_dict['matches']:
-                    rule = match_dict['rule']
                     crule = deepcopy(rule)
                     file_details = {
                         'file_path': match_dict['file'],
@@ -130,7 +133,6 @@ class PatternMatcher:
                             'files': [file_details],
                             'metadata': metadata,
                         }
-        to_sort = self.findings[rule['id']]['files']
-        self.findings[rule['id']]['files'] = sorted(
-            to_sort,
-            key=itemgetter('file_path', 'match_string', 'match_lines'))
+                self.findings[rule['id']]['files'] = sorted(
+                    self.findings[rule['id']]['files'],
+                    key=itemgetter('file_path', 'match_string', 'match_lines'))
