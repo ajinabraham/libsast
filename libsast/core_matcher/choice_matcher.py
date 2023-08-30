@@ -1,6 +1,9 @@
 # -*- coding: utf_8 -*-
 """Choice Macher."""
 from pathlib import Path
+from multiprocessing import (
+    Pool,
+)
 
 from libsast.core_matcher.helpers import (
     get_rules,
@@ -31,6 +34,7 @@ class ChoiceMatcher:
         if not (self.scan_rules and paths):
             return
         self.validate_rules()
+        choice_args = []
         if self.show_progress:
             pbar = common.ProgressBar('Choice Match', len(self.scan_rules))
             self.scan_rules = pbar.progrees_loop(self.scan_rules)
@@ -39,7 +43,15 @@ class ChoiceMatcher:
             if rule['type'] != 'code' and self.alternative_path:
                 # Scan only alternative path
                 scan_paths = [Path(self.alternative_path)]
-            self.choice_matcher(scan_paths, rule)
+            choice_args.append((scan_paths, rule))
+
+        # Multiprocess Pool
+        with Pool() as pool:
+            results = pool.starmap(
+                self.choice_matcher,
+                choice_args,
+                chunksize=10)
+        self.add_finding(results)
         return self.findings
 
     def validate_rules(self):
@@ -66,6 +78,7 @@ class ChoiceMatcher:
 
     def choice_matcher(self, scan_paths, rule):
         """Run a Single Choice Matcher rule on all files."""
+        results = []
         try:
             matches = set()
             all_matches = set()
@@ -89,22 +102,34 @@ class ChoiceMatcher:
                     elif isinstance(match, list):
                         # or, and
                         matches.add(match[0])
-            self.add_finding(rule, matches, all_matches)
+                    results.append({
+                        'rule': rule,
+                        'matches': matches,
+                        'all_matches': all_matches,
+                    })
         except Exception:
             raise exceptions.RuleProcessingError('Rule processing error.')
+        return results
 
-    def add_finding(self, rule, matches, all_matches):
+    def add_finding(self, results):
         """Add Choice Findings."""
-        if all_matches:
-            selection = rule['selection'].format(list(all_matches))
-        elif matches:
-            select = rule['choice'][min(matches)][1]
-            selection = rule['selection'].format(select)
-        elif rule.get('else'):
-            selection = rule['selection'].format(rule['else'])
-        else:
-            return
-        self.findings[rule['id']] = self.get_meta(rule, selection)
+        for res_list in results:
+            if not res_list:
+                continue
+            for match_dict in res_list:
+                all_matches = match_dict['all_matches']
+                matches = match_dict['matches']
+                rule = match_dict['rule']
+                if all_matches:
+                    selection = rule['selection'].format(list(all_matches))
+                elif matches:
+                    select = rule['choice'][min(matches)][1]
+                    selection = rule['selection'].format(select)
+                elif rule.get('else'):
+                    selection = rule['selection'].format(rule['else'])
+                else:
+                    continue
+                self.findings[rule['id']] = self.get_meta(rule, selection)
 
     def get_meta(self, rule, selection):
         """Get Finding Meta."""
