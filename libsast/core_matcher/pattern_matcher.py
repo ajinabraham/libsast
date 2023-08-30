@@ -79,7 +79,7 @@ class PatternMatcher:
 
     def pattern_matcher(self, file_path):
         """Static Analysis Pattern Matcher."""
-        result = []
+        results = []
         try:
             data = file_path.read_text('utf-8', 'ignore')
             for rule in self.scan_rules:
@@ -99,14 +99,14 @@ class PatternMatcher:
                     fmt_data,
                     rule)
                 if matches:
-                    result.append({
+                    results.append({
                         'file': file_path.as_posix(),
                         'rule': rule,
                         'matches': matches,
                     })
         except Exception:
             raise exceptions.RuleProcessingError('Rule processing error.')
-        return result
+        return results
 
     def add_finding(self, results):
         """Add Code Analysis Findings."""
