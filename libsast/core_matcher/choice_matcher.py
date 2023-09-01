@@ -46,7 +46,7 @@ class ChoiceMatcher:
             choice_args.append((scan_paths, rule))
 
         with ProcessPoolExecutor(max_workers=common.get_worker_count()) as exe:
-            results = exe.starmap(
+            results = exe.map(
                 self.choice_matcher,
                 choice_args,
                 chunksize=1)
@@ -75,9 +75,10 @@ class ChoiceMatcher:
                 raise exceptions.PatternKeyMissingError(
                     'The rule is missing the key \'choice\'')
 
-    def choice_matcher(self, scan_paths, rule):
+    def choice_matcher(self, args):
         """Run a Single Choice Matcher rule on all files."""
         results = []
+        scan_paths, rule = args
         try:
             matches = set()
             all_matches = set()
