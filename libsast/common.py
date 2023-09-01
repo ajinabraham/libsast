@@ -74,7 +74,6 @@ def read_yaml(file_obj, text=False):
 
 def get_worker_count():
     """Get worker count for pool."""
-    worker_count = 16
     try:
         worker_count = os.cpu_count()
         if not worker_count:
@@ -85,5 +84,5 @@ def get_worker_count():
         if os.getenv('LIBSAST_WORKERS'):
             worker_count = int(os.getenv('LIBSAST_WORKERS'))
     except Exception:
-        pass
+        worker_count = 16
     return worker_count
