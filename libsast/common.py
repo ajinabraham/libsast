@@ -1,5 +1,6 @@
 # -*- coding: utf_8 -*-
 """Common Helpers."""
+import os
 import sys
 from threading import Thread
 
@@ -69,3 +70,20 @@ def read_yaml(file_obj, text=False):
     except Exception as gen:
         raise YamlRuleLoadError(
             f'Failed to load YAML file: {repr(gen)}')
+
+
+def get_worker_count():
+    """Get worker count for pool."""
+    worker_count = 16
+    try:
+        worker_count = os.cpu_count()
+        if not worker_count:
+            worker_count = 1
+        if worker_count != 1 and sys.platform == 'win32':
+            # Work around https://bugs.python.org/issue26903
+            worker_count = min(worker_count, 61)
+        if os.getenv('LIBSAST_WORKERS'):
+            worker_count = int(os.getenv('LIBSAST_WORKERS'))
+    except Exception:
+        pass
+    return worker_count
