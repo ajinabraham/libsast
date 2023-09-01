@@ -2,8 +2,8 @@
 """Pattern Macher."""
 from copy import deepcopy
 from operator import itemgetter
-from multiprocessing import (
-    Pool,
+from concurrent.futures import (
+    ProcessPoolExecutor,
 )
 
 from libsast.core_matcher.helpers import (
@@ -47,9 +47,8 @@ class PatternMatcher:
                 print(f'Skipping large file {sfile.as_posix()}')
                 continue
             files_to_scan.add(sfile)
-        # Multiprocess Pool
-        with Pool(common.get_worker_count()) as pool:
-            results = pool.map(
+        with ProcessPoolExecutor(max_workers=common.get_worker_count()) as exe:
+            results = exe.map(
                 self.pattern_matcher,
                 files_to_scan,
                 chunksize=1)
