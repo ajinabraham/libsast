@@ -1,8 +1,8 @@
 # -*- coding: utf_8 -*-
 """Choice Macher."""
 from pathlib import Path
-from multiprocessing import (
-    Pool,
+from concurrent.futures import (
+    ProcessPoolExecutor,
 )
 
 from libsast.core_matcher.helpers import (
@@ -45,9 +45,8 @@ class ChoiceMatcher:
                 scan_paths = [Path(self.alternative_path)]
             choice_args.append((scan_paths, rule))
 
-        # Multiprocess Pool
-        with Pool(common.get_worker_count()) as pool:
-            results = pool.starmap(
+        with ProcessPoolExecutor(max_workers=common.get_worker_count()) as exe:
+            results = exe.starmap(
                 self.choice_matcher,
                 choice_args,
                 chunksize=1)
