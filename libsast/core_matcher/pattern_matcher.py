@@ -81,18 +81,18 @@ class PatternMatcher:
         results = []
         try:
             data = file_path.read_text('utf-8', 'ignore')
+            if file_path.suffix.lower() in ('.html', '.xml'):
+                tmp_data = strip_comments2(data)
+            else:
+                tmp_data = strip_comments(data)
             for rule in self.scan_rules:
                 case = rule.get('input_case')
                 if case == 'lower':
-                    tmp_data = data.lower()
+                    fmt_data = tmp_data.lower()
                 elif case == 'upper':
-                    tmp_data = data.upper()
+                    fmt_data = tmp_data.upper()
                 else:
-                    tmp_data = data
-                if file_path.suffix.lower() in ('.html', '.xml'):
-                    fmt_data = strip_comments2(tmp_data)
-                else:
-                    fmt_data = strip_comments(tmp_data)
+                    fmt_data = tmp_data
                 matches = self.matcher._find_match(
                     rule['type'],
                     fmt_data,
