@@ -15,6 +15,10 @@ from libsast.exceptions import (
     InvalidPathError,
 )
 
+from fnmatch import (
+    fnmatch,
+)
+
 
 class Scanner:
     def __init__(self, options: dict, paths: list) -> None:
@@ -85,7 +89,7 @@ class Scanner:
         """Check if we should scan the file."""
         ignore_paths = any(
             Path(pp).as_posix() in path.as_posix() for pp in self.ignore_paths)
-        ignore_files = path.name in self.ignore_filenames
+        ignore_files = any(fnmatch(path.name, ignore_filename) for ignore_filename in self.ignore_filenames)
         ignore_exts = path.suffix.lower() in self.ignore_extensions
         if (ignore_paths or ignore_files or ignore_exts):
             return False
