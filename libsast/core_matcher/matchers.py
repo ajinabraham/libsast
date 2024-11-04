@@ -27,6 +27,11 @@ class MatchCommand:
     def _find_match(self, pattern_name, content, rule):
         pattern_class = self.patterns.get(pattern_name) or globals()[pattern_name]()
         self.patterns.setdefault(pattern_name, pattern_class)
+        case = rule.get('input_case')
+        if case == 'lower':
+            content = content.lower()
+        elif case == 'upper':
+            content = content.upper()
         return pattern_class._perform_search(content, rule)
 
 
