@@ -43,9 +43,11 @@ class SemanticGrep:
 
     def format_output(self, results):
         """Format sgrep results."""
-        errs = self.findings.get('errors')
+        errs = results.get('errors')
         if errs:
             self.findings['errors'] = errs
+        if not results.get('results'):
+            return
         smatches = self.findings['matches']
         for find in results['results']:
             file_details = {
@@ -54,7 +56,7 @@ class SemanticGrep:
                 'match_lines': (find['start']['line'], find['end']['line']),
                 'match_string': find['extra']['lines'],
             }
-            rule_id = find['check_id'].rsplit('.', 1)[1]
+            rule_id = find['check_id']
             if rule_id in smatches:
                 smatches[rule_id]['files'].append(file_details)
             else:
