@@ -10,12 +10,12 @@ def invoke_semgrep(paths, scan_rules):
         return None
     ps = [pt.as_posix() for pt in paths]
     command = [
-        "semgrep",
-        "--metrics=off",
-        "--no-rewrite-rule-ids",
-        "--json",
-        "-q",
-        "--config",
+        'semgrep',
+        '--metrics=off',
+        '--no-rewrite-rule-ids',
+        '--json',
+        '-q',
+        '--config',
         scan_rules,
         *ps,
     ]
@@ -26,4 +26,4 @@ def invoke_semgrep(paths, scan_rules):
         try:
             return json.loads(e.output)
         except json.JSONDecodeError:
-            return {"errors": e.output}
+            return {'errors': e.output}
