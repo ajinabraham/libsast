@@ -26,6 +26,7 @@ class Scanner:
             'ignore_paths': [],
             'show_progress': False,
             'cpu_core': 1,
+            # Overwrite with options from invocation
             **(options or {}),
         }
 

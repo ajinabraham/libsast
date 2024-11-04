@@ -116,7 +116,8 @@ class PatternMatcher:
                         'matches': matches,
                     })
         except Exception as e:
-            print(f'Error processing rule for {file_path}: {e}')
+            msg = f'Error processing rule for {file_path}: {e}'
+            raise exceptions.RuleProcessingError(msg)
         return results
 
     @staticmethod

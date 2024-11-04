@@ -139,7 +139,6 @@ class ChoiceMatcher:
     def _format_content(data, file_suffix):
         return strip_comments(data, file_suffix)
 
-
     def add_finding(self, results):
         """Add Choice Findings and generate metadata."""
         for res_list in results:
