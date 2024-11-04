@@ -14,7 +14,7 @@ def get_pos(match):
 
 
 # Cache compiled regex patterns
-@lru_cache(maxsize=128)
+@lru_cache(maxsize=256)
 def get_compiled_pattern(pattern):
     """Compile and cache regex patterns."""
     return re.compile(pattern)
@@ -23,11 +23,35 @@ def get_compiled_pattern(pattern):
 class MatchCommand:
     def __init__(self):
         self.patterns = {}
+        # Dictionary to map pattern names to their corresponding classes
+        self.available_patterns = {
+            'Regex': Regex,
+            'RegexAnd': RegexAnd,
+            'RegexOr': RegexOr,
+            'RegexAndNot': RegexAndNot,
+            'RegexAndOr': RegexAndOr,
+        }
 
     def _find_match(self, pattern_name, content, rule):
-        pattern_class = self.patterns.get(pattern_name) or globals()[pattern_name]()
+        pattern_class = self.patterns.get(
+            pattern_name) or self._get_pattern_class(pattern_name)
         self.patterns.setdefault(pattern_name, pattern_class)
+
+        # Apply case transformation if specified in the rule
+        case = rule.get('input_case')
+        if case == 'lower':
+            content = content.lower()
+        elif case == 'upper':
+            content = content.upper()
+
+        # Perform search
         return pattern_class._perform_search(content, rule)
+
+    def _get_pattern_class(self, pattern_name):
+        """Get pattern class from the available patterns dictionary."""
+        if pattern_name in self.available_patterns:
+            return self.available_patterns[pattern_name]()
+        raise ValueError(f"Pattern '{pattern_name}' is not recognized.")
 
 
 class MatchStrategy(ABC):
