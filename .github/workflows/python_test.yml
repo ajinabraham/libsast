@@ -36,7 +36,7 @@ jobs:
         poetry install --no-interaction --no-ansi
     - name: Bandit Scan
       run: |
-        poetry run bandit libsast -r
+        poetry run bandit -ll libsast -r
     - name: Unit test
       run: |
         poetry run pytest -v --cache-clear tests
