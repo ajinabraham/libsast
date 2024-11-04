@@ -85,7 +85,7 @@ class ChoiceMatcher:
             for key in required_keys:
                 if not rule.get(key):
                     raise exceptions.PatternKeyMissingError(
-                        f'The rule is missing the key \'{key}\'')
+                        f'The rule is missing the key "{key}"')
 
     def _read_file_contents(self, args_tuple):
         """Read file contents for the given paths and rule."""

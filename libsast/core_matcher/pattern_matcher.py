@@ -76,8 +76,9 @@ class PatternMatcher:
             # Check for missing required keys
             missing_keys = [key for key in required_keys if key not in rule]
             if missing_keys:
+                mkeys = ', '.join(missing_keys)
                 raise exceptions.PatternKeyMissingError(
-                    f'The rule is missing the keys: {', '.join(missing_keys)}')
+                    f'The rule is missing the keys: {mkeys}')
 
             pattern_name = rule['type']
             if pattern_name not in available_matchers:
