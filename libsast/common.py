@@ -79,9 +79,9 @@ def get_worker_count():
 
     # Try to get the CPU count
     try:
-        worker_count = os.cpu_count() or worker_count
+        worker_count = os.cpu_count()
     except Exception:
-        pass  # Default to 1 if an exception occurs
+        worker_count = 1
 
     # Adjust worker count for Windows
     if sys.platform == 'win32':
@@ -93,6 +93,6 @@ def get_worker_count():
         try:
             worker_count = int(libsast_workers)
         except ValueError:
-            pass
+            worker_count = 1
 
     return worker_count
