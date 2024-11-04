@@ -85,7 +85,7 @@ def comment_replacer(matches, data):
     return data
 
 
-def strip_comments(data):
+def strip_comments1(data):
     """Remove Comments.
 
     Replace multiline comments first and
@@ -128,3 +128,36 @@ def get_match_lines(content, pos):
         if filepos >= pos[1] and skip:
             # Multiline march, find end line
             return (start_line, idx)
+
+
+def is_file_valid(sfile, allowed_extensions=None, max_size_mb=5):
+    """Check if the file is valid based on its extension and size.
+
+    Args:
+        sfile (Path): The file to check.
+        allowed_extensions (set): A set of allowed file extensions.
+        max_size_mb (int): The maximum file size in MB.
+
+    Returns:
+        bool: True if the file is valid, False otherwise.
+    """
+    # Get the file extension in lowercase
+    ext = sfile.suffix.lower()
+
+    # Check if the file extension is allowed
+    if allowed_extensions and ext not in allowed_extensions:
+        return False
+
+    # Check if the file size exceeds the maximum limit (in bytes)
+    max_size_bytes = max_size_mb * 1024 * 1024  # Convert MB to bytes
+    if sfile.stat().st_size > max_size_bytes:
+        return False
+
+    return True
+
+
+def strip_comments(data, ext):
+    """Format content by stripping comments based on file type."""
+    if ext in ('.html', '.xml'):
+        return strip_comments2(data)
+    return strip_comments1(data)

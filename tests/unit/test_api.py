@@ -14,12 +14,12 @@ def get_config():
 
 
 def test_no_rule():
-    assert libsast.Scanner({}, []).scan() is None
+    assert libsast.Scanner({}, []).scan() == {}
 
 
 def test_no_path():
     options, _ = get_config()
-    assert libsast.Scanner(options, []).scan() is None
+    assert libsast.Scanner(options, []).scan() == {}
 
 
 def test_pattern_matcher_dir():

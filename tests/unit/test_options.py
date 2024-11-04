@@ -41,4 +41,4 @@ def test_ignore_paths():
     paths = [files_dir.as_posix()]
     options = {'ignore_paths': paths}
     result = scanner(options).scan()
-    assert result is None
+    assert result == {}

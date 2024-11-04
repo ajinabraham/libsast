@@ -26,7 +26,7 @@ class ProgressBar:
         self.output.write(f'- {self.prefix} {prog} {index}\r')
         self.output.flush()
 
-    def progrees_loop(self, iterator):
+    def progress_loop(self, iterator):
         """Show progress for loop."""
         self.progress_print(0)
         for index, item in enumerate(iterator):
@@ -74,15 +74,18 @@ def read_yaml(file_obj, text=False):
 
 def get_worker_count():
     """Get worker count for pool."""
+    libsast_workers = os.getenv('LIBSAST_WORKERS')
+    if libsast_workers:
+        try:
+            return int(libsast_workers)
+        except ValueError:
+            return 1
     try:
         worker_count = os.cpu_count()
-        if not worker_count:
-            worker_count = 1
-        if worker_count != 1 and sys.platform == 'win32':
-            # Work around https://bugs.python.org/issue26903
-            worker_count = min(worker_count, 61)
-        if os.getenv('LIBSAST_WORKERS'):
-            worker_count = int(os.getenv('LIBSAST_WORKERS'))
     except Exception:
-        worker_count = 16
+        worker_count = 1
+
+    # Adjust worker count for Windows
+    if sys.platform == 'win32':
+        worker_count = min(worker_count, 61)
     return worker_count

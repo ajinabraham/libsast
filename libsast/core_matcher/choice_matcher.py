@@ -1,16 +1,18 @@
 # -*- coding: utf_8 -*-
-"""Choice Macher."""
+"""Choice Matcher."""
+import re
 from pathlib import Path
 from concurrent.futures import (
     ProcessPoolExecutor,
+    ThreadPoolExecutor,
 )
+from functools import lru_cache
 
 from libsast.core_matcher.helpers import (
     get_rules,
+    is_file_valid,
     strip_comments,
-    strip_comments2,
 )
-from libsast.core_matcher import choices
 from libsast import (
     common,
     exceptions,
@@ -21,12 +23,10 @@ class ChoiceMatcher:
     def __init__(self, options: dict) -> None:
         self.scan_rules = get_rules(options.get('choice_rules'))
         self.show_progress = options.get('show_progress')
+        self.cpu = options.get('cpu_core')
         self.alternative_path = options.get('alternative_path')
         exts = options.get('choice_extensions')
-        if exts:
-            self.exts = [ext.lower() for ext in exts]
-        else:
-            self.exts = []
+        self.exts = [ext.lower() for ext in exts] if exts else []
         self.findings = {}
 
     def scan(self, paths: list) -> dict:
@@ -34,10 +34,12 @@ class ChoiceMatcher:
         if not (self.scan_rules and paths):
             return
         self.validate_rules()
-        choice_args = []
+
         if self.show_progress:
             pbar = common.ProgressBar('Choice Match', len(self.scan_rules))
-            self.scan_rules = pbar.progrees_loop(self.scan_rules)
+            self.scan_rules = pbar.progress_loop(self.scan_rules)
+
+        choice_args = []
         for rule in self.scan_rules:
             scan_paths = paths
             if rule['type'] != 'code' and self.alternative_path:
@@ -45,11 +47,26 @@ class ChoiceMatcher:
                 scan_paths = [Path(self.alternative_path)]
             choice_args.append((scan_paths, rule))
 
-        with ProcessPoolExecutor(max_workers=common.get_worker_count()) as exe:
-            results = exe.map(
-                self.choice_matcher,
-                choice_args,
-                chunksize=1)
+        # Use ThreadPoolExecutor for reading file contents and
+        # ProcessPoolExecutor for processing regex
+        with ThreadPoolExecutor() as io_executor, ProcessPoolExecutor(
+                max_workers=self.cpu) as cpu_executor:
+            futures = []
+            for args_tuple in choice_args:
+                # Submit each read task and store the future along with the args
+                future = io_executor.submit(
+                    self._read_file_contents, args_tuple)
+                futures.append((future, args_tuple))
+
+            results = []
+            for future, _ in futures:
+                file_contents = future.result()
+                # This will block until the file reading is done
+                # Process the file contents with ProcessPoolExecutor
+                process_future = cpu_executor.submit(
+                    self.choice_matcher, file_contents)
+                results.append(process_future.result())
+
         self.add_finding(results)
         return self.findings
 
@@ -59,91 +76,99 @@ class ChoiceMatcher:
             if not isinstance(rule, dict):
                 raise exceptions.InvalidRuleFormatError(
                     'Choice Matcher Rule format is invalid.')
-            if not rule.get('id'):
-                raise exceptions.TypeKeyMissingError(
-                    'The rule is missing the key \'id\'')
-            if not rule.get('type'):
-                raise exceptions.PatternKeyMissingError(
-                    'The rule is missing the key \'type\'')
-            if not rule.get('choice_type'):
-                raise exceptions.PatternKeyMissingError(
-                    'The rule is missing the key \'choice_type\'')
-            if not rule.get('selection'):
-                raise exceptions.PatternKeyMissingError(
-                    'The rule is missing the key \'selection\'')
-            if not rule.get('choice'):
-                raise exceptions.PatternKeyMissingError(
-                    'The rule is missing the key \'choice\'')
+            required_keys = [
+                'id',
+                'type',
+                'choice_type',
+                'selection',
+                'choice']
+            for key in required_keys:
+                if not rule.get(key):
+                    raise exceptions.PatternKeyMissingError(
+                        f'The rule is missing the key "{key}"')
 
-    def choice_matcher(self, args):
-        """Run a Single Choice Matcher rule on all files."""
+    def _read_file_contents(self, args_tuple):
+        """Read file contents for the given paths and rule."""
+        scan_paths, rule = args_tuple
         results = []
-        scan_paths, rule = args
-        try:
-            matches = set()
-            all_matches = set()
-            for sfile in scan_paths:
-                ext = sfile.suffix.lower()
-                if self.exts and ext not in self.exts:
-                    continue
-                if sfile.stat().st_size / 1000 / 1000 > 5:
-                    # Skip scanning files greater than 5 MB
-                    continue
-                data = sfile.read_text('utf-8', 'ignore')
-                if ext in ('.html', '.xml'):
-                    data = strip_comments2(data)
-                else:
-                    data = strip_comments(data)
-                match = choices.find_choices(data, rule)
-                if match:
-                    if isinstance(match, set):
-                        # all
-                        all_matches.update(match)
-                    elif isinstance(match, list):
-                        # or, and
-                        matches.add(match[0])
-                    results.append({
-                        'rule': rule,
-                        'matches': matches,
-                        'all_matches': all_matches,
-                    })
-        except Exception:
-            raise exceptions.RuleProcessingError('Rule processing error.')
+        for sfile in scan_paths:
+            if not is_file_valid(sfile, self.exts, 5):
+                continue
+            try:
+                data = self._format_content(
+                    sfile.read_text('utf-8', 'ignore'),
+                    sfile.suffix.lower())
+                results.append((data, rule))
+            except Exception as e:
+                raise exceptions.RuleProcessingError(
+                    'Error reading file: {}'.format(sfile)) from e
         return results
 
+    def find_choices(self, data, rule):
+        """Find Choices."""
+        all_matches = set()
+        for idx, choice in enumerate(rule['choice']):
+            typ = rule['choice_type']
+            if typ == 'and':
+                # Return on first and choice
+                if all(re.compile(and_regx).search(data) for and_regx in choice[0]):
+                    return (all_matches, [idx])
+            elif re.compile(choice[0]).search(data):
+                if typ == 'or':
+                    # Return on first or choice
+                    return (all_matches, [idx])
+                elif typ == 'all':
+                    # Extract all choice(s) from all files
+                    all_matches.add(choice[1])
+        return (all_matches, None)  # None means no matches found.
+
+    def choice_matcher(self, file_contents):
+        """Process regex matches on the file contents."""
+        results = []
+        for data, rule in file_contents:
+            match = self.find_choices(data, rule)
+            results.append({
+                'rule': rule,
+                'matches': match[1] if isinstance(match, tuple) else set(),
+                'all_matches': match[0] if isinstance(match, tuple) else match,
+            })
+        return results
+
+    @staticmethod
+    @lru_cache(maxsize=128)
+    def _format_content(data, file_suffix):
+        return strip_comments(data, file_suffix)
+
     def add_finding(self, results):
-        """Add Choice Findings."""
+        """Add Choice Findings and generate metadata."""
         for res_list in results:
             if not res_list:
                 continue
             for match_dict in res_list:
+                rule = match_dict['rule']
                 all_matches = match_dict['all_matches']
                 matches = match_dict['matches']
-                rule = match_dict['rule']
+
+                # Determine selection string
                 if all_matches:
                     selection = rule['selection'].format(list(all_matches))
                 elif matches:
                     select = rule['choice'][min(matches)][1]
                     selection = rule['selection'].format(select)
-                elif rule.get('else'):
-                    selection = rule['selection'].format(rule['else'])
                 else:
-                    continue
-                self.findings[rule['id']] = self.get_meta(rule, selection)
+                    selection = rule['selection'].format(rule.get('else', ''))
 
-    def get_meta(self, rule, selection):
-        """Get Finding Meta."""
-        meta_dict = {}
-        meta_dict['choice'] = selection
-        meta_dict['description'] = rule['message']
-        for key in rule:
-            if key in ('choice',
-                       'message',
-                       'id',
-                       'type',
-                       'choice_type',
-                       'selection',
-                       'else'):
-                continue
-            meta_dict[key] = rule[key]
-        return meta_dict
+                # Create metadata dictionary
+                meta_dict = {
+                    'choice': selection,
+                    'description': rule['message'],
+                    **{key: rule[key] for key in rule if key not in {
+                        'choice',
+                        'message',
+                        'id',
+                        'type',
+                        'choice_type',
+                        'selection',
+                        'else'}}}
+
+                self.findings[rule['id']] = meta_dict

@@ -46,7 +46,14 @@
   type: Regex
   metadata:
     owasp-mobile: m1
+    owasp-mobile-2024: m1
     owasp-web: a10
     cwe: cwe-1051
     masvs: storage-3
     foo: bar
+- id: test_regex_case
+  message: This is a rule to test regex case
+  input_case: lower
+  pattern: match\d{1}
+  severity: error
+  type: Regex

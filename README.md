@@ -31,13 +31,13 @@ usage: libsast [-h] [-o OUTPUT] [-p PATTERN_FILE] [-s SGREP_PATTERN_FILE]
                [--ignore-filenames IGNORE_FILENAMES [IGNORE_FILENAMES ...]]
                [--ignore-extensions IGNORE_EXTENSIONS [IGNORE_EXTENSIONS ...]]
                [--ignore-paths IGNORE_PATHS [IGNORE_PATHS ...]]
-               [--show-progress] [-v]
-               [path [path ...]]
+               [--show-progress] [--cpu-core CPU_CORE] [-v]
+               [path ...]
 
 positional arguments:
   path                  Path can be file(s) or directories
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -o OUTPUT, --output OUTPUT
                         Output filename to save JSON report.
@@ -46,7 +46,8 @@ optional arguments:
   -s SGREP_PATTERN_FILE, --sgrep-pattern-file SGREP_PATTERN_FILE
                         sgrep rules directory
   --sgrep-file-extensions SGREP_FILE_EXTENSIONS [SGREP_FILE_EXTENSIONS ...]
-                        File extensions that should be scanned with sgrep
+                        File extensions that should be scanned with semantic
+                        grep
   --file-extensions FILE_EXTENSIONS [FILE_EXTENSIONS ...]
                         File extensions that should be scanned with pattern
                         matcher
@@ -57,6 +58,7 @@ optional arguments:
   --ignore-paths IGNORE_PATHS [IGNORE_PATHS ...]
                         Path(s) to ignore
   --show-progress       Show scan progress
+  --cpu-core CPU_CORE   No of CPU cores to use. Use all cores by default
   -v, --version         Show libsast version
 ```
 

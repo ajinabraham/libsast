@@ -101,7 +101,7 @@ def test_load_file_missing_type():
     rule_file = base_dir / 'assets' / 'invalid' / 'missing_type.yaml'
     options = {'match_rules': rule_file.as_posix()}
     paths = [files_dir.as_posix()]
-    with pytest.raises(libsast.exceptions.TypeKeyMissingError):
+    with pytest.raises(libsast.exceptions.PatternKeyMissingError):
         libsast.Scanner(options, paths).scan()
 
 

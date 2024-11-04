@@ -51,7 +51,7 @@ def main():
     parser.add_argument('--sgrep-file-extensions',
                         nargs='+',
                         help=('File extensions that should be scanned'
-                              ' with sgrep'),
+                              ' with semantic grep'),
                         required=False)
     parser.add_argument('--file-extensions',
                         nargs='+',
@@ -74,6 +74,10 @@ def main():
                         help='Show scan progress',
                         required=False,
                         action='store_true')
+    parser.add_argument('--cpu-core',
+                        help='No of CPU cores to use. Use all cores by default',
+                        type=int,
+                        required=False)
     parser.add_argument('-v', '--version',
                         help='Show libsast version',
                         required=False,
@@ -89,6 +93,7 @@ def main():
             'ignore_extensions': args.ignore_extensions,
             'ignore_paths': args.ignore_paths,
             'show_progress': args.show_progress,
+            'cpu_core': args.cpu_core,
         }
         result = Scanner(options, args.path).scan()
         output(args.output, result)

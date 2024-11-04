@@ -1,15 +1,16 @@
 # -*- coding: utf_8 -*-
-"""Pattern Macher."""
-from copy import deepcopy
+"""Pattern Matcher."""
 from operator import itemgetter
 from concurrent.futures import (
     ProcessPoolExecutor,
+    ThreadPoolExecutor,
 )
+from functools import lru_cache
 
 from libsast.core_matcher.helpers import (
     get_rules,
+    is_file_valid,
     strip_comments,
-    strip_comments2,
 )
 from libsast.core_matcher import matchers
 from libsast import (
@@ -23,11 +24,9 @@ class PatternMatcher:
         self.matcher = matchers.MatchCommand()
         self.scan_rules = get_rules(options.get('match_rules'))
         self.show_progress = options.get('show_progress')
+        self.cpu = options.get('cpu_core')
         exts = options.get('match_extensions')
-        if exts:
-            self.exts = [ext.lower() for ext in exts]
-        else:
-            self.exts = []
+        self.exts = [ext.lower() for ext in exts] if exts else []
         self.findings = {}
 
     def scan(self, paths: list) -> dict:
@@ -35,77 +34,96 @@ class PatternMatcher:
         if not (self.scan_rules and paths):
             return
         self.validate_rules()
+
         if self.show_progress:
             pbar = common.ProgressBar('Pattern Match', len(paths))
-            paths = pbar.progrees_loop(paths)
-        files_to_scan = set()
-        for sfile in paths:
-            if self.exts and sfile.suffix.lower() not in self.exts:
-                continue
-            if sfile.stat().st_size / 1000 / 1000 > 5:
-                # Skip scanning files greater than 5 MB
-                print(f'Skipping large file {sfile.as_posix()}')
-                continue
-            files_to_scan.add(sfile)
-        with ProcessPoolExecutor(max_workers=common.get_worker_count()) as exe:
-            results = exe.map(
+            paths = pbar.progress_loop(paths)
+
+        # Filter files by extension and size, prepare list for processing
+        files_to_scan = {
+            sfile for sfile in paths
+            if is_file_valid(sfile, self.exts, 5)
+        }
+
+        # Use a ThreadPool for file reading, and ProcessPool for CPU-bound regex
+        with ThreadPoolExecutor() as io_executor, ProcessPoolExecutor(
+                max_workers=self.cpu) as cpu_executor:
+
+            # Read all files
+            file_contents = list(io_executor.map(
+                self._read_file_content, files_to_scan))
+
+            # Run regex on file data
+            results = cpu_executor.map(
                 self.pattern_matcher,
-                files_to_scan,
-                chunksize=1)
+                file_contents,
+            )
+
+        # Compile findings
         self.add_finding(results)
         return self.findings
 
     def validate_rules(self):
         """Validate Rules before scanning."""
+        available_matchers = {m for m in dir(matchers) if m.startswith('R')}
+        required_keys = ['type', 'pattern']
+
         for rule in self.scan_rules:
             if not isinstance(rule, dict):
                 raise exceptions.InvalidRuleFormatError(
                     'Pattern Matcher Rule format is invalid.')
-            if not rule.get('type'):
-                raise exceptions.TypeKeyMissingError(
-                    'The rule is missing the key \'type\'')
-            if not rule.get('pattern'):
-                raise exceptions.PatternKeyMissingError(
-                    'The rule is missing the key \'pattern\'')
-            all_mts = [m for m in dir(matchers) if m.startswith('R')]
-            pattern_name = rule['type']
-            if pattern_name not in all_mts:
-                supported = ', '.join(all_mts)
-                raise exceptions.MatcherNotFoundError(
-                    f'Matcher \'{pattern_name}\' is not supported.'
-                    f' Available matchers are {supported}',
-                )
 
-    def pattern_matcher(self, file_path):
+            # Check for missing required keys
+            missing_keys = [key for key in required_keys if key not in rule]
+            if missing_keys:
+                mkeys = ', '.join(missing_keys)
+                raise exceptions.PatternKeyMissingError(
+                    f'The rule is missing the keys: {mkeys}')
+
+            pattern_name = rule['type']
+            if pattern_name not in available_matchers:
+                supported = ', '.join(available_matchers)
+                raise exceptions.MatcherNotFoundError(
+                    f'Matcher {pattern_name} is not supported.'
+                    f' Available matchers are {supported}.')
+
+    @staticmethod
+    def _read_file_content(file_path):
+        """Read file content with encoding handling."""
+        try:
+            return file_path, file_path.read_text('utf-8', 'ignore')
+        except Exception as e:
+            print(f'Error reading {file_path}: {e}')
+            return file_path, ''
+
+    def pattern_matcher(self, file_data):
         """Static Analysis Pattern Matcher."""
+        file_path, data = file_data
         results = []
         try:
-            data = file_path.read_text('utf-8', 'ignore')
+            fmt_data = self._format_content(data, file_path.suffix.lower())
             for rule in self.scan_rules:
                 case = rule.get('input_case')
                 if case == 'lower':
-                    tmp_data = data.lower()
+                    fmt_data = fmt_data.lower()
                 elif case == 'upper':
-                    tmp_data = data.upper()
-                else:
-                    tmp_data = data
-                if file_path.suffix.lower() in ('.html', '.xml'):
-                    fmt_data = strip_comments2(tmp_data)
-                else:
-                    fmt_data = strip_comments(tmp_data)
-                matches = self.matcher._find_match(
-                    rule['type'],
-                    fmt_data,
-                    rule)
+                    fmt_data = fmt_data.upper()
+                matches = self.matcher._find_match(rule['type'], fmt_data, rule)
                 if matches:
                     results.append({
                         'file': file_path.as_posix(),
                         'rule': rule,
                         'matches': matches,
                     })
-        except Exception:
-            raise exceptions.RuleProcessingError('Rule processing error.')
+        except Exception as e:
+            msg = f'Error processing rule for {file_path}: {e}'
+            raise exceptions.RuleProcessingError(msg)
         return results
+
+    @staticmethod
+    @lru_cache(maxsize=128)
+    def _format_content(data, file_suffix):
+        return strip_comments(data, file_suffix)
 
     def add_finding(self, results):
         """Add Code Analysis Findings."""
@@ -114,24 +132,26 @@ class PatternMatcher:
                 continue
             for match_dict in res_list:
                 rule = match_dict['rule']
+                rule_id = rule['id']
+                files = self.findings.setdefault(
+                    rule_id, {'files': [], 'metadata': {}})['files']
+
                 for match in match_dict['matches']:
-                    crule = deepcopy(rule)
                     file_details = {
                         'file_path': match_dict['file'],
                         'match_string': match[0],
                         'match_position': match[1],
                         'match_lines': match[2],
                     }
-                    if rule['id'] in self.findings:
-                        self.findings[rule['id']]['files'].append(file_details)
-                    else:
-                        metadata = crule.get('metadata', {})
-                        metadata['description'] = crule['message']
-                        metadata['severity'] = crule['severity']
-                        self.findings[rule['id']] = {
-                            'files': [file_details],
-                            'metadata': metadata,
-                        }
-                self.findings[rule['id']]['files'] = sorted(
-                    self.findings[rule['id']]['files'],
+                    files.append(file_details)
+
+                if not self.findings[rule_id]['metadata']:
+                    meta = rule.get('metadata', {})
+                    # message & severity are mandatory
+                    meta['description'] = rule['message']
+                    meta['severity'] = rule['severity']
+                    self.findings[rule_id]['metadata'] = meta
+
+                # Sort files by specified criteria
+                self.findings[rule_id]['files'].sort(
                     key=itemgetter('file_path', 'match_string', 'match_lines'))
