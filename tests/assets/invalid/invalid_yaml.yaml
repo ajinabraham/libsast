@@ -1,5 +1,6 @@
 - id: test_regex
 message: This is a rule to test regex
+input_case: exact
 pattern: \.close\(\)
 severity: info
 type: regex

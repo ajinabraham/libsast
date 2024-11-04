@@ -1,5 +1,6 @@
 - id: test_regex_and_not
   message: This is a rule to test regex_and_not
+  input_case: exact
   pattern:
   - WKWebView
   - \.javaScriptEnabled=false
@@ -7,6 +8,7 @@
   type: RegexAndNot
 - id: test_regex_and_or
   message: This is a rule to test regex_and_or
+  input_case: exact
   pattern:
   - telephony.SmsManager
   - - sendMultipartTextMessage
