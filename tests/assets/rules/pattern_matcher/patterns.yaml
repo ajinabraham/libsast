@@ -1,12 +1,10 @@
 - id: test_regex
   message: This is a rule to test regex
-  input_case: exact
   pattern: \.close\(\)
   severity: info
   type: Regex
 - id: test_regex_and
   message: This is a rule to test regex_and
-  input_case: exact
   pattern:
   - \.loadUrl\(.*getExternalStorageDirectory\(
   - webkit\.WebView
@@ -14,7 +12,6 @@
   type: RegexAnd
 - id: test_regex_or
   message: This is a rule to test regex_or
-  input_case: exact
   pattern:
   - MODE_WORLD_READABLE|Context\.MODE_WORLD_READABLE
   - openFileOutput\(\s*".+"\s*,\s*1\s*\)
@@ -22,7 +19,6 @@
   type: RegexOr
 - id: test_regex_and_not
   message: This is a rule to test regex_and_not
-  input_case: exact
   pattern:
   - WKWebView
   - \.javaScriptEnabled=false
@@ -30,7 +26,6 @@
   type: RegexAndNot
 - id: test_regex_and_or
   message: This is a rule to test regex_and_or
-  input_case: exact
   pattern:
   - telephony.SmsManager
   - - sendMultipartTextMessage
@@ -40,12 +35,12 @@
   type: RegexAndOr
 - id: test_regex_multiline_and_metadata
   message: This is a rule to test regex
-  input_case: exact
   pattern: ((?:public.+)+)
   severity: info
   type: Regex
   metadata:
     owasp-mobile: m1
+    owasp-mobile-2024: m1
     owasp-web: a10
     cwe: cwe-1051
     masvs: storage-3

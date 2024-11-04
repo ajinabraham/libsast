@@ -1,0 +1,12 @@
+---
+owasp-mobile-2024:
+  m1: 'M1: Improper Credential Usage'
+  m2: 'M2: Inadequate Supply Chain Security'
+  m3: 'M3: Insecure Authentication/Authorization'
+  m4: 'M4: Insufficient Input/Output Validation'
+  m5: 'M5: Insecure Communication'
+  m6: 'M6: Inadequate Privacy Controls'
+  m7: 'M7: Insufficient Binary Protections'
+  m8: 'M8: Security Misconfiguration'
+  m9: 'M9: Insecure Data Storage'
+  m10: 'M10: Insufficient Cryptography'

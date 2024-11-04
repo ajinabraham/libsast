@@ -20,6 +20,7 @@ def test_standards_mapping():
     assert match['metadata']
     assert match['metadata']['cwe'] == stds['cwe']['cwe-1051']
     assert match['metadata']['owasp-mobile'] == stds['owasp-mobile']['m1']
+    assert match['metadata']['owasp-mobile-2024'] == stds['owasp-mobile-2024']['m1']
     assert match['metadata']['owasp-web'] == stds['owasp-web']['a10']
     assert match['metadata']['masvs'] == stds['masvs']['storage-3']
     assert match['metadata']['foo'] == 'bar'
