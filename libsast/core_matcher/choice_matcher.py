@@ -140,36 +140,36 @@ class ChoiceMatcher:
         return strip_comments(data, file_suffix)
 
 
-def add_finding(self, results):
-    """Add Choice Findings and generate metadata."""
-    for res_list in results:
-        if not res_list:
-            continue
-        for match_dict in res_list:
-            rule = match_dict['rule']
-            all_matches = match_dict['all_matches']
-            matches = match_dict['matches']
+    def add_finding(self, results):
+        """Add Choice Findings and generate metadata."""
+        for res_list in results:
+            if not res_list:
+                continue
+            for match_dict in res_list:
+                rule = match_dict['rule']
+                all_matches = match_dict['all_matches']
+                matches = match_dict['matches']
 
-            # Determine selection string
-            if all_matches:
-                selection = rule['selection'].format(list(all_matches))
-            elif matches:
-                select = rule['choice'][min(matches)][1]
-                selection = rule['selection'].format(select)
-            else:
-                selection = rule['selection'].format(rule.get('else', ''))
+                # Determine selection string
+                if all_matches:
+                    selection = rule['selection'].format(list(all_matches))
+                elif matches:
+                    select = rule['choice'][min(matches)][1]
+                    selection = rule['selection'].format(select)
+                else:
+                    selection = rule['selection'].format(rule.get('else', ''))
 
-            # Create metadata dictionary
-            meta_dict = {
-                'choice': selection,
-                'description': rule['message'],
-                **{key: rule[key] for key in rule if key not in {
-                    'choice',
-                    'message',
-                    'id',
-                    'type',
-                    'choice_type',
-                    'selection',
-                    'else'}}}
+                # Create metadata dictionary
+                meta_dict = {
+                    'choice': selection,
+                    'description': rule['message'],
+                    **{key: rule[key] for key in rule if key not in {
+                        'choice',
+                        'message',
+                        'id',
+                        'type',
+                        'choice_type',
+                        'selection',
+                        'else'}}}
 
-            self.findings[rule['id']] = meta_dict
+                self.findings[rule['id']] = meta_dict
