@@ -103,6 +103,11 @@ class PatternMatcher:
         try:
             fmt_data = self._format_content(data, file_path.suffix.lower())
             for rule in self.scan_rules:
+                case = rule.get('input_case')
+                if case == 'lower':
+                    fmt_data = fmt_data.lower()
+                elif case == 'upper':
+                    fmt_data = fmt_data.upper()
                 matches = self.matcher._find_match(rule['type'], fmt_data, rule)
                 if matches:
                     results.append({

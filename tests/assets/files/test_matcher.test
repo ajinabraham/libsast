@@ -68,3 +68,8 @@ import android.telephony.SmsManager;
 
    }
 }
+
+//RegexCase
+
+// Test case
+common MATCH1 me.
