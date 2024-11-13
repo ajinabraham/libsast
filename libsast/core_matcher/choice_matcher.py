@@ -50,6 +50,8 @@ class ChoiceMatcher:
                 # Scan only alternative path
                 scan_paths = [Path(self.alternative_path)]
             choice_args.append((scan_paths, rule))
+        if not choice_args:
+            return []
 
         # Use ThreadPoolExecutor for file reading
         with ThreadPoolExecutor() as io_executor:

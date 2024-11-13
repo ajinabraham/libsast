@@ -49,6 +49,8 @@ class PatternMatcher:
             sfile for sfile in paths
             if is_file_valid(sfile, self.exts, 5)
         }
+        if not files_to_scan:
+            return []
 
         # Use a ThreadPool for file reading
         with ThreadPoolExecutor() as io_executor:
