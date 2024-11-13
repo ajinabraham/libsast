@@ -31,13 +31,18 @@ class PatternMatcher:
 
     def scan(self, paths: list) -> dict:
         """Scan file(s) or directory."""
-        if not (self.scan_rules and paths):
-            return
-        self.validate_rules()
-
         if self.show_progress:
             pbar = common.ProgressBar('Pattern Match', len(paths))
             paths = pbar.progress_loop(paths)
+
+        file_contents = self.read_file_contents(paths)
+        return self.regex_scan(file_contents)
+
+    def read_file_contents(self, paths: list) -> list:
+        """Load file(s) content."""
+        if not (self.scan_rules and paths):
+            return
+        self.validate_rules()
 
         # Filter files by extension and size, prepare list for processing
         files_to_scan = {
@@ -45,13 +50,18 @@ class PatternMatcher:
             if is_file_valid(sfile, self.exts, 5)
         }
 
-        # Use a ThreadPool for file reading, and ProcessPool for CPU-bound regex
-        with ThreadPoolExecutor() as io_executor, ProcessPoolExecutor(
-                max_workers=self.cpu) as cpu_executor:
+        # Use a ThreadPool for file reading
+        with ThreadPoolExecutor() as io_executor:
 
             # Read all files
             file_contents = list(io_executor.map(
                 self._read_file_content, files_to_scan))
+            return file_contents
+
+    def regex_scan(self, file_contents: list) -> dict:
+        """Scan file(s) content."""
+        # Use a ProcessPool for CPU-bound regex
+        with ProcessPoolExecutor(max_workers=self.cpu) as cpu_executor:
 
             # Run regex on file data
             results = cpu_executor.map(
