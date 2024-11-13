@@ -31,14 +31,18 @@ class ChoiceMatcher:
 
     def scan(self, paths: list) -> dict:
         """Scan file(s) or directory per rule."""
-        if not (self.scan_rules and paths):
-            return
-        self.validate_rules()
-
         if self.show_progress:
             pbar = common.ProgressBar('Choice Match', len(self.scan_rules))
             self.scan_rules = pbar.progress_loop(self.scan_rules)
 
+        file_contents = self.read_file_contents(paths)
+        return self.regex_scan(file_contents)
+
+    def read_file_contents(self, paths: list) -> list:
+        """Load file(s) content."""
+        if not (self.scan_rules and paths):
+            return
+        self.validate_rules()
         choice_args = []
         for rule in self.scan_rules:
             scan_paths = paths
@@ -46,25 +50,29 @@ class ChoiceMatcher:
                 # Scan only alternative path
                 scan_paths = [Path(self.alternative_path)]
             choice_args.append((scan_paths, rule))
+        if not choice_args:
+            return []
 
-        # Use ThreadPoolExecutor for reading file contents and
-        # ProcessPoolExecutor for processing regex
-        with ThreadPoolExecutor() as io_executor, ProcessPoolExecutor(
-                max_workers=self.cpu) as cpu_executor:
+        # Use ThreadPoolExecutor for file reading
+        with ThreadPoolExecutor() as io_executor:
+            # Submit file reading tasks and wait for results
             futures = []
             for args_tuple in choice_args:
-                # Submit each read task and store the future along with the args
                 future = io_executor.submit(
                     self._read_file_contents, args_tuple)
-                futures.append((future, args_tuple))
+                futures.append(future)
+            return [future.result() for future in futures]
+
+    def regex_scan(self, file_contents) -> list:
+        """Process regex matches on the file contents."""
+        # Use ProcessPoolExecutor for regex processing
+        with ProcessPoolExecutor(max_workers=self.cpu) as cpu_executor:
 
             results = []
-            for future, _ in futures:
-                file_contents = future.result()
-                # This will block until the file reading is done
-                # Process the file contents with ProcessPoolExecutor
+            for content in file_contents:
+                # Process Choice Matcher on the file contents
                 process_future = cpu_executor.submit(
-                    self.choice_matcher, file_contents)
+                    self.choice_matcher, content)
                 results.append(process_future.result())
 
         self.add_finding(results)
