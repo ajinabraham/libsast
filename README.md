@@ -17,7 +17,10 @@ Made with ![Love](https://cloud.githubusercontent.com/assets/4301109/16754758/82
 
 ## Install
 
-`pip install libsast`
+```bash
+pip install semgrep==1.86.0 #For semgrep support
+pip install libsast
+```
 
 Pattern Matcher is cross-platform, but Semgrep supports only Mac and Linux.
 
