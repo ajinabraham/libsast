@@ -25,7 +25,7 @@ class PatternMatcher:
         self.scan_rules = get_rules(options.get('match_rules'))
         self.show_progress = options.get('show_progress')
         self.cpu = options.get('cpu_core')
-        self.queue = options.get('queue')
+        self.multiprocessing = options.get('multiprocessing')
         exts = options.get('match_extensions')
         self.exts = [ext.lower() for ext in exts] if exts else []
         self.findings = {}
@@ -68,12 +68,20 @@ class PatternMatcher:
             return {}
         self.validate_rules()
 
-        if self.queue:
+        if self.multiprocessing == 'billiard':
             # Use billiard's pool for CPU-bound regex (support queues)
             from billiard import Pool
             with Pool(processes=self.cpu) as cpu_executor:
                 # Run regex on file data
                 results = cpu_executor.map(
+                    self.pattern_matcher,
+                    file_contents,
+                )
+        elif self.multiprocessing == 'thread':
+            # Use a ThreadPool for regex check
+            with ThreadPoolExecutor() as io_executor:
+                # Run regex on file data
+                results = io_executor.map(
                     self.pattern_matcher,
                     file_contents,
                 )
