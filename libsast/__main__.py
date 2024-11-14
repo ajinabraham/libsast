@@ -78,6 +78,12 @@ def main():
                         help='No of CPU cores to use. Use all cores by default',
                         type=int,
                         required=False)
+    parser.add_argument('-mp', '--multiprocessing',
+                        help=('Multiprocessing strategy to use.'
+                              ' Options: default, thread, billiard'),
+                        default='default',
+                        type=str,
+                        required=False)
     parser.add_argument('-v', '--version',
                         help='Show libsast version',
                         required=False,
@@ -94,6 +100,7 @@ def main():
             'ignore_paths': args.ignore_paths,
             'show_progress': args.show_progress,
             'cpu_core': args.cpu_core,
+            'multiprocessing': args.multiprocessing,
         }
         result = Scanner(options, args.path).scan()
         output(args.output, result)
