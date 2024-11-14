@@ -12,7 +12,7 @@ year = str(datetime.now().year)
 __title__ = 'libsast'
 __authors__ = 'Ajin Abraham'
 __copyright__ = f'Copyright {year} Ajin Abraham, opensecurity.in'
-__version__ = '3.1.4'
+__version__ = '3.1.5'
 __version_info__ = tuple(int(i) for i in __version__.split('.'))
 __all__ = [
     'Scanner',
