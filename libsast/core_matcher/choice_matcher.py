@@ -41,9 +41,9 @@ class ChoiceMatcher:
 
     def read_file_contents(self, paths: list) -> list:
         """Load file(s) content."""
-        if not (self.scan_rules and paths):
-            return
-        self.validate_rules()
+        if not paths:
+            return []
+
         choice_args = []
         for rule in self.scan_rules:
             scan_paths = paths
@@ -64,8 +64,14 @@ class ChoiceMatcher:
                 futures.append(future)
             return [future.result() for future in futures]
 
-    def regex_scan(self, file_contents) -> list:
+    def regex_scan(self, file_contents: list, rules=None) -> dict:
         """Process regex matches on the file contents."""
+        if rules:
+            self.scan_rules = get_rules(rules)
+        if not (self.scan_rules and file_contents):
+            return {}
+        self.validate_rules()
+
         if self.queue:
             # Use billiard's pool for regex (support queues)
             from billiard import Pool

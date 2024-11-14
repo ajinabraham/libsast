@@ -41,9 +41,8 @@ class PatternMatcher:
 
     def read_file_contents(self, paths: list) -> list:
         """Load file(s) content."""
-        if not (self.scan_rules and paths):
-            return
-        self.validate_rules()
+        if not paths:
+            return []
 
         # Filter files by extension and size, prepare list for processing
         files_to_scan = {
@@ -61,8 +60,14 @@ class PatternMatcher:
                 self._read_file_content, files_to_scan))
             return file_contents
 
-    def regex_scan(self, file_contents: list) -> dict:
+    def regex_scan(self, file_contents: list, rules=None) -> dict:
         """Scan file(s) content."""
+        if rules:
+            self.scan_rules = get_rules(rules)
+        if not (self.scan_rules and file_contents):
+            return {}
+        self.validate_rules()
+
         if self.queue:
             # Use billiard's pool for CPU-bound regex (support queues)
             from billiard import Pool
