@@ -62,6 +62,10 @@ class PatternMatcher:
 
     def regex_scan(self, file_contents: list) -> dict:
         """Scan file(s) content."""
+        import time
+        from billiard import Pool
+        start_time = time.time()
+
         # Use a ProcessPool for CPU-bound regex
         with ProcessPoolExecutor(max_workers=self.cpu) as cpu_executor:
 
@@ -70,6 +74,18 @@ class PatternMatcher:
                 self.pattern_matcher,
                 file_contents,
             )
+        endtime = time.time()
+        print(f"Execution ProcPool time: {endtime - start_time:.2f} seconds")
+
+        with Pool(processes=self.cpu) as cpu_pool:
+            # Use billiard's map to distribute file_contents to self.pattern_matcher
+            results = cpu_pool.map(
+                self.pattern_matcher,
+                file_contents,
+            )
+        endtime = time.time()
+        print(f"Execution Billiard time: {endtime - start_time:.2f} seconds")
+        start_time = time.time()
 
         # Compile findings
         self.add_finding(results)
