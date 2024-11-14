@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "libsast"
-version = "3.1.3"
+version = "3.1.4"
 description = "A generic SAST library built on top of semgrep and regex"
 keywords = ["libsast", "SAST", "Python SAST", "SAST API", "Regex SAST", "Pattern Matcher"]
 authors = ["Ajin Abraham <ajin@opensecurity.in>"]
@@ -26,8 +26,13 @@ libsast = "libsast.__main__:main"
 python = "^3.8"
 requests = "*"
 pyyaml = ">=6.0"
-semgrep = {version = "1.86.0", markers = "sys_platform != 'win32'"}
 billiard = "^4.2.1"
+
+[tool.poetry.group.semgrep]
+optional = true
+
+[tool.poetry.group.semgrep.dependencies]
+semgrep = {version = "1.86.0", markers = "sys_platform != 'win32'"}
 
 [tool.poetry.group.dev.dependencies]
 bandit = "*"
