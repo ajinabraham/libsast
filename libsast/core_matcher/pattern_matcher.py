@@ -25,6 +25,7 @@ class PatternMatcher:
         self.scan_rules = get_rules(options.get('match_rules'))
         self.show_progress = options.get('show_progress')
         self.cpu = options.get('cpu_core')
+        self.queue = options.get('queue')
         exts = options.get('match_extensions')
         self.exts = [ext.lower() for ext in exts] if exts else []
         self.findings = {}
@@ -62,30 +63,23 @@ class PatternMatcher:
 
     def regex_scan(self, file_contents: list) -> dict:
         """Scan file(s) content."""
-        import time
-        from billiard import Pool
-        start_time = time.time()
-
-        # Use a ProcessPool for CPU-bound regex
-        with ProcessPoolExecutor(max_workers=self.cpu) as cpu_executor:
-
-            # Run regex on file data
-            results = cpu_executor.map(
-                self.pattern_matcher,
-                file_contents,
-            )
-        endtime = time.time()
-        print(f"Execution ProcPool time: {endtime - start_time:.2f} seconds")
-
-        with Pool(processes=self.cpu) as cpu_pool:
-            # Use billiard's map to distribute file_contents to self.pattern_matcher
-            results = cpu_pool.map(
-                self.pattern_matcher,
-                file_contents,
-            )
-        endtime = time.time()
-        print(f"Execution Billiard time: {endtime - start_time:.2f} seconds")
-        start_time = time.time()
+        if self.queue:
+            # Use billiard's pool for CPU-bound regex (support queues)
+            from billiard import Pool
+            with Pool(processes=self.cpu) as cpu_executor:
+                # Run regex on file data
+                results = cpu_executor.map(
+                    self.pattern_matcher,
+                    file_contents,
+                )
+        else:
+            # Use a ProcessPool for CPU-bound regex
+            with ProcessPoolExecutor(max_workers=self.cpu) as cpu_executor:
+                # Run regex on file data
+                results = cpu_executor.map(
+                    self.pattern_matcher,
+                    file_contents,
+                )
 
         # Compile findings
         self.add_finding(results)

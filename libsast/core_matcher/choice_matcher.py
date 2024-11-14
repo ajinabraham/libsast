@@ -24,6 +24,7 @@ class ChoiceMatcher:
         self.scan_rules = get_rules(options.get('choice_rules'))
         self.show_progress = options.get('show_progress')
         self.cpu = options.get('cpu_core')
+        self.queue = options.get('queue')
         self.alternative_path = options.get('alternative_path')
         exts = options.get('choice_extensions')
         self.exts = [ext.lower() for ext in exts] if exts else []
@@ -65,15 +66,20 @@ class ChoiceMatcher:
 
     def regex_scan(self, file_contents) -> list:
         """Process regex matches on the file contents."""
-        # Use ProcessPoolExecutor for regex processing
-        with ProcessPoolExecutor(max_workers=self.cpu) as cpu_executor:
-
-            results = []
-            for content in file_contents:
-                # Process Choice Matcher on the file contents
-                process_future = cpu_executor.submit(
-                    self.choice_matcher, content)
-                results.append(process_future.result())
+        if self.queue:
+            # Use billiard's pool for regex (support queues)
+            from billiard import Pool
+            with Pool(processes=self.cpu) as pool:
+                # Run regex on file data
+                results = pool.map(
+                    self.choice_matcher,
+                    file_contents)
+        else:
+            # Use ProcessPoolExecutor for regex processing
+            with ProcessPoolExecutor(max_workers=self.cpu) as cpu_executor:
+                results = list(cpu_executor.map(
+                    self.choice_matcher,
+                    file_contents))
 
         self.add_finding(results)
         return self.findings
