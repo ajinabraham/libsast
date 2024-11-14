@@ -54,7 +54,7 @@ class Scanner:
     def scan(self) -> dict:
         """Start Scan."""
         results = {}
-        valid_paths = self.get_scan_files(self.paths)
+        valid_paths = self.get_scan_files()
 
         if not valid_paths:
             return {}
@@ -68,13 +68,13 @@ class Scanner:
 
         return results
 
-    def get_scan_files(self, paths):
+    def get_scan_files(self):
         """Get files valid for scanning."""
-        if not isinstance(paths, list):
+        if not isinstance(self.paths, list):
             raise InvalidPathError('Path should be a list')
 
         all_files = set()
-        for path in paths:
+        for path in self.paths:
             pobj = Path(path)
             if pobj.is_dir():
                 all_files.update({
