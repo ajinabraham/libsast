@@ -1,6 +1,6 @@
 # -*- coding: utf_8 -*-
 """Semantic Grep Core."""
-from libsast.core_sgrep.helpers import invoke_semgrep
+from libsast.core_sgrep.helpers import get_match_string, invoke_semgrep
 from libsast import (
     common,
     standards,
@@ -43,6 +43,8 @@ class SemanticGrep:
 
     def format_output(self, results):
         """Format sgrep results."""
+        if not results:
+            return
         errs = results.get('errors')
         if errs:
             self.findings['errors'] = errs
@@ -50,11 +52,19 @@ class SemanticGrep:
             return
         smatches = self.findings['matches']
         for find in results['results']:
+            file_path = find['path']
+            start_line = find['start']['line']
+            end_line = find['end']['line']
             file_details = {
-                'file_path': find['path'],
+                'file_path': file_path,
                 'match_position': (find['start']['col'], find['end']['col']),
-                'match_lines': (find['start']['line'], find['end']['line']),
-                'match_string': find['extra']['lines'],
+                'match_lines': (start_line, end_line),
+                'match_string': get_match_string(
+                    file_path,
+                    start_line,
+                    end_line,
+                    find.get('extra', {}).get('lines', ''),
+                ),
             }
             rule_id = find['check_id']
             if rule_id in smatches:
