@@ -25,12 +25,9 @@ class SemanticGrep:
     def scan(self, paths: list) -> dict:
         """Do sgrep scan."""
         if self.exts:
-            filtered = []
-            for sfile in paths:
-                if sfile.suffix.lower() in self.exts:
-                    filtered.append(sfile)
-            if filtered:
-                paths = filtered
+            paths = [sfile for sfile in paths if sfile.suffix.lower() in self.exts]
+            if not paths:
+                return self.findings
         if self.show_progress:
             pbar = common.ProgressBar('Semantic Grep', len(paths))
             sgrep_out = pbar.progress_function(
