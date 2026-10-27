@@ -147,6 +147,9 @@ def invoke_semgrep(paths, scan_rules):
         '--json',
         '--config',
         scan_rules,
+        # A scanned file named like an option, such as `--output=x`, must
+        # still be read as a path.
+        '--',
     ]
     return _invoke_semgrep_batched(base_command, ps)
 
