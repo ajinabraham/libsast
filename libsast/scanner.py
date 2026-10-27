@@ -89,8 +89,9 @@ class Scanner:
 
     def validate_file(self, path):
         """Check if we should scan the file."""
-        # Early exit if the path is not a file or does not exist
-        if not path.exists() or not path.is_file():
+        # Early exit if the path is not a file or does not exist.
+        # Symlinks are skipped: one in the scanned tree can point outside it.
+        if path.is_symlink() or not path.exists() or not path.is_file():
             return False
 
         # Validate against ignore conditions
