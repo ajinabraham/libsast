@@ -86,16 +86,34 @@ def comment_replacer(matches, data):
     return data
 
 
+def _multi_comment_sub(match):
+    """Replace a multiline or XML comment with spaces, preserving newlines."""
+    grp = match.group()
+    if 'ignore:' in grp:
+        return grp
+    return REPL_REGEX.sub(' ', grp)
+
+
 def strip_comments1(data):
     """Remove Comments.
 
     Replace multiline comments first and
     then replace single line comments.
     """
-    mmatches = DEF_MULTI.finditer(data)
-    data = comment_replacer(mmatches, data)
-    smatches = DEF_SINGLE.finditer(data)
-    data = comment_replacer(smatches, data)
+    if '/*' in data:
+        data = DEF_MULTI.sub(_multi_comment_sub, data)
+    if '//' in data:
+        def _single_sub(match):
+            grp = match.group()
+            stripm = grp.strip()
+            if stripm == '//' or 'ignore:' in stripm:
+                return grp
+            start = match.start()
+            if start > 0 and data[start - 1] == ':':
+                return grp
+            return REPL_REGEX.sub(' ', grp)
+
+        data = DEF_SINGLE.sub(_single_sub, data)
     return data
 
 
@@ -104,8 +122,8 @@ def strip_comments2(data):
 
     Replace comments for HTML/XML
     """
-    mmatches = XML_CMT.finditer(data)
-    data = comment_replacer(mmatches, data)
+    if '<!--' in data:
+        data = XML_CMT.sub(_multi_comment_sub, data)
     return data
 
 

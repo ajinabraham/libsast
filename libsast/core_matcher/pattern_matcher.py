@@ -68,12 +68,14 @@ class PatternMatcher:
             return {}
         self.validate_rules()
 
+        chunksize = max(1, len(file_contents) // ((self.cpu or 1) * 4))
         if self.multiprocessing == 'billiard':
             from billiard import Pool
             with Pool(processes=self.cpu) as cpu_executor:
                 results = cpu_executor.map(
                     self.pattern_matcher,
                     file_contents,
+                    chunksize=chunksize,
                 )
         elif self.multiprocessing == 'thread':
             with ThreadPoolExecutor() as io_executor:
@@ -86,6 +88,7 @@ class PatternMatcher:
                 results = cpu_executor.map(
                     self.pattern_matcher,
                     file_contents,
+                    chunksize=chunksize,
                 )
 
         self.add_finding(results)

@@ -120,16 +120,19 @@ class TreeSitterMatcher:
             return {}
         self.validate_rules()
 
+        chunksize = max(1, len(file_contents) // ((self.cpu or 1) * 4))
         if self.multiprocessing == 'billiard':
             from billiard import Pool
             with Pool(processes=self.cpu) as cpu_executor:
-                results = cpu_executor.map(self.ts_matcher, file_contents)
+                results = cpu_executor.map(
+                    self.ts_matcher, file_contents, chunksize=chunksize)
         elif self.multiprocessing == 'thread':
             with ThreadPoolExecutor() as io_executor:
                 results = list(io_executor.map(self.ts_matcher, file_contents))
         else:
             with ProcessPoolExecutor(max_workers=self.cpu) as cpu_executor:
-                results = list(cpu_executor.map(self.ts_matcher, file_contents))
+                results = list(cpu_executor.map(
+                    self.ts_matcher, file_contents, chunksize=chunksize))
 
         self.add_finding(results)
         return self.findings

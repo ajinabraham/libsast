@@ -89,12 +89,14 @@ class ChoiceMatcher:
             return {}
         self.validate_rules()
 
+        chunksize = max(1, len(file_contents) // ((self.cpu or 1) * 4))
         if self.multiprocessing == 'billiard':
             from billiard import Pool
             with Pool(processes=self.cpu) as pool:
                 results = pool.map(
                     self.choice_matcher,
-                    file_contents)
+                    file_contents,
+                    chunksize=chunksize)
         elif self.multiprocessing == 'thread':
             with ThreadPoolExecutor() as io_executor:
                 results = list(io_executor.map(
@@ -104,7 +106,8 @@ class ChoiceMatcher:
             with ProcessPoolExecutor(max_workers=self.cpu) as cpu_executor:
                 results = list(cpu_executor.map(
                     self.choice_matcher,
-                    file_contents))
+                    file_contents,
+                    chunksize=chunksize))
 
         self.add_finding(results)
         return self.findings
