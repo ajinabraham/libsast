@@ -1,0 +1,1 @@
+__d(function(g,r){_jsx(WebView,{allowUniversalAccessFromFileURLs:!0});AsyncStorage.setItem("token",x);Linking.openURL(u);});

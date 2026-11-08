@@ -1,0 +1,6 @@
+- id: bad_lang
+  type: TreeSitter
+  languages: [nonexistent_lang_xyz]
+  message: test
+  severity: info
+  pattern: (identifier) @match

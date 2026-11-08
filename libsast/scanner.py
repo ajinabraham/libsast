@@ -7,6 +7,7 @@ from libsast.common import get_worker_count
 from libsast.core_matcher.pattern_matcher import PatternMatcher
 from libsast.core_matcher.choice_matcher import ChoiceMatcher
 from libsast.core_sgrep.semantic_sgrep import SemanticGrep
+from libsast.core_treesitter.ts_matcher import TreeSitterMatcher
 from libsast.exceptions import InvalidPathError
 
 
@@ -16,6 +17,11 @@ class Scanner:
         self.options = {
             'sgrep_rules': None,
             'sgrep_extensions': None,
+            'ts_rules': None,
+            'ts_extensions': None,
+            'ts_extension_map': None,
+            'ts_max_file_size_mb': 15,
+            'ts_max_match_length': 300,
             'match_rules': None,
             'match_extensions': None,
             'choice_rules': None,
@@ -60,11 +66,17 @@ class Scanner:
             return {}
 
         if self.options['match_rules']:
-            results['pattern_matcher'] = PatternMatcher(self.options).scan(valid_paths)
+            results['pattern_matcher'] = PatternMatcher(
+                self.options).scan(valid_paths)
+        if self.options['ts_rules']:
+            results['treesitter_matcher'] = TreeSitterMatcher(
+                self.options).scan(valid_paths)
         if self.options['choice_rules']:
-            results['choice_matcher'] = ChoiceMatcher(self.options).scan(valid_paths)
+            results['choice_matcher'] = ChoiceMatcher(
+                self.options).scan(valid_paths)
         if self.options['sgrep_rules']:
-            results['semantic_grep'] = SemanticGrep(self.options).scan(valid_paths)
+            results['semantic_grep'] = SemanticGrep(
+                self.options).scan(valid_paths)
 
         return results
 

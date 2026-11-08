@@ -1,6 +1,6 @@
 # libsast
 
-Generic SAST for Security Engineers. Powered by regex based pattern matcher and semantic aware [semgrep](https://github.com/returntocorp/semgrep).
+Generic SAST for Security Engineers. Powered by [tree-sitter](https://tree-sitter.github.io/tree-sitter/) AST pattern matcher, regex based pattern matcher, and semantic aware [semgrep](https://github.com/returntocorp/semgrep).
 
 Made with ![Love](https://cloud.githubusercontent.com/assets/4301109/16754758/82e3a63c-4813-11e6-9430-6015d98aeaab.png) in India [![Tweet](https://img.shields.io/twitter/url?url=https://github.com/ajinabraham/libsast)](https://twitter.com/intent/tweet/?text=Generic%20SAST%20for%20Security%20Engineers.%20Powered%20by%20regex%20based%20pattern%20matcher%20and%20semantic%20aware%20semgrep%20by%20%40ajinabraham%20%40OpenSecurity_IN&url=https://github.com/ajinabraham/libsast)
 
@@ -18,17 +18,26 @@ Made with ![Love](https://cloud.githubusercontent.com/assets/4301109/16754758/82
 ## Install
 
 ```bash
-pip install semgrep==1.172.0 #For semgrep support
 pip install libsast
+# Optional Tree-sitter language grammar extras:
+pip install "libsast[treesitter]"  # 165+ languages via tree-sitter-language-pack
+pip install "libsast[mobile]"      # JS, TS/TSX, Java, Kotlin, Swift, ObjC, C#
+pip install "libsast[js]"          # JavaScript and TypeScript/TSX
+# Or install any individual tree-sitter-<lang> package alongside libsast:
+pip install libsast tree-sitter-python
+# Optional Semgrep support (macOS/Linux):
+pip install semgrep==1.172.0
 ```
 
-Pattern Matcher is cross-platform, but Semgrep supports only Mac and Linux.
+Pattern Matcher and Tree-sitter Matcher are cross-platform (Windows, macOS, and Linux). Semgrep supports macOS and Linux.
 
 ## Command Line Options
 
 ```bash
 $ libsast
-usage: libsast [-h] [-o OUTPUT] [-p PATTERN_FILE] [-s SGREP_PATTERN_FILE]
+usage: libsast [-h] [-o OUTPUT] [-p PATTERN_FILE] [-t TS_PATTERN_FILE]
+               [-s SGREP_PATTERN_FILE]
+               [--ts-file-extensions TS_FILE_EXTENSIONS [TS_FILE_EXTENSIONS ...]]
                [--sgrep-file-extensions SGREP_FILE_EXTENSIONS [SGREP_FILE_EXTENSIONS ...]]
                [--file-extensions FILE_EXTENSIONS [FILE_EXTENSIONS ...]]
                [--ignore-filenames IGNORE_FILENAMES [IGNORE_FILENAMES ...]]
@@ -46,8 +55,13 @@ options:
                         Output filename to save JSON report.
   -p PATTERN_FILE, --pattern-file PATTERN_FILE
                         YAML pattern file, directory or url
+  -t TS_PATTERN_FILE, --ts-pattern-file TS_PATTERN_FILE
+                        Tree-sitter YAML pattern file, directory or url
   -s SGREP_PATTERN_FILE, --sgrep-pattern-file SGREP_PATTERN_FILE
                         sgrep rules directory
+  --ts-file-extensions TS_FILE_EXTENSIONS [TS_FILE_EXTENSIONS ...]
+                        File extensions that should be scanned with
+                        tree-sitter matcher
   --sgrep-file-extensions SGREP_FILE_EXTENSIONS [SGREP_FILE_EXTENSIONS ...]
                         File extensions that should be scanned with semantic
                         grep
@@ -273,23 +287,23 @@ $ libsast -s tests/assets/rules/semantic_grep/ -p tests/assets/rules/pattern_mat
 
 ```python
 >>> from libsast import Scanner
->>> options = {'match_rules': '/Users/ajinabraham/Code/njsscan/njsscan/rules/pattern_matcher', 'sgrep_rules': '/Users/ajinabraham/Code/njsscan/njsscan/rules/semantic_grep', 'sgrep_extensions': {'', '.js'}, 'match_extensions': {'.hbs', '.sh', '.ejs', '.toml', '.mustache', '.tmpl', '.jade', '.json', '.ect', '.vue', '.yml', '.hdbs', '.tl', '.html', '.haml', '.dust', '.pug', '.tpl'}, 'ignore_filenames': {'bootstrap.min.js', '.DS_Store', 'bootstrap-tour.js', 'd3.min.js', 'tinymce.js', 'codemirror.js', 'tinymce.min.js', 'react-dom.production.min.js', 'react.js', 'jquery.min.js', 'react.production.min.js', 'codemirror-compressed.js', 'axios.min.js', 'angular.min.js', 'raphael-min.js', 'vue.min.js'}, 'ignore_extensions': {'.7z', '.exe', '.rar', '.zip', '.a', '.o', '.tz'}, 'ignore_paths': {'__MACOSX', 'jquery', 'fixtures', 'node_modules', 'bower_components', 'example', 'spec'}, 'show_progress': False}
+>>> options = {'match_rules': '/Users/ajinabraham/Code/njsscan/njsscan/rules/pattern_matcher', 'sgrep_rules': '/Users/ajinabraham/Code/njsscan/njsscan/rules/semantic_grep', 'sgrep_extensions': {'', '.js'}, 'match_extensions': {'.hbs', '.sh', '.ejs', '.toml', '.mustache', '.tmpl', '.jade', '.json', '.ect', '.vue', '.yml', '.hdbs', '.tl', '.html', '.haml', '.dust', '.pug', '.tpl'}, 'ignore_filenames': {'bootstrap.min.js', '.DS_Store', 'bootstrap-tour.js', 'd3.min.js', 'tinymce.js', 'codemirror.js', 'tinymce.min.js', 'react-dom.production.min.js', 'react.js', 'jquery.min.js', 'react.production.min.js', 'codemirror-compressed.js', 'axios.min.js', 'angular.min.js', 'raphael-min.js', 'vue.min.js'}, 'ignore_paths': {'__MACOSX', 'jquery', 'fixtures', 'node_modules', 'bower_components', 'example', 'spec'}, 'show_progress': False}
 >>> paths = ['../njsscan/tests/assets/dot_njsscan/']
 >>> scanner = Scanner(options, paths)
 >>> scanner.scan()
-{'pattern_matcher': {'handlebar_mustache_template': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/ignore_ext.hbs', 'match_string': '{{{html}}}', 'match_position': (52, 62), 'match_lines': (1, 1)}], 'metadata': {'id': 'handlebar_mustache_template', 'description': 'The Handlebar.js/Mustache.js template has an unescaped variable. Untrusted user input passed to this variable results in Cross Site Scripting (XSS).', 'type': 'Regex', 'pattern': '{{{.+}}}|{{[ ]*&[\\w]+.*}}', 'severity': 'ERROR', 'input_case': 'exact', 'cwe': "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')", 'owasp': 'A1: Injection'}}}, 'semantic_grep': {'matches': {'node_aes_ecb': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/lorem_scan.js', 'match_position': (16, 87), 'match_lines': (14, 14), 'match_string': "let decipher = crypto.createDecipheriv('aes-128-ecb', Buffer.from(ENCRYPTION_KEY), iv);"}], 'metadata': {'owasp': 'A9: Using Components with Known Vulnerabilities', 'cwe': 'CWE-327: Use of a Broken or Risky Cryptographic Algorithm', 'description': 'AES with ECB mode is deterministic in nature and not suitable for encrypting large amount of repetitive data.', 'severity': 'ERROR'}}, 'node_tls_reject': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/skip_dir/skip_me.js', 'match_position': (9, 58), 'match_lines': (9, 9), 'match_string': "        process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';"}, {'file_path': '../njsscan/tests/assets/dot_njsscan/skip_dir/skip_me.js', 'match_position': (9, 55), 'match_lines': (18, 18), 'match_string': '        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";'}], 'metadata': {'owasp': 'A6: Security Misconfiguration', 'cwe': 'CWE-295: Improper Certificate Validation', 'description': "Setting 'NODE_TLS_REJECT_UNAUTHORIZED' to 0 will allow node server to accept self signed certificates and is not a secure behaviour.", 'severity': 'ERROR'}}, 'node_curl_ssl_verify_disable': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/skip_dir/skip_me.js', 'match_position': (5, 11), 'match_lines': (45, 51), 'match_string': '    curl(url,\n\n        {\n\n            SSL_VERIFYPEER: 0\n\n        },\n\n        function (err) {\n\n            response.end(this.body);\n\n        })'}], 'metadata': {'owasp': 'A6: Security Misconfiguration', 'cwe': 'CWE-599: Missing Validation of OpenSSL Certificate', 'description': 'SSL Certificate verification for node-curl is disabled.', 'severity': 'ERROR'}}, 'regex_injection_dos': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/lorem_scan.js', 'match_position': (5, 37), 'match_lines': (25, 27), 'match_string': '    var key = req.param("key");\n\n    // Regex created from user input\n\n    var re = new RegExp("\\\\b" + key);'}], 'metadata': {'owasp': 'A1: Injection', 'cwe': 'CWE-400: Uncontrolled Resource Consumption', 'description': 'User controlled data in RegExp() can make the application vulnerable to layer 7 DoS.', 'severity': 'ERROR'}}, 'express_xss': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/skip.js', 'match_position': (9, 55), 'match_lines': (7, 10), 'match_string': '        var str = new Buffer(req.cookies.profile, \'base64\').toString();\n\n        var obj = serialize.unserialize(str);\n\n        if (obj.username) {\n\n            res.send("Hello " + escape(obj.username));'}], 'metadata': {'owasp': 'A1: Injection', 'cwe': "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')", 'description': 'Untrusted User Input in Response will result in Reflected Cross Site Scripting Vulnerability.', 'severity': 'ERROR'}}, 'generic_path_traversal': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/lorem_scan.js', 'match_position': (5, 35), 'match_lines': (36, 37), 'match_string': "    var filePath = path.join(__dirname, '/' + req.query.load);\n\n    fileSystem.readFile(filePath); // ignore: generic_path_traversal"}, {'file_path': '../njsscan/tests/assets/dot_njsscan/lorem_scan.js', 'match_position': (5, 35), 'match_lines': (42, 43), 'match_string': "    var filePath = path.join(__dirname, '/' + req.query.load);\n\n    fileSystem.readFile(filePath); // detect this"}], 'metadata': {'owasp': 'A5: Broken Access Control', 'cwe': 'CWE-23: Relative Path Traversal', 'description': 'Untrusted user input in readFile()/readFileSync() can endup in Directory Traversal Attacks.', 'severity': 'ERROR'}}, 'express_open_redirect': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/lorem_scan.js', 'match_position': (5, 26), 'match_lines': (49, 51), 'match_string': '    var target = req.param("target");\n\n    // BAD: sanitization doesn\'t apply here\n\n    res.redirect(target); //ignore: express_open_redirect'}], 'metadata': {'owasp': 'A1: Injection', 'cwe': "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')", 'description': 'Untrusted user input in redirect() can result in Open Redirect vulnerability.', 'severity': 'ERROR'}}, 'node_deserialize': {'files': [{'file_path': '../njsscan/tests/assets/dot_njsscan/skip.js', 'match_position': (19, 45), 'match_lines': (8, 8), 'match_string': '        var obj = serialize.unserialize(str);'}], 'metadata': {'owasp': 'A8: Insecure Deserialization', 'cwe': 'CWE-502: Deserialization of Untrusted Data', 'description': "User controlled data in 'unserialize()' or 'deserialize()' function can result in Object Injection or Remote Code Injection.", 'severity': 'ERROR'}}}, 'errors': [{'type': 'SourceParseError', 'code': 3, 'short_msg': 'parse error', 'long_msg': 'Could not parse .njsscan as javascript', 'level': 'warn', 'spans': [{'start': {'line': 2, 'col': 20}, 'end': {'line': 2, 'col': 21}, 'source_hash': 'c60298be568bfb1325d92cbb3c0bc1450a25b85bb2e4000bdc3267c05f1c8c73', 'file': '.njsscan', 'context_start': None, 'context_end': None}], 'help': 'If the code appears to be valid, this may be a semgrep bug.'}, {'type': 'SourceParseError', 'code': 3, 'short_msg': 'parse error', 'long_msg': 'Could not parse no_ext_scan as javascript', 'level': 'warn', 'spans': [{'start': {'line': 1, 'col': 3}, 'end': {'line': 1, 'col': 5}, 'source_hash': 'f002e2a715be216987dd1b134e7b9fa6eef28e3caa82dead0109c4cdc489e089', 'file': 'no_ext_scan', 'context_start': None, 'context_end': None}], 'help': 'If the code appears to be valid, this may be a semgrep bug.'}]}}
 ```
 
-## Write you own Static Analysis tool
+## Write your own Static Analysis tool
 
-With libsast, you can write your own static analysis tools. libsast provides two matching engines:
+With libsast, you can write your own static analysis tools. libsast provides three matching engines:
 
-1. **Pattern Matcher**
-2. **Semantic Grep**
+1. **Pattern Matcher (Regex)**
+2. **Tree-sitter Matcher (AST)**
+3. **Semantic Grep (Semgrep)**
 
 ### Pattern Matcher
 
-Currently Pattern Matcher supports any language.
+Pattern Matcher supports any language.
 
 Use [Regex 101](https://regex101.com/r/nGbAay/1) to write simple Python Regex rule patterns.
 
@@ -309,15 +323,15 @@ A sample rule looks like
     reference: http://foo.bar
     foo: Some extra metadata
 ```
-A rule consist of 
+A rule consists of
 
 * `id` : A unique id for the rule.
 * `message`: A description for the rule.
 * `input_case`: It can be `exact`, `upper` or `lower`. Data will be converted to lower case/upper case/as it is before comparing with the regex.
 * `pattern`: List of patterns depends on `type`.
 * `severity`: It can be `error`, `warning` or `info`.
-* `type`: Pattern Matcher supports `Regex`, `RegexAnd`, `RegexOr`, `RegexAndOr`, `RegexAndNot`.
-* `metadata` (optional): Define your own custom fields that you can use as metadata along with standard mappings. 
+* `type`: Pattern Matcher supports `Regex`, `RegexAnd`, `RegexOr`, `RegexAndOr`, `RegexAndNot` (as well as `TreeSitter`, `TreeSitterAnd`, `TreeSitterOr`, `TreeSitterAndOr`, `TreeSitterAndNot`).
+* `metadata` (optional): Define your own custom fields that you can use as metadata along with standard mappings.
 
 ```bash
 1. Regex - if regex1 in input
@@ -332,11 +346,46 @@ Test your pattern matcher rules
 
 `$ libsast -p tests/assets/rules/pattern_matcher/patterns.yaml tests/assets/files/`
 
+### Tree-sitter Matcher
+
+Tree-sitter Matcher provides language-agnostic, syntax-aware AST pattern matching across any language supported by [Tree-sitter](https://tree-sitter.github.io/tree-sitter/using-parsers/queries/1-syntax.html) (JavaScript, TypeScript/TSX, HTML/Vue `<script>`, Java, Kotlin, Swift, Objective-C, Dart, C#, Python, Go, Rust, C/C++, etc.).
+
+Tree-sitter rules can be placed inside `--pattern-file` (`match_rules`) alongside Regex rules or passed separately via `-t` / `ts_rules`:
+
+```yaml
+- id: rn_webview_universal_file_access
+  type: TreeSitter
+  languages: [javascript, typescript, tsx]
+  message: WebView allows universal access from file URLs
+  severity: error
+  pattern: |
+    (jsx_opening_element
+      name: (_) @_tag (#match? @_tag "WebView$")
+      attribute: (jsx_attribute
+        (property_identifier) @_prop (#eq? @_prop "allowUniversalAccessFromFileURLs")
+        (_ (true)))) @match
+  exclude_ancestor: |
+    (if_statement condition: (_) @_c (#match? @_c "__DEV__"))
+  metadata:
+    cwe: cwe-200
+    owasp-mobile: m1
+    masvs: platform-2
+```
+
+Supported rule keys:
+
+* `type`: `TreeSitter`, `TreeSitterAnd`, `TreeSitterOr`, `TreeSitterAndOr`, `TreeSitterAndNot`.
+* `pattern`: Tree-sitter S-expression query (or list of queries) capturing `@match`.
+* `languages` (optional): List of Tree-sitter language names the rule applies to.
+* `exclude_ancestor` (optional): S-expression query; suppresses matches nested inside a matching ancestor node (e.g., `if (__DEV__)`).
+* `within_ancestor` (optional): S-expression query; requires `@match` to be nested inside a matching ancestor node.
+* `not_within_node` (optional): S-expression query; suppresses `@match` if the matched node itself contains a sub-node matching this query (e.g., missing-property checks).
+
 #### Inbuilt Standard Mapping Support
 
 Metadata fields also support [libsast standard mapping](https://github.com/ajinabraham/libsast/tree/master/libsast/standards).
 
-For example, the metadata field `owasp-web: a1` will get expanded at runtime as `owasp-web: 'A1: Injection'`. 
+For example, the metadata field `owasp-web: a1` will get expanded at runtime as `owasp-web: 'A1: Injection'`.
 
 *Currently Supports*
 

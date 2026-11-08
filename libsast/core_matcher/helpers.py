@@ -17,6 +17,7 @@ import requests
 DEF_SINGLE = re.compile(r'//.+', re.MULTILINE)
 DEF_MULTI = re.compile(r'/\*([\S|\s]+?)\*/', re.MULTILINE)
 XML_CMT = re.compile(r'<!--([\S|\s]+?)-->', re.MULTILINE)
+REPL_REGEX = re.compile(r'\S', re.MULTILINE)
 
 
 def download_rule(url):
@@ -65,22 +66,22 @@ def get_rules(rule_loc):  # noqa: R701
 def comment_replacer(matches, data):
     """Replace Comments from data."""
     to_replace = set()
-    repl_regex = re.compile(r'\S', re.MULTILINE)
     for match in matches:
-        if match.group():
-            stripm = match.group().strip()
+        grp = match.group()
+        if grp:
+            stripm = grp.strip()
             if stripm == '//':
                 # ignore comment starters
                 continue
             if ':' + stripm in data:
                 # possible URLs http://, do not strip
                 continue
-            if 'ignore:' in data:
+            if 'ignore:' in stripm:
                 # preserve ignore tags
                 continue
-            to_replace.add(match.group())
+            to_replace.add(grp)
     for itm in to_replace:
-        dummy = repl_regex.sub(' ', itm)
+        dummy = REPL_REGEX.sub(' ', itm)
         data = data.replace(itm, dummy)
     return data
 
@@ -91,11 +92,9 @@ def strip_comments1(data):
     Replace multiline comments first and
     then replace single line comments.
     """
-    single_line = DEF_SINGLE
-    multi_line = DEF_MULTI
-    mmatches = multi_line.finditer(data)
+    mmatches = DEF_MULTI.finditer(data)
     data = comment_replacer(mmatches, data)
-    smatches = single_line.finditer(data)
+    smatches = DEF_SINGLE.finditer(data)
     data = comment_replacer(smatches, data)
     return data
 
@@ -105,29 +104,20 @@ def strip_comments2(data):
 
     Replace comments for HTML/XML
     """
-    multi_line = XML_CMT
-    mmatches = multi_line.finditer(data)
+    mmatches = XML_CMT.finditer(data)
     data = comment_replacer(mmatches, data)
     return data
 
 
 def get_match_lines(content, pos):
-    """Get Match lines from position."""
-    start_line = 0
-    filepos = 0
-    skip = False
-    for idx, line in enumerate(content.split('\n'), 1):
-        filepos += len(line) + 1
-        if filepos >= pos[0] and filepos >= pos[1] and not skip:
-            # Match is on the same line
-            return (idx, idx)
-        elif filepos >= pos[0] and not skip:
-            # Multiline match, find start line
-            skip = True
-            start_line = idx
-        if filepos >= pos[1] and skip:
-            # Multiline march, find end line
-            return (start_line, idx)
+    """Get Match lines from position in O(1) C-level newline count."""
+    start_pos = max(0, pos[0] - 1)
+    end_pos = max(start_pos, pos[1] - 1)
+    start_line = content.count('\n', 0, start_pos) + 1
+    if end_pos == start_pos:
+        return (start_line, start_line)
+    end_line = start_line + content.count('\n', start_pos, end_pos)
+    return (start_line, end_line)
 
 
 def is_file_valid(sfile, allowed_extensions=None, max_size_mb=5):
@@ -141,15 +131,11 @@ def is_file_valid(sfile, allowed_extensions=None, max_size_mb=5):
     Returns:
         bool: True if the file is valid, False otherwise.
     """
-    # Get the file extension in lowercase
     ext = sfile.suffix.lower()
-
-    # Check if the file extension is allowed
     if allowed_extensions and ext not in allowed_extensions:
         return False
 
-    # Check if the file size exceeds the maximum limit (in bytes)
-    max_size_bytes = max_size_mb * 1024 * 1024  # Convert MB to bytes
+    max_size_bytes = max_size_mb * 1024 * 1024
     if sfile.stat().st_size > max_size_bytes:
         return False
 
