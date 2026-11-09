@@ -14,7 +14,7 @@ def get_pos(match):
 
 
 # Cache compiled regex patterns
-@lru_cache(maxsize=256)
+@lru_cache(maxsize=4096)
 def get_compiled_pattern(pattern):
     """Compile and cache regex patterns."""
     return re.compile(pattern)
@@ -23,7 +23,6 @@ def get_compiled_pattern(pattern):
 class MatchCommand:
     def __init__(self):
         self.patterns = {}
-        # Dictionary to map pattern names to their corresponding classes
         self.available_patterns = {
             'Regex': Regex,
             'RegexAnd': RegexAnd,
@@ -37,14 +36,12 @@ class MatchCommand:
             pattern_name) or self._get_pattern_class(pattern_name)
         self.patterns.setdefault(pattern_name, pattern_class)
 
-        # Apply case transformation if specified in the rule
         case = rule.get('input_case')
         if case == 'lower':
             content = content.lower()
         elif case == 'upper':
             content = content.upper()
 
-        # Perform search
         return pattern_class._perform_search(content, rule)
 
     def _get_pattern_class(self, pattern_name):
@@ -70,10 +67,11 @@ class Regex(MatchStrategy):
         """Helper to find all matches in content and extract details."""
         matches = set()
         for match in pattern.finditer(content):
-            if match.group():
+            grp = match.group()
+            if grp:
                 match_pos = get_pos(match)
                 match_lines = get_match_lines(content, match_pos)
-                matches.add((match.group(), match_pos, match_lines))
+                matches.add((grp, match_pos, match_lines))
         return matches
 
 
@@ -81,10 +79,12 @@ class RegexAnd(MatchStrategy):
     def _perform_search(self, content, rule):
         patterns = rule['pattern'] if isinstance(
             rule['pattern'], list) else [rule['pattern']]
+        compiled = [get_compiled_pattern(regex) for regex in patterns]
+        if not all(pat.search(content) for pat in compiled):
+            return False
         all_matches = set()
-        for regex in patterns:
-            pattern = get_compiled_pattern(regex)
-            matches = Regex._find_matches(content, pattern)
+        for pat in compiled:
+            matches = Regex._find_matches(content, pat)
             if not matches:
                 return False
             all_matches.update(matches)
@@ -105,24 +105,28 @@ class RegexOr(MatchStrategy):
 class RegexAndNot(MatchStrategy):
     def _perform_search(self, content, rule):
         present_pattern, not_pattern = rule['pattern']
-        not_found = get_compiled_pattern(not_pattern).search(content) is None
-        if not not_found:
+        present_re = get_compiled_pattern(present_pattern)
+        if not present_re.search(content):
             return False
-        present_matches = Regex._find_matches(
-            content, get_compiled_pattern(present_pattern))
+        if get_compiled_pattern(not_pattern).search(content) is not None:
+            return False
+        present_matches = Regex._find_matches(content, present_re)
         return present_matches if present_matches else False
 
 
 class RegexAndOr(MatchStrategy):
     def _perform_search(self, content, rule):
         and_pattern, or_patterns = rule['pattern']
-        and_matches = Regex._find_matches(content, get_compiled_pattern(and_pattern))
+        and_re = get_compiled_pattern(and_pattern)
+        if not and_re.search(content):
+            return False
         or_matches = set()
         for regex in or_patterns:
             or_pattern = get_compiled_pattern(regex)
             or_matches = Regex._find_matches(content, or_pattern)
             if or_matches:
                 break
-        if and_matches and or_matches:
-            return and_matches.union(or_matches)
-        return False
+        if not or_matches:
+            return False
+        and_matches = Regex._find_matches(content, and_re)
+        return and_matches.union(or_matches) if and_matches else False

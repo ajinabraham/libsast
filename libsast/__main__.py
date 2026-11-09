@@ -27,7 +27,8 @@ def output(out, scan_results):
     if scan_results:
         sgrep_out = scan_results.get('semantic_grep', {}).get('matches')
         matcher_out = scan_results.get('pattern_matcher')
-        if sgrep_out or matcher_out:
+        ts_out = scan_results.get('treesitter_matcher')
+        if sgrep_out or matcher_out or ts_out:
             sys.exit(1)
     sys.exit(0)
 
@@ -45,8 +46,16 @@ def main():
     parser.add_argument('-p', '--pattern-file',
                         help='YAML pattern file, directory or url',
                         required=False)
+    parser.add_argument('-t', '--ts-pattern-file',
+                        help='Tree-sitter YAML pattern file, directory or url',
+                        required=False)
     parser.add_argument('-s', '--sgrep-pattern-file',
                         help='sgrep rules directory',
+                        required=False)
+    parser.add_argument('--ts-file-extensions',
+                        nargs='+',
+                        help=('File extensions that should be scanned'
+                              ' with tree-sitter matcher'),
                         required=False)
     parser.add_argument('--sgrep-file-extensions',
                         nargs='+',
@@ -89,10 +98,14 @@ def main():
                         required=False,
                         action='store_true')
     args = parser.parse_args()
-    if args.path and (args.pattern_file or args.sgrep_pattern_file):
+    has_rules = bool(
+        args.pattern_file or args.ts_pattern_file or args.sgrep_pattern_file)
+    if args.path and has_rules:
         options = {
             'sgrep_rules': args.sgrep_pattern_file,
             'sgrep_extensions': args.sgrep_file_extensions,
+            'ts_rules': args.ts_pattern_file,
+            'ts_extensions': args.ts_file_extensions,
             'match_rules': args.pattern_file,
             'match_extensions': args.file_extensions,
             'ignore_filenames': args.ignore_filenames,

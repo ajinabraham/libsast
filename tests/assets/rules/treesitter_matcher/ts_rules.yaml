@@ -1,0 +1,75 @@
+- id: ts_eval_call
+  type: TreeSitter
+  languages: [javascript, typescript, tsx]
+  message: Avoid eval() call
+  severity: error
+  pattern: |
+    (call_expression
+      function: (identifier) @_fn (#eq? @_fn "eval")) @match
+  exclude_ancestor: |
+    (if_statement condition: (_) @_c (#match? @_c "__DEV__"))
+  metadata:
+    cwe: cwe-95
+
+- id: ts_webview_universal_access
+  type: TreeSitter
+  languages: [tsx, javascript]
+  message: WebView universal file access enabled
+  severity: error
+  pattern:
+    - |
+      (jsx_self_closing_element
+        name: (identifier) @_tag (#eq? @_tag "WebView")
+        attribute: (jsx_attribute
+          (property_identifier) @_prop
+          (#eq? @_prop "allowUniversalAccessFromFileURLs"))) @match
+    - |
+      (pair
+        key: (property_identifier) @_prop
+        (#eq? @_prop "allowUniversalAccessFromFileURLs")
+        value: [
+          (true)
+          (unary_expression operator: "!" argument: (number) @_n (#eq? @_n "0"))
+        ]) @match
+
+- id: ts_mmkv_missing_encryption
+  type: TreeSitter
+  languages: [typescript, tsx, javascript]
+  message: MMKV initialized without encryptionKey
+  severity: warning
+  pattern: |
+    (new_expression
+      constructor: (identifier) @_cls (#eq? @_cls "MMKV")) @match
+  not_within_node: |
+    (pair key: (property_identifier) @_k (#eq? @_k "encryptionKey"))
+
+- id: ts_and_rule
+  type: TreeSitterAnd
+  languages: [javascript]
+  message: Both AsyncStorage and setItem used
+  severity: warning
+  pattern:
+    - ((identifier) @match (#eq? @match "AsyncStorage"))
+    - ((property_identifier) @match (#eq? @match "setItem"))
+
+- id: ts_and_not_rule
+  type: TreeSitterAndNot
+  languages: [javascript]
+  message: openURL called without sanitizeURL
+  severity: warning
+  pattern:
+    - ((property_identifier) @match (#eq? @match "openURL"))
+    - ((identifier) @match (#eq? @match "sanitizeURL"))
+
+- id: ts_async_storage_sensitive_key
+  type: TreeSitter
+  languages: [javascript, typescript, tsx]
+  message: Sensitive key stored in AsyncStorage
+  severity: error
+  pattern: |
+    (call_expression
+      function: (member_expression
+        object: (identifier) @_obj (#eq? @_obj "AsyncStorage")
+        property: (property_identifier) @_fn (#eq? @_fn "setItem"))
+      arguments: (arguments
+        (string) @_key (#match? @_key "(?i)(token|password|secret)"))) @match

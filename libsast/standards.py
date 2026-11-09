@@ -1,5 +1,6 @@
 # -*- coding: utf_8 -*-
 """Standards Matcher."""
+from functools import lru_cache
 from pathlib import Path
 
 from libsast.common import (
@@ -19,6 +20,7 @@ def read_standards(rule_loc):
     return None
 
 
+@lru_cache(maxsize=1)
 def get_standards():
     """Get inbuilt mappings."""
     stds_loc = Path(__file__).parents[0] / 'standards'

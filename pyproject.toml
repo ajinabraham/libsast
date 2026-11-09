@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "libsast"
-version = "3.1.10"
-description = "A generic SAST library built on top of semgrep and regex"
-keywords = ["libsast", "SAST", "Python SAST", "SAST API", "Regex SAST", "Pattern Matcher"]
+version = "3.2.0"
+description = "A generic SAST library built on top of tree-sitter, semgrep, and regex"
+keywords = ["libsast", "SAST", "Python SAST", "SAST API", "Tree-sitter SAST", "Regex SAST", "Pattern Matcher"]
 authors = ["Ajin Abraham <ajin@opensecurity.in>"]
 license = "LGPL-3.0-or-later"
 readme = "README.md"
@@ -27,6 +27,28 @@ python = "^3.10"
 requests = "*"
 pyyaml = ">=6.0"
 billiard = "^4.2.1"
+tree-sitter = ">=0.25.0"
+tree-sitter-javascript = {version = ">=0.23.0", optional = true}
+tree-sitter-typescript = {version = ">=0.23.2", optional = true}
+tree-sitter-java = {version = ">=0.23.0", optional = true}
+tree-sitter-kotlin = {version = ">=1.0.0", optional = true}
+tree-sitter-swift = {version = ">=0.0.1", optional = true}
+tree-sitter-objc = {version = ">=3.0.0", optional = true}
+tree-sitter-c-sharp = {version = ">=0.23.0", optional = true}
+tree-sitter-language-pack = {version = ">=0.13.0", python = ">=3.11", optional = true}
+
+[tool.poetry.extras]
+js = ["tree-sitter-javascript", "tree-sitter-typescript"]
+mobile = [
+    "tree-sitter-javascript",
+    "tree-sitter-typescript",
+    "tree-sitter-java",
+    "tree-sitter-kotlin",
+    "tree-sitter-swift",
+    "tree-sitter-objc",
+    "tree-sitter-c-sharp",
+]
+treesitter = ["tree-sitter-language-pack"]
 
 [tool.poetry.group.semgrep]
 optional = true
@@ -37,6 +59,8 @@ semgrep = {version = "1.172.0", markers = "sys_platform != 'win32'"}
 [tool.poetry.group.dev.dependencies]
 bandit = "*"
 pytest = "*"
+tree-sitter-javascript = ">=0.23.0"
+tree-sitter-typescript = ">=0.23.2"
 
 [build-system]
 requires = ["poetry-core"]

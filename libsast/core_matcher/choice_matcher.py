@@ -1,6 +1,5 @@
 # -*- coding: utf_8 -*-
 """Choice Matcher."""
-import re
 from pathlib import Path
 from concurrent.futures import (
     ProcessPoolExecutor,
@@ -13,6 +12,7 @@ from libsast.core_matcher.helpers import (
     is_file_valid,
     strip_comments,
 )
+from libsast.core_matcher.matchers import get_compiled_pattern
 from libsast import (
     common,
     exceptions,
@@ -39,30 +39,51 @@ class ChoiceMatcher:
         file_contents = self.read_file_contents(paths)
         return self.regex_scan(file_contents)
 
-    def read_file_contents(self, paths: list) -> list:
-        """Load file(s) content."""
-        if not paths:
-            return []
-
-        choice_args = []
-        for rule in self.scan_rules:
-            scan_paths = paths
-            if rule['type'] != 'code' and self.alternative_path:
-                # Scan only alternative path
-                scan_paths = [Path(self.alternative_path)]
-            choice_args.append((scan_paths, rule))
-        if not choice_args:
-            return []
-
-        # Use ThreadPoolExecutor for file reading
+    def _load_formatted_paths(self, unique_paths):
+        """Read and format all unique candidate paths in parallel."""
+        path_list = list(unique_paths)
         with ThreadPoolExecutor() as io_executor:
-            # Submit file reading tasks and wait for results
-            futures = []
-            for args_tuple in choice_args:
-                future = io_executor.submit(
-                    self._read_file_contents, args_tuple)
-                futures.append(future)
-            return [future.result() for future in futures]
+            formatted_list = list(io_executor.map(
+                self._read_formatted_path, path_list))
+        return {
+            p: d for p, d in zip(path_list, formatted_list) if d is not None
+        }
+
+    def read_file_contents(self, paths: list) -> list:
+        """Load file(s) content once and pair with each choice rule."""
+        if not paths or not self.scan_rules:
+            return []
+
+        alt_path = Path(self.alternative_path) if self.alternative_path else None
+        rule_paths = []
+        unique_paths = set()
+        for rule in self.scan_rules:
+            scan_paths = [alt_path] if (
+                rule['type'] != 'code' and alt_path) else paths
+            rule_paths.append((scan_paths, rule))
+            unique_paths.update(scan_paths)
+
+        path_to_data = self._load_formatted_paths(unique_paths)
+        return [
+            [
+                (path_to_data[p], rule)
+                for p in scan_paths
+                if p in path_to_data
+            ]
+            for scan_paths, rule in rule_paths
+        ]
+
+    def _read_formatted_path(self, sfile):
+        """Read and strip comments for a single file once."""
+        if not is_file_valid(sfile, self.exts, 5):
+            return None
+        try:
+            return self._format_content(
+                sfile.read_text('utf-8', 'ignore'),
+                sfile.suffix.lower())
+        except Exception as e:
+            raise exceptions.RuleProcessingError(
+                f'Error reading file: {sfile}') from e
 
     def regex_scan(self, file_contents: list, rules=None) -> dict:
         """Process regex matches on the file contents."""
@@ -72,26 +93,25 @@ class ChoiceMatcher:
             return {}
         self.validate_rules()
 
+        chunksize = max(1, len(file_contents) // ((self.cpu or 1) * 4))
         if self.multiprocessing == 'billiard':
-            # Use billiard's pool for regex (support queues)
             from billiard import Pool
             with Pool(processes=self.cpu) as pool:
-                # Run regex on file data
                 results = pool.map(
                     self.choice_matcher,
-                    file_contents)
+                    file_contents,
+                    chunksize=chunksize)
         elif self.multiprocessing == 'thread':
-            # Use a ThreadPool for regex check
             with ThreadPoolExecutor() as io_executor:
                 results = list(io_executor.map(
                     self.choice_matcher,
                     file_contents))
         else:
-            # Use ProcessPoolExecutor for regex processing
             with ProcessPoolExecutor(max_workers=self.cpu) as cpu_executor:
                 results = list(cpu_executor.map(
                     self.choice_matcher,
-                    file_contents))
+                    file_contents,
+                    chunksize=chunksize))
 
         self.add_finding(results)
         return self.findings
@@ -113,40 +133,21 @@ class ChoiceMatcher:
                     raise exceptions.PatternKeyMissingError(
                         f'The rule is missing the key "{key}"')
 
-    def _read_file_contents(self, args_tuple):
-        """Read file contents for the given paths and rule."""
-        scan_paths, rule = args_tuple
-        results = []
-        for sfile in scan_paths:
-            if not is_file_valid(sfile, self.exts, 5):
-                continue
-            try:
-                data = self._format_content(
-                    sfile.read_text('utf-8', 'ignore'),
-                    sfile.suffix.lower())
-                results.append((data, rule))
-            except Exception as e:
-                raise exceptions.RuleProcessingError(
-                    'Error reading file: {}'.format(sfile)) from e
-        return results
-
     def find_choices(self, data, rule):
-        """Find Choices."""
+        """Find Choices using cached compiled patterns."""
         all_matches = set()
         for idx, choice in enumerate(rule['choice']):
             typ = rule['choice_type']
             if typ == 'and':
-                # Return on first and choice
-                if all(re.compile(and_regx).search(data) for and_regx in choice[0]):
+                if all(get_compiled_pattern(and_regx).search(data)
+                       for and_regx in choice[0]):
                     return (all_matches, [idx])
-            elif re.compile(choice[0]).search(data):
+            elif get_compiled_pattern(choice[0]).search(data):
                 if typ == 'or':
-                    # Return on first or choice
                     return (all_matches, [idx])
                 elif typ == 'all':
-                    # Extract all choice(s) from all files
                     all_matches.add(choice[1])
-        return (all_matches, None)  # None means no matches found.
+        return (all_matches, None)
 
     def choice_matcher(self, file_contents):
         """Process regex matches on the file contents."""
@@ -175,7 +176,6 @@ class ChoiceMatcher:
                 all_matches = match_dict['all_matches']
                 matches = match_dict['matches']
 
-                # Determine selection string
                 if all_matches:
                     selection = rule['selection'].format(list(all_matches))
                 elif matches:
@@ -184,7 +184,6 @@ class ChoiceMatcher:
                 else:
                     selection = rule['selection'].format(rule.get('else', ''))
 
-                # Create metadata dictionary
                 meta_dict = {
                     'choice': selection,
                     'description': rule['message'],

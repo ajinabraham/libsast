@@ -13,6 +13,8 @@ from libsast.core_matcher.helpers import (
     strip_comments,
 )
 from libsast.core_matcher import matchers
+from libsast.core_treesitter.matchers import TS_MATCHERS
+from libsast.core_treesitter.ts_matcher import match_ts_rules_on_file
 from libsast import (
     common,
     exceptions,
@@ -26,6 +28,8 @@ class PatternMatcher:
         self.show_progress = options.get('show_progress')
         self.cpu = options.get('cpu_core')
         self.multiprocessing = options.get('multiprocessing')
+        self.ts_ext_map = options.get('ts_extension_map')
+        self.ts_max_match_len = options.get('ts_max_match_length') or 300
         exts = options.get('match_extensions')
         self.exts = [ext.lower() for ext in exts] if exts else []
         self.findings = {}
@@ -44,7 +48,6 @@ class PatternMatcher:
         if not paths:
             return []
 
-        # Filter files by extension and size, prepare list for processing
         files_to_scan = {
             sfile for sfile in paths
             if is_file_valid(sfile, self.exts, 5)
@@ -52,10 +55,7 @@ class PatternMatcher:
         if not files_to_scan:
             return []
 
-        # Use a ThreadPool for file reading
         with ThreadPoolExecutor() as io_executor:
-
-            # Read all files
             file_contents = list(io_executor.map(
                 self._read_file_content, files_to_scan))
             return file_contents
@@ -68,39 +68,36 @@ class PatternMatcher:
             return {}
         self.validate_rules()
 
+        chunksize = max(1, len(file_contents) // ((self.cpu or 1) * 4))
         if self.multiprocessing == 'billiard':
-            # Use billiard's pool for CPU-bound regex (support queues)
             from billiard import Pool
             with Pool(processes=self.cpu) as cpu_executor:
-                # Run regex on file data
                 results = cpu_executor.map(
                     self.pattern_matcher,
                     file_contents,
+                    chunksize=chunksize,
                 )
         elif self.multiprocessing == 'thread':
-            # Use a ThreadPool for regex check
             with ThreadPoolExecutor() as io_executor:
-                # Run regex on file data
                 results = io_executor.map(
                     self.pattern_matcher,
                     file_contents,
                 )
         else:
-            # Use a ProcessPool for CPU-bound regex
             with ProcessPoolExecutor(max_workers=self.cpu) as cpu_executor:
-                # Run regex on file data
                 results = cpu_executor.map(
                     self.pattern_matcher,
                     file_contents,
+                    chunksize=chunksize,
                 )
 
-        # Compile findings
         self.add_finding(results)
         return self.findings
 
     def validate_rules(self):
         """Validate Rules before scanning."""
-        available_matchers = {m for m in dir(matchers) if m.startswith('R')}
+        regex_matchers = {m for m in dir(matchers) if m.startswith('R')}
+        available_matchers = regex_matchers | set(TS_MATCHERS)
         required_keys = ['type', 'pattern']
 
         for rule in self.scan_rules:
@@ -108,7 +105,6 @@ class PatternMatcher:
                 raise exceptions.InvalidRuleFormatError(
                     'Pattern Matcher Rule format is invalid.')
 
-            # Check for missing required keys
             missing_keys = [key for key in required_keys if key not in rule]
             if missing_keys:
                 mkeys = ', '.join(missing_keys)
@@ -117,7 +113,7 @@ class PatternMatcher:
 
             pattern_name = rule['type']
             if pattern_name not in available_matchers:
-                supported = ', '.join(available_matchers)
+                supported = ', '.join(sorted(available_matchers))
                 raise exceptions.MatcherNotFoundError(
                     f'Matcher {pattern_name} is not supported.'
                     f' Available matchers are {supported}.')
@@ -131,24 +127,60 @@ class PatternMatcher:
             print(f'Error reading {file_path}: {e}')
             return file_path, ''
 
+    def _match_regex_rules(self, file_path, data, regex_rules):
+        """Run regex rules against formatted file content."""
+        if not regex_rules:
+            return []
+        results = []
+        fmt_data = self._format_content(data, file_path.suffix.lower())
+        case_cache = {'exact': fmt_data, None: fmt_data}
+        for rule in regex_rules:
+            case = rule.get('input_case')
+            if case not in case_cache:
+                if case == 'lower':
+                    case_cache[case] = fmt_data.lower()
+                elif case == 'upper':
+                    case_cache[case] = fmt_data.upper()
+                else:
+                    case_cache[case] = fmt_data
+            rule_view = (
+                {**rule, 'input_case': 'exact'} if case in ('lower', 'upper')
+                else rule
+            )
+            matches = self.matcher._find_match(
+                rule['type'], case_cache[case], rule_view)
+            if matches:
+                results.append({
+                    'file': file_path.as_posix(),
+                    'rule': rule,
+                    'matches': matches,
+                })
+        return results
+
     def pattern_matcher(self, file_data):
         """Static Analysis Pattern Matcher."""
         file_path, data = file_data
-        results = []
         try:
-            fmt_data = self._format_content(data, file_path.suffix.lower())
-            for rule in self.scan_rules:
-                matches = self.matcher._find_match(rule['type'], fmt_data, rule)
-                if matches:
-                    results.append({
-                        'file': file_path.as_posix(),
-                        'rule': rule,
-                        'matches': matches,
-                    })
+            regex_rules = [
+                r for r in self.scan_rules if r['type'] not in TS_MATCHERS
+            ]
+            ts_rules = [
+                r for r in self.scan_rules if r['type'] in TS_MATCHERS
+            ]
+            results = self._match_regex_rules(file_path, data, regex_rules)
+            if ts_rules:
+                results.extend(match_ts_rules_on_file(
+                    file_path,
+                    data,
+                    ts_rules,
+                    self.ts_ext_map,
+                    self.ts_max_match_len))
+            return results
+        except exceptions.LibsastError:
+            raise
         except Exception as e:
             msg = f'Error processing rule for {file_path}: {e}'
             raise exceptions.RuleProcessingError(msg)
-        return results
 
     @staticmethod
     @lru_cache(maxsize=128)
@@ -177,11 +209,10 @@ class PatternMatcher:
 
                 if not self.findings[rule_id]['metadata']:
                     meta = rule.get('metadata', {})
-                    # message & severity are mandatory
                     meta['description'] = rule['message']
                     meta['severity'] = rule['severity']
                     self.findings[rule_id]['metadata'] = meta
 
-                # Sort files by specified criteria
-                self.findings[rule_id]['files'].sort(
-                    key=itemgetter('file_path', 'match_string', 'match_lines'))
+        sort_key = itemgetter('file_path', 'match_string', 'match_lines')
+        for details in self.findings.values():
+            details['files'].sort(key=sort_key)
