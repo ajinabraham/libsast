@@ -13,7 +13,7 @@ def get_pos(match):
     return (1 if start == 0 else start, end)
 
 
-# Cache compiled regex patterns (android_permissions.yaml alone has >2600 patterns)
+# Cache compiled regex patterns
 @lru_cache(maxsize=4096)
 def get_compiled_pattern(pattern):
     """Compile and cache regex patterns."""
