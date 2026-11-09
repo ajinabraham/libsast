@@ -55,19 +55,23 @@ class ChoiceMatcher:
             return []
 
         alt_path = Path(self.alternative_path) if self.alternative_path else None
-        unique_paths = set(paths) | ({alt_path} if alt_path else set())
-        path_to_data = self._load_formatted_paths(unique_paths)
-
-        choice_data = []
+        rule_paths = []
+        unique_paths = set()
         for rule in self.scan_rules:
             scan_paths = [alt_path] if (
                 rule['type'] != 'code' and alt_path) else paths
-            choice_data.append([
+            rule_paths.append((scan_paths, rule))
+            unique_paths.update(scan_paths)
+
+        path_to_data = self._load_formatted_paths(unique_paths)
+        return [
+            [
                 (path_to_data[p], rule)
                 for p in scan_paths
                 if p in path_to_data
-            ])
-        return choice_data
+            ]
+            for scan_paths, rule in rule_paths
+        ]
 
     def _read_formatted_path(self, sfile):
         """Read and strip comments for a single file once."""

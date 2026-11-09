@@ -2,7 +2,6 @@
 """Dynamic language grammar loader and extension mapping for tree-sitter."""
 from functools import lru_cache
 import importlib
-import re
 
 from tree_sitter import Language
 
@@ -53,10 +52,6 @@ _MODULE_OVERRIDE = {
     'typescript': ('tree_sitter_typescript', 'language_typescript'),
     'c_sharp': ('tree_sitter_c_sharp', 'language'),
 }
-_SCRIPT_TAG_RE = re.compile(
-    rb'<script\b[^>]*>(.*?)</script\s*>',
-    re.IGNORECASE | re.DOTALL,
-)
 
 
 def _wrap_language(obj):
@@ -123,17 +118,43 @@ def resolve_file_language(file_path, custom_ext_map=None):
     return str(entry).lower(), False
 
 
+def _find_script_body_spans(lower_bytes):
+    """Locate (body_start, body_end) byte spans of <script> elements."""
+    spans = []
+    pos = 0
+    n = len(lower_bytes)
+    while pos < n:
+        open_idx = lower_bytes.find(b'<script', pos)
+        if open_idx == -1:
+            break
+        after_tag = open_idx + 7
+        if after_tag < n and lower_bytes[after_tag:after_tag + 1] not in (
+                b'>', b' ', b'\t', b'\r', b'\n', b'/'):
+            pos = after_tag
+            continue
+        gt_idx = lower_bytes.find(b'>', after_tag)
+        if gt_idx == -1:
+            break
+        body_start = gt_idx + 1
+        close_idx = lower_bytes.find(b'</script', body_start)
+        if close_idx == -1:
+            break
+        spans.append((body_start, close_idx))
+        end_gt = lower_bytes.find(b'>', close_idx + 8)
+        pos = (end_gt + 1) if end_gt != -1 else n
+    return spans
+
+
 def extract_script_bytes(raw_bytes):
     """Blank out non-<script> regions while preserving exact line/byte offsets."""
-    if b'<script' not in raw_bytes.lower():
+    lower = raw_bytes.lower()
+    spans = _find_script_body_spans(lower)
+    if not spans:
         return b''
     out = bytearray(
         10 if b == 10 else (13 if b == 13 else 32)
         for b in raw_bytes
     )
-    found = False
-    for match in _SCRIPT_TAG_RE.finditer(raw_bytes):
-        start, end = match.span(1)
+    for start, end in spans:
         out[start:end] = raw_bytes[start:end]
-        found = True
-    return bytes(out) if found else b''
+    return bytes(out)

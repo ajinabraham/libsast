@@ -1,6 +1,7 @@
 # -*- coding: utf_8 -*-
 """Tree-sitter AST Matching Strategies."""
 from abc import ABC, abstractmethod
+from bisect import bisect_right
 from functools import lru_cache
 
 from tree_sitter import Parser, Query
@@ -14,7 +15,6 @@ from libsast.core_treesitter.languages import get_language
 _IDENTIFIER_TYPES = {
     'identifier',
     'simple_identifier',
-    'property_identifier',
     'variable_name',
     'constant',
 }
@@ -22,8 +22,22 @@ _DECLARATOR_TYPES = {
     'variable_declarator',
     'constant_declaration',
     'property_declaration',
-    'assignment',
     'short_var_declaration',
+}
+_MUTATION_TYPES = {
+    'assignment_expression',
+    'augmented_assignment_expression',
+    'update_expression',
+    'reassignment',
+}
+_SCOPE_TYPES = {
+    'program',
+    'source_file',
+    'module',
+    'statement_block',
+    'block',
+    'function_body',
+    'class_body',
 }
 
 
@@ -44,9 +58,32 @@ def parse_tree(lang_name, source_bytes):
     return parser.parse(source_bytes)
 
 
-def _declarator_pair(node):
-    """Return (name_node, val_node) if node is a constant/variable declarator."""
+def _enclosing_scope_span(node):
+    """Return (start_byte, end_byte) of the nearest enclosing lexical scope."""
+    cur = node.parent
+    while cur is not None:
+        if cur.type in _SCOPE_TYPES:
+            return (cur.start_byte, cur.end_byte)
+        cur = cur.parent
+    return (0, 1 << 60)
+
+
+def _is_const_declarator(node, source_bytes):
+    """Return True if declarator node belongs to an immutable declaration."""
+    if node.type == 'constant_declaration':
+        return True
     if node.type not in _DECLARATOR_TYPES:
+        return False
+    parent = node.parent
+    if parent is None:
+        return False
+    header = source_bytes[parent.start_byte:node.start_byte].strip()
+    return header.startswith((b'const', b'val', b'final'))
+
+
+def _declarator_pair(node, source_bytes):
+    """Return (name_node, val_node) for an immutable single-line declarator."""
+    if not _is_const_declarator(node, source_bytes):
         return None, None
     name_node = node.child_by_field_name(
         'name') or node.child_by_field_name('left')
@@ -56,39 +93,93 @@ def _declarator_pair(node):
         return None, None
     if name_node.type not in _IDENTIFIER_TYPES:
         return None, None
+    if val_node.start_point[0] != val_node.end_point[0]:
+        return None, None
     return name_node, val_node
 
 
-def extract_constants_map(root_node, source_bytes):
-    """Extract a file-local map of identifier_bytes -> value_bytes."""
-    consts = {}
+def _collect_mutated_identifiers(root_node, source_bytes):
+    """Return set of identifier byte strings that are reassigned/mutated."""
+    mutated = set()
     stack = [root_node]
     while stack:
         node = stack.pop()
-        name_node, val_node = _declarator_pair(node)
-        if name_node is not None:
-            ident = source_bytes[name_node.start_byte:name_node.end_byte]
-            if ident and ident not in consts:
-                consts[ident] = source_bytes[
-                    val_node.start_byte:val_node.end_byte]
+        if node.type in _MUTATION_TYPES:
+            target = node.child_by_field_name(
+                'left') or node.child_by_field_name('argument')
+            if target is not None and target.type in _IDENTIFIER_TYPES:
+                mutated.add(source_bytes[target.start_byte:target.end_byte])
         for child in node.children:
             if child.is_named:
                 stack.append(child)
-    return consts
+    return mutated
 
 
-def _is_declaration_or_callee(node):
-    """Return True if identifier node is a declaration LHS or callee."""
+def _filter_unique_scope_bindings(bindings, counts):
+    """Keep only bindings declared once in their enclosing scope."""
+    clean = {}
+    for ident, entries in bindings.items():
+        valid = [
+            e for e in entries
+            if counts.get(((e[0], e[1]), ident), 0) == 1
+        ]
+        if valid:
+            clean[ident] = valid
+    return clean
+
+
+def extract_scoped_constants(root_node, source_bytes):
+    """Extract scope-aware immutable bindings: ident -> list of bindings."""
+    mutated = _collect_mutated_identifiers(root_node, source_bytes)
+    bindings = {}
+    counts = {}
+    stack = [root_node]
+    while stack:
+        node = stack.pop()
+        name_node, val_node = _declarator_pair(node, source_bytes)
+        if name_node is not None:
+            ident = source_bytes[name_node.start_byte:name_node.end_byte]
+            if ident and ident not in mutated:
+                scope_span = _enclosing_scope_span(node)
+                key = (scope_span, ident)
+                counts[key] = counts.get(key, 0) + 1
+                val_bytes = source_bytes[val_node.start_byte:val_node.end_byte]
+                bindings.setdefault(ident, []).append(
+                    (scope_span[0], scope_span[1], val_node.end_byte, val_bytes))
+        for child in node.children:
+            if child.is_named:
+                stack.append(child)
+    return _filter_unique_scope_bindings(bindings, counts)
+
+
+def _resolve_scoped_value(ident, use_pos, scoped_consts):
+    """Find the innermost in-scope constant value declared before use_pos."""
+    candidates = scoped_consts.get(ident)
+    if not candidates:
+        return None
+    best = None
+    best_width = 1 << 62
+    for s_start, s_end, decl_end, val_bytes in candidates:
+        if s_start <= use_pos <= s_end and decl_end < use_pos:
+            width = s_end - s_start
+            if width < best_width:
+                best_width = width
+                best = val_bytes
+    return best
+
+
+def _is_non_value_identifier(node):
+    """Return True if identifier node is a declaration LHS, callee, or key."""
     parent = node.parent
     if parent is None:
         return False
-    for field in ('name', 'left', 'function'):
+    for field in ('name', 'left', 'function', 'property', 'key'):
         if parent.child_by_field_name(field) == node:
             return True
     return False
 
 
-def _collect_constant_replacements(root_node, source_bytes, consts):
+def _collect_constant_replacements(root_node, source_bytes, scoped_consts):
     """Collect sorted (start, end, val_bytes) spans for identifier uses."""
     replacements = []
     stack = [root_node]
@@ -96,9 +187,12 @@ def _collect_constant_replacements(root_node, source_bytes, consts):
         node = stack.pop()
         if node.type in _IDENTIFIER_TYPES:
             ident = source_bytes[node.start_byte:node.end_byte]
-            if ident in consts and not _is_declaration_or_callee(node):
-                replacements.append((
-                    node.start_byte, node.end_byte, consts[ident]))
+            if ident in scoped_consts and not _is_non_value_identifier(node):
+                val_bytes = _resolve_scoped_value(
+                    ident, node.start_byte, scoped_consts)
+                if val_bytes is not None:
+                    replacements.append((
+                        node.start_byte, node.end_byte, val_bytes))
             continue
         for child in node.children:
             if child.is_named:
@@ -108,23 +202,47 @@ def _collect_constant_replacements(root_node, source_bytes, consts):
 
 
 def inline_tree_constants(lang_name, tree, source_bytes):
-    """Return a Tree with identifier uses replaced by their constant values."""
-    consts = extract_constants_map(tree.root_node, source_bytes)
-    if not consts:
-        return tree
+    """Return (inlined_tree, offset_shifts) for constant-resolved matching."""
+    scoped_consts = extract_scoped_constants(tree.root_node, source_bytes)
+    if not scoped_consts:
+        return tree, ()
     replacements = _collect_constant_replacements(
-        tree.root_node, source_bytes, consts)
+        tree.root_node, source_bytes, scoped_consts)
     if not replacements:
-        return tree
+        return tree, ()
     out = bytearray()
+    shifts = []
     cursor = 0
+    cum_delta = 0
     for start, end, val_bytes in replacements:
-        if start >= cursor:
-            out.extend(source_bytes[cursor:start])
-            out.extend(val_bytes)
-            cursor = end
+        if start < cursor:
+            continue
+        out.extend(source_bytes[cursor:start])
+        out.extend(val_bytes)
+        new_end = len(out)
+        cum_delta += len(val_bytes) - (end - start)
+        shifts.append((new_end, cum_delta, start, end))
+        cursor = end
     out.extend(source_bytes[cursor:])
-    return parse_tree(lang_name, bytes(out))
+    return parse_tree(lang_name, bytes(out)), tuple(shifts)
+
+
+def _map_to_original_byte(inlined_byte, shifts):
+    """Translate a byte offset from inlined source back to original source."""
+    if not shifts:
+        return inlined_byte
+    ends = [s[0] for s in shifts]
+    idx = bisect_right(ends, inlined_byte) - 1
+    if idx < 0:
+        return inlined_byte
+    new_end, cum_delta, orig_start, orig_end = shifts[idx]
+    prev_delta = shifts[idx - 1][1] if idx > 0 else 0
+    new_start = orig_start + prev_delta
+    if inlined_byte >= new_end:
+        return inlined_byte - cum_delta
+    if inlined_byte <= new_start:
+        return orig_start
+    return orig_end
 
 
 def _query_matches(query, node):
@@ -162,73 +280,70 @@ def _matches_subquery(lang_name, query_str, node):
     return bool(_captured_nodes(q, node))
 
 
-def _has_matching_ancestor(lang_name, query_str, node, root_node):
-    """Return True if node is inside any ancestor matched by query_str."""
+def _ancestor_spans(lang_name, query_str, root_node):
+    """Compute (start_byte, end_byte) spans for an ancestor query once."""
     if not query_str:
-        return False
+        return None
     q = get_compiled_query(lang_name, query_str)
-    ancestors = _captured_nodes(q, root_node)
-    if not ancestors:
+    return [
+        (a.start_byte, a.end_byte)
+        for a in _captured_nodes(q, root_node)
+    ]
+
+
+def _in_spans(node, spans):
+    """Return True if node is inside any (start, end) span."""
+    if not spans:
         return False
     n_start, n_end = node.start_byte, node.end_byte
-    return any(
-        a.start_byte <= n_start and n_end <= a.end_byte
-        for a in ancestors
-    )
+    return any(s <= n_start and n_end <= e for s, e in spans)
 
 
-def _node_passes_filters(node, root_node, lang_name, rule):
-    """Check optional exclude_ancestor, within_ancestor, and not_within_node."""
-    exclude_anc = rule.get('exclude_ancestor')
-    if exclude_anc and _has_matching_ancestor(
-            lang_name, exclude_anc, node, root_node):
+def _format_node_match(node, source_bytes, shifts=(), max_len=300):
+    """Convert a matched AST Node into a libsast (match_str, pos, lines) tuple."""
+    orig_start = _map_to_original_byte(node.start_byte, shifts)
+    orig_end = max(orig_start, _map_to_original_byte(node.end_byte, shifts))
+    raw = source_bytes[orig_start:orig_end].decode('utf-8', 'ignore').strip()
+    if max_len and len(raw) > max_len:
+        raw = raw[:max_len]
+    pos = (1 if orig_start == 0 else orig_start, orig_end)
+    lines = (node.start_point[0] + 1, node.end_point[0] + 1)
+    return (raw, pos, lines)
+
+
+def _node_allowed(node, lang_name, excl_spans, within_spans, not_within):
+    """Return True if node passes ancestor and not_within_node filters."""
+    if excl_spans is not None and _in_spans(node, excl_spans):
         return False
-    within_anc = rule.get('within_ancestor')
-    if within_anc and not _has_matching_ancestor(
-            lang_name, within_anc, node, root_node):
+    if within_spans is not None and not _in_spans(node, within_spans):
         return False
-    not_within = rule.get('not_within_node')
     if not_within and _matches_subquery(lang_name, not_within, node):
         return False
     return True
 
 
-def _format_node_match(node, source_bytes, max_len=300):
-    """Convert a matched AST Node into a libsast (match_str, pos, lines) tuple."""
-    start_row = node.start_point[0]
-    end_row = node.end_point[0]
-    src_lines = source_bytes.splitlines()
-    if 0 <= start_row < len(src_lines) and end_row < len(src_lines):
-        if start_row == end_row and len(src_lines[start_row]) <= max_len:
-            raw = src_lines[start_row][
-                node.start_point[1]:node.end_point[1]
-            ].decode('utf-8', 'ignore').strip()
-            if not raw:
-                raw = src_lines[start_row].decode('utf-8', 'ignore').strip()
-        else:
-            chunk = b'\n'.join(src_lines[start_row:end_row + 1])
-            raw = chunk.decode('utf-8', 'ignore').strip()
-    else:
-        raw = source_bytes[
-            node.start_byte:node.end_byte
-        ].decode('utf-8', 'ignore').strip()
-    if max_len and len(raw) > max_len:
-        raw = raw[:max_len]
-    pos = (1 if node.start_byte == 0 else node.start_byte, node.end_byte)
-    lines = (start_row + 1, end_row + 1)
-    return (raw, pos, lines)
-
-
 def find_query_matches(tree, source_bytes, lang_name, query_str, rule,
-                       max_len=300):
+                       max_len=300, shifts=()):
     """Run a single S-expression query and return a set of formatted matches."""
     root = tree.root_node
-    query = get_compiled_query(lang_name, query_str)
+    try:
+        query = get_compiled_query(lang_name, query_str)
+    except Exception:
+        return set()
+    captured = _captured_nodes(query, root)
+    if not captured:
+        return set()
+
+    excl_spans = _ancestor_spans(lang_name, rule.get('exclude_ancestor'), root)
+    within_spans = _ancestor_spans(lang_name, rule.get('within_ancestor'), root)
+    not_within = rule.get('not_within_node')
+
     matches = set()
-    for node in _captured_nodes(query, root):
-        if not _node_passes_filters(node, root, lang_name, rule):
+    for node in captured:
+        if not _node_allowed(
+                node, lang_name, excl_spans, within_spans, not_within):
             continue
-        match_tuple = _format_node_match(node, source_bytes, max_len)
+        match_tuple = _format_node_match(node, source_bytes, shifts, max_len)
         if match_tuple[0]:
             matches.add(match_tuple)
     return matches
@@ -246,31 +361,34 @@ def rule_supports_language(rule, lang_name):
 
 class TSMatchStrategy(ABC):
     @abstractmethod
-    def _perform_search(self, tree, source_bytes, lang_name, rule, max_len):
+    def _perform_search(self, tree, source_bytes, lang_name, rule, max_len,
+                        shifts=()):
         """Search for AST pattern matches in tree."""
 
 
 class TreeSitter(TSMatchStrategy):
-    def _perform_search(self, tree, source_bytes, lang_name, rule, max_len):
+    def _perform_search(self, tree, source_bytes, lang_name, rule, max_len,
+                        shifts=()):
         patterns = rule['pattern']
         if isinstance(patterns, list):
             matches = set()
             for pat in patterns:
                 matches.update(find_query_matches(
-                    tree, source_bytes, lang_name, pat, rule, max_len))
+                    tree, source_bytes, lang_name, pat, rule, max_len, shifts))
             return matches
         return find_query_matches(
-            tree, source_bytes, lang_name, patterns, rule, max_len)
+            tree, source_bytes, lang_name, patterns, rule, max_len, shifts)
 
 
 class TreeSitterAnd(TSMatchStrategy):
-    def _perform_search(self, tree, source_bytes, lang_name, rule, max_len):
+    def _perform_search(self, tree, source_bytes, lang_name, rule, max_len,
+                        shifts=()):
         patterns = rule['pattern'] if isinstance(
             rule['pattern'], list) else [rule['pattern']]
         all_matches = set()
         for pat in patterns:
             matches = find_query_matches(
-                tree, source_bytes, lang_name, pat, rule, max_len)
+                tree, source_bytes, lang_name, pat, rule, max_len, shifts)
             if not matches:
                 return False
             all_matches.update(matches)
@@ -278,38 +396,41 @@ class TreeSitterAnd(TSMatchStrategy):
 
 
 class TreeSitterOr(TSMatchStrategy):
-    def _perform_search(self, tree, source_bytes, lang_name, rule, max_len):
+    def _perform_search(self, tree, source_bytes, lang_name, rule, max_len,
+                        shifts=()):
         patterns = rule['pattern'] if isinstance(
             rule['pattern'], list) else [rule['pattern']]
         matches = set()
         for pat in patterns:
             matches.update(find_query_matches(
-                tree, source_bytes, lang_name, pat, rule, max_len))
+                tree, source_bytes, lang_name, pat, rule, max_len, shifts))
         return matches
 
 
 class TreeSitterAndNot(TSMatchStrategy):
-    def _perform_search(self, tree, source_bytes, lang_name, rule, max_len):
+    def _perform_search(self, tree, source_bytes, lang_name, rule, max_len,
+                        shifts=()):
         present_pat, absent_pat = rule['pattern']
         absent_matches = find_query_matches(
-            tree, source_bytes, lang_name, absent_pat, {}, max_len)
+            tree, source_bytes, lang_name, absent_pat, {}, max_len, shifts)
         if absent_matches:
             return False
         present_matches = find_query_matches(
-            tree, source_bytes, lang_name, present_pat, rule, max_len)
+            tree, source_bytes, lang_name, present_pat, rule, max_len, shifts)
         return present_matches if present_matches else False
 
 
 class TreeSitterAndOr(TSMatchStrategy):
-    def _perform_search(self, tree, source_bytes, lang_name, rule, max_len):
+    def _perform_search(self, tree, source_bytes, lang_name, rule, max_len,
+                        shifts=()):
         and_pat, or_pats = rule['pattern']
         and_matches = find_query_matches(
-            tree, source_bytes, lang_name, and_pat, rule, max_len)
+            tree, source_bytes, lang_name, and_pat, rule, max_len, shifts)
         if not and_matches:
             return False
         for pat in or_pats:
             or_matches = find_query_matches(
-                tree, source_bytes, lang_name, pat, rule, max_len)
+                tree, source_bytes, lang_name, pat, rule, max_len, shifts)
             if or_matches:
                 return and_matches.union(or_matches)
         return False

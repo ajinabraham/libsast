@@ -355,7 +355,7 @@ Tree-sitter rules can be placed inside `--pattern-file` (`match_rules`) alongsid
 ```yaml
 - id: rn_webview_universal_file_access
   type: TreeSitter
-  languages: [javascript, typescript, tsx]
+  languages: [javascript, tsx]
   message: WebView allows universal access from file URLs
   severity: error
   pattern: |

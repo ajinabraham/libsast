@@ -36,14 +36,17 @@ def _prepare_source_bytes(data, is_embedded):
 def _run_applicable_rules(lang_name, source_bytes, applicable, max_len):
     """Parse AST (and constant-inlined AST) and run applicable rules."""
     raw_tree = parse_tree(lang_name, source_bytes)
-    inlined_tree = inline_tree_constants(lang_name, raw_tree, source_bytes)
+    inlined_tree, shifts = inline_tree_constants(
+        lang_name, raw_tree, source_bytes)
     results = []
     for rule in applicable:
-        target = inlined_tree if rule.get(
-            'resolve_constants', True) else raw_tree
+        if rule.get('resolve_constants', True):
+            target, active_shifts = inlined_tree, shifts
+        else:
+            target, active_shifts = raw_tree, ()
         strat = TS_MATCHERS[rule['type']]()
         matches = strat._perform_search(
-            target, source_bytes, lang_name, rule, max_len)
+            target, source_bytes, lang_name, rule, max_len, active_shifts)
         if matches:
             results.append((rule, matches))
     return results
@@ -78,6 +81,7 @@ def match_ts_rules_on_file(file_path, data, rules, custom_ext_map=None,
 
 class TreeSitterMatcher:
     def __init__(self, options: dict) -> None:
+        has_ts_rules = bool(options.get('ts_rules'))
         rule_loc = options.get('ts_rules') or options.get('match_rules')
         self.scan_rules = get_rules(rule_loc) if rule_loc else []
         self.show_progress = options.get('show_progress')
@@ -86,7 +90,9 @@ class TreeSitterMatcher:
         self.ext_map = options.get('ts_extension_map')
         self.max_size_mb = options.get('ts_max_file_size_mb') or 15
         self.max_match_len = options.get('ts_max_match_length') or 300
-        exts = options.get('ts_extensions') or options.get('match_extensions')
+        exts = options.get('ts_extensions')
+        if not exts and not has_ts_rules:
+            exts = options.get('match_extensions')
         self.exts = [ext.lower() for ext in exts] if exts else []
         self.findings = {}
 
