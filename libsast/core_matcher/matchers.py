@@ -84,7 +84,10 @@ class RegexAnd(MatchStrategy):
             return False
         all_matches = set()
         for pat in compiled:
-            all_matches.update(Regex._find_matches(content, pat))
+            matches = Regex._find_matches(content, pat)
+            if not matches:
+                return False
+            all_matches.update(matches)
         return all_matches
 
 

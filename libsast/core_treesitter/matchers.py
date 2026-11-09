@@ -39,6 +39,27 @@ _SCOPE_TYPES = {
     'function_body',
     'class_body',
 }
+_LITERAL_VALUE_TYPES = {
+    'string',
+    'string_literal',
+    'interpreted_string_literal',
+    'raw_string_literal',
+    'line_string_literal',
+    'number',
+    'integer',
+    'integer_literal',
+    'decimal_integer_literal',
+    'float',
+    'float_literal',
+    'true',
+    'false',
+    'boolean_literal',
+    'null',
+    'none',
+    'nil',
+    'object',
+    'array',
+}
 
 
 @lru_cache(maxsize=256)
@@ -92,6 +113,8 @@ def _declarator_pair(node, source_bytes):
     if name_node is None or val_node is None:
         return None, None
     if name_node.type not in _IDENTIFIER_TYPES:
+        return None, None
+    if val_node.type not in _LITERAL_VALUE_TYPES:
         return None, None
     if val_node.start_point[0] != val_node.end_point[0]:
         return None, None
@@ -227,22 +250,20 @@ def inline_tree_constants(lang_name, tree, source_bytes):
     return parse_tree(lang_name, bytes(out)), tuple(shifts)
 
 
-def _map_to_original_byte(inlined_byte, shifts):
+def _map_to_original_byte(inlined_byte, shifts, is_end=False):
     """Translate a byte offset from inlined source back to original source."""
     if not shifts:
         return inlined_byte
     ends = [s[0] for s in shifts]
-    idx = bisect_right(ends, inlined_byte) - 1
-    if idx < 0:
-        return inlined_byte
-    new_end, cum_delta, orig_start, orig_end = shifts[idx]
-    prev_delta = shifts[idx - 1][1] if idx > 0 else 0
-    new_start = orig_start + prev_delta
-    if inlined_byte >= new_end:
-        return inlined_byte - cum_delta
-    if inlined_byte <= new_start:
-        return orig_start
-    return orig_end
+    idx = bisect_right(ends, inlined_byte)
+    if idx < len(shifts):
+        new_end, _delta, orig_start, orig_end = shifts[idx]
+        prev_delta = shifts[idx - 1][1] if idx > 0 else 0
+        new_start = orig_start + prev_delta
+        if new_start <= inlined_byte <= new_end:
+            return orig_end if is_end else orig_start
+        return inlined_byte - prev_delta
+    return inlined_byte - shifts[-1][1]
 
 
 def _query_matches(query, node):
@@ -301,8 +322,11 @@ def _in_spans(node, spans):
 
 def _format_node_match(node, source_bytes, shifts=(), max_len=300):
     """Convert a matched AST Node into a libsast (match_str, pos, lines) tuple."""
-    orig_start = _map_to_original_byte(node.start_byte, shifts)
-    orig_end = max(orig_start, _map_to_original_byte(node.end_byte, shifts))
+    orig_start = _map_to_original_byte(node.start_byte, shifts, is_end=False)
+    orig_end = max(
+        orig_start,
+        _map_to_original_byte(node.end_byte, shifts, is_end=True),
+    )
     raw = source_bytes[orig_start:orig_end].decode('utf-8', 'ignore').strip()
     if max_len and len(raw) > max_len:
         raw = raw[:max_len]

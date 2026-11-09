@@ -36,8 +36,13 @@ def _prepare_source_bytes(data, is_embedded):
 def _run_applicable_rules(lang_name, source_bytes, applicable, max_len):
     """Parse AST (and constant-inlined AST) and run applicable rules."""
     raw_tree = parse_tree(lang_name, source_bytes)
-    inlined_tree, shifts = inline_tree_constants(
-        lang_name, raw_tree, source_bytes)
+    needs_inlining = any(
+        r.get('resolve_constants', True) for r in applicable)
+    if needs_inlining:
+        inlined_tree, shifts = inline_tree_constants(
+            lang_name, raw_tree, source_bytes)
+    else:
+        inlined_tree, shifts = raw_tree, ()
     results = []
     for rule in applicable:
         if rule.get('resolve_constants', True):
